@@ -1,0 +1,18 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: killbichos_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: killbichos
+      POSTGRES_PASSWORD: killbichos_dev
+      POSTGRES_DB: killbichos
+    ports:
+      - "5432:5432"
+    volumes:
+      - killbichos_data:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/1_schema.sql
+      - ./seed.sql:/docker-entrypoint-initdb.d/2_seed.sql
+
+volumes:
+  killbichos_data:
