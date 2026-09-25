@@ -1,3 +1,9 @@
+# =============================================================================
+# routers/croquis.py — Croquis de una visita
+# -----------------------------------------------------------------------------
+#   GET /croquis/{visita_id}   el plano de la visita con todas sus trampas.
+# =============================================================================
+
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -17,8 +23,9 @@ def get_croquis(visit_id: UUID, user: CurrentUser = Depends(get_current_user), d
     acceso (404 si la visita no existe, 403 si es de otro operador)."""
     visit = fetch_visit(db, visit_id)
     ensure_visit_access(user, visit)
-    croquis = fetch_croquis_for_visit(db, visit_id)
-    devices = fetch_devices_for_croquis(db, croquis["id"])
+    croquis = fetch_croquis_for_visit(db, visit_id)          # 404 si la visita no tiene croquis
+    devices = fetch_devices_for_croquis(db, croquis["id"])   # las trampas de ese croquis
+    # Arma la respuesta: los datos del croquis más la lista de trampas.
     return CroquisResponse(
         id=croquis["id"],
         visita_id=visit_id,
