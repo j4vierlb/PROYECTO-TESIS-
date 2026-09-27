@@ -1,3 +1,13 @@
+# =============================================================================
+# dependencies.py — Quién está haciendo el request y qué puede hacer
+# -----------------------------------------------------------------------------
+# Autenticación (¿quién eres?) y autorización (¿puedes hacer esto?).
+# Los endpoints las usan con Depends(...): FastAPI las ejecuta antes del
+# endpoint, y si fallan cortan el request con el error correspondiente:
+#   401 Unauthorized = no hay sesión válida (sin token, vencido o falso)
+#   403 Forbidden    = hay sesión, pero no tienes permiso para eso
+# =============================================================================
+
 from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
@@ -11,7 +21,10 @@ from app.repositories import fetch_operator_by_id, fetch_web_user_by_id
 from app.schemas import CurrentUser
 from app.security import decode_token
 
-security = HTTPBearer(auto_error=False)  # extrae el header "Authorization: Bearer <token>"
+# Extrae el header "Authorization: Bearer <token>".
+# auto_error=False: si falta, no responde por su cuenta; dejamos que
+# get_current_user responda con nuestro propio mensaje de error.
+security = HTTPBearer(auto_error=False)
 
 
 def get_current_user(
@@ -22,8 +35,10 @@ def get_current_user(
     Lee el header Authorization, valida el JWT y busca al usuario real en
     Postgres (operadores si el rol es 'operador', usuarios en caso contrario).
     Si algo falla responde 401 con el formato de error {"detail": "..."}."""
+    # 1) ¿Llegó un token?
     if credentials is None or credentials.scheme.lower() != "bearer":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token de acceso requerido")
+    # 2) ¿El token es auténtico, no venció y es de tipo "access"?
     try:
         payload = decode_token(credentials.credentials, settings.jwt_secret)
         if payload.get("type") != "access":
@@ -33,6 +48,8 @@ def get_current_user(
     except (JWTError, KeyError, ValueError):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido o expirado")
 
+    # 3) ¿La persona sigue existiendo y activa en la base? (Si se desactivó
+    #    la cuenta, su token deja de servir aunque no haya vencido.)
     if rol == "operador":
         user = fetch_operator_by_id(db, user_id)
     else:
@@ -45,6 +62,7 @@ def get_current_user(
 def require_operator(user: CurrentUser = Depends(get_current_user)) -> CurrentUser:
     """Igual que get_current_user, pero además exige que el rol sea 'operador'.
     Se usa en los endpoints exclusivos del técnico en terreno."""
+    # Depende de get_current_user: primero valida la sesión y después el rol.
     if user.rol != "operador":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Se requiere un operador")
     return user

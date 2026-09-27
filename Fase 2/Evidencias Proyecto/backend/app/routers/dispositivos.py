@@ -1,3 +1,10 @@
+# =============================================================================
+# routers/dispositivos.py — Acciones sobre una trampa
+# -----------------------------------------------------------------------------
+#   PATCH /dispositivos-trampa/{id}   confirmar, mover o retirar una trampa.
+#   Body de ejemplo: {"accion": "mover", "lat": -33.48, "lng": -70.59}
+# =============================================================================
+
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -12,6 +19,7 @@ router = APIRouter(tags=["dispositivos"])
 
 
 def _to_device_response(row: dict) -> DeviceResponse:
+    """Convierte una fila de la base en la respuesta de la API."""
     return DeviceResponse(
         id=row["id"],
         codigo=row["codigo"],
@@ -28,6 +36,7 @@ def _to_device_response(row: dict) -> DeviceResponse:
 def update_device(
     device_id: UUID,
     changes: DeviceUpdate,
+    # Solo un operador puede tocar trampas (un admin recibe 403).
     user: CurrentUser = Depends(require_operator),
     db: Connection = Depends(get_db),
 ) -> DeviceResponse:
@@ -39,7 +48,9 @@ def update_device(
     if changes.accion == DeviceAction.confirmar:
         confirm_device(db, device_id)
     elif changes.accion == DeviceAction.mover:
+        # lat y lng ya vienen validados por DeviceUpdate (obligatorios al mover).
         move_device(db, device_id, changes.lat, changes.lng)
     elif changes.accion == DeviceAction.eliminar:
         remove_device(db, device_id)
+    # Se relee la trampa para responder con su estado real después del cambio.
     return _to_device_response(fetch_device(db, device_id))
