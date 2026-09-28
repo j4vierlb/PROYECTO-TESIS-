@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     jwt_secret: str = "desarrollo-cambia-esta-clave"
     database_url: str = "postgresql+psycopg://killbichos:killbichos_dev@localhost:5432/killbichos"
-    allowed_origins: str = "http://localhost:3000,http://localhost:5173"
+    allowed_origins: str = "http://localhost:3000,http://localhost:5173,http://127.0.0.1:5173"
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 

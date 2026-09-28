@@ -50,6 +50,13 @@ def require_operator(user: CurrentUser = Depends(get_current_user)) -> CurrentUs
     return user
 
 
+def require_web_user(user: CurrentUser = Depends(get_current_user)) -> CurrentUser:
+    """Restringe el panel web a usuarios administrativos de la empresa."""
+    if user.rol not in {"admin", "coordinador"}:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Se requiere un usuario del panel")
+    return user
+
+
 def ensure_visit_access(user: CurrentUser, visit: dict) -> None:
     """Un operador solo puede ver/editar sus propias visitas; un admin puede
     ver cualquiera. Se reutiliza en los routers de visitas y croquis, ya que

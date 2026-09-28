@@ -41,9 +41,21 @@ app/
 ├── repositories.py       # consultas SQL a Postgres/PostGIS
 └── routers/
     ├── auth.py
+    ├── panel.py       # CRUD de clientes, agenda y operadores del panel web
     ├── visitas.py
     ├── croquis.py
     └── dispositivos.py
 ```
+
+## Panel web
+
+El frontend está en `../frontend/` y consume los endpoints protegidos del panel:
+
+- `GET /panel/stats`, `GET /panel/operadores`
+- `GET/POST /clientes`, `PATCH/DELETE /clientes/{id}`
+- `GET/POST /panel/visitas`, `PATCH/DELETE /panel/visitas/{id}`
+
+El acceso está limitado a usuarios con rol `admin` o `coordinador`; todas las consultas
+se filtran por `empresa_id` para mantener el aislamiento del tenant.
 
 Las coordenadas se guardan en PostgreSQL como `GEOGRAPHY(Point, 4326)` (PostGIS) y se convierten a `lat`/`lng` sueltos en las respuestas de la API con `ST_Y`/`ST_X`.
