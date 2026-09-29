@@ -16,12 +16,19 @@
 #   db.commit()                                        -> confirma un cambio (UPDATE)
 # =============================================================================
 
+import logging
+from datetime import datetime, time, timedelta, timezone
 from typing import Any
 from uuid import UUID
+from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException, status
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
+
+from app.config import settings
+
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Consultas relacionadas a visitas
@@ -241,3 +248,315 @@ def fetch_web_user_by_id(db: Connection, user_id: UUID) -> dict[str, Any] | None
         {"id": str(user_id)},
     ).mappings().first()
     return dict(row) if row else None
+
+
+# ---------------------------------------------------------------------------
+# WhatsApp + agente IA
+# ---------------------------------------------------------------------------
+# Funciones que usa routers/whatsapp.py: identificar al cliente por su
+# número, guardar la conversación y agendar la visita que pide la IA.
+
+SANTIAGO = ZoneInfo("America/Santiago")
+UTC = timezone.utc
+# Dos visitas del mismo operador deben estar separadas por al menos 1 hora.
+VISIT_MARGIN = timedelta(hours=1)
+# Hasta cuántos días hacia adelante se busca un horario alternativo.
+SUGGESTION_SEARCH_DAYS = 7
+# Solo estos estados "ocupan" al operador (una visita cancelada no).
+_ACTIVE_VISIT_STATES = "('agendada', 'reagendada')"
+
+
+class HorarioNoDisponible(Exception):
+    """El horario pedido no se puede agendar. Si se encontró uno libre
+    cercano, viene en `sugerencia` (UTC) para ofrecérselo al cliente."""
+
+    def __init__(self, motivo: str, sugerencia: datetime | None = None):
+        super().__init__(motivo)
+        self.sugerencia = sugerencia
+
+
+def normalize_phone(phone: str) -> str:
+    """Twilio entrega el número como 'whatsapp:+569...'; se guarda sin prefijo."""
+    return phone.removeprefix("whatsapp:").strip()
+
+
+def fetch_or_create_whatsapp_client(
+    db: Connection, phone: str, empresa_id: UUID, profile_name: str | None = None
+) -> dict[str, Any]:
+    """Busca al cliente por su número de WhatsApp. Si es nuevo, lo crea sin
+    dirección ni ubicación (la IA le pedirá la dirección antes de agendar).
+    profile_name es el nombre de perfil de WhatsApp que envía Twilio."""
+    phone = normalize_phone(phone)
+    select_sql = text("""
+        SELECT id, empresa_id, nombre, telefono_whatsapp, direccion
+        FROM clientes
+        WHERE telefono_whatsapp = :phone
+    """)
+    row = db.execute(select_sql, {"phone": phone}).mappings().first()
+    if row:
+        return dict(row)
+
+    # ON CONFLICT: si llegan dos mensajes simultáneos del mismo número nuevo,
+    # el segundo no falla por el UNIQUE de telefono_whatsapp; solo relee.
+    db.execute(
+        text("""
+            INSERT INTO clientes (empresa_id, nombre, telefono_whatsapp)
+            VALUES (:empresa_id, :nombre, :phone)
+            ON CONFLICT (telefono_whatsapp) DO NOTHING
+        """),
+        {
+            "empresa_id": str(empresa_id),
+            "nombre": (profile_name or "").strip()[:150] or f"Cliente WhatsApp {phone}",
+            "phone": phone,
+        },
+    )
+    db.commit()
+    return dict(db.execute(select_sql, {"phone": phone}).mappings().one())
+
+
+def update_whatsapp_client_address(db: Connection, cliente_id: UUID, address: str) -> None:
+    """Guarda la dirección que el cliente entregó por WhatsApp. La ubicación
+    (lat/lng) queda vacía hasta que alguien la geolocalice."""
+    db.execute(
+        text("UPDATE clientes SET direccion = :direccion WHERE id = :cliente_id"),
+        {"direccion": address, "cliente_id": str(cliente_id)},
+    )
+    db.commit()
+
+
+def fetch_active_whatsapp_conversation(db: Connection, cliente_id: UUID) -> dict[str, Any]:
+    """Devuelve la conversación activa del cliente, o crea una nueva."""
+    row = db.execute(
+        text("""
+            SELECT id, cliente_id, estado
+            FROM conversaciones_whatsapp
+            WHERE cliente_id = :cliente_id AND estado = 'activa'
+            ORDER BY created_at DESC
+            LIMIT 1
+        """),
+        {"cliente_id": str(cliente_id)},
+    ).mappings().first()
+    if row:
+        return dict(row)
+    row = db.execute(
+        text("""
+            INSERT INTO conversaciones_whatsapp (cliente_id, estado)
+            VALUES (:cliente_id, 'activa')
+            RETURNING id, cliente_id, estado
+        """),
+        {"cliente_id": str(cliente_id)},
+    ).mappings().one()
+    db.commit()
+    return dict(row)
+
+
+def whatsapp_message_exists(db: Connection, message_sid: str) -> bool:
+    """True si ya se procesó un mensaje con ese MessageSid (reintento de Twilio)."""
+    if not message_sid:
+        return False
+    row = db.execute(
+        text("SELECT 1 FROM mensajes_whatsapp WHERE message_sid = :message_sid LIMIT 1"),
+        {"message_sid": message_sid},
+    ).first()
+    return row is not None
+
+
+def insert_whatsapp_message(
+    db: Connection,
+    conversation_id: UUID,
+    emitter: str,
+    content: str,
+    intent: str | None = None,
+    message_sid: str | None = None,
+) -> dict[str, Any] | None:
+    """Guarda un mensaje. Devuelve None si el MessageSid ya existía: el
+    UNIQUE de la columna + ON CONFLICT DO NOTHING cubren el caso en que dos
+    reintentos llegan al mismo tiempo y ambos pasaron whatsapp_message_exists."""
+    row = db.execute(
+        text("""
+            INSERT INTO mensajes_whatsapp
+                (conversacion_id, emisor, contenido, intencion_detectada, message_sid)
+            VALUES (:conversation_id, :emisor, :content, :intent, :message_sid)
+            ON CONFLICT DO NOTHING
+            RETURNING id, conversacion_id, emisor, contenido, intencion_detectada, message_sid, created_at
+        """),
+        {
+            "conversation_id": str(conversation_id),
+            "emisor": emitter,
+            "content": content,
+            "intent": intent,
+            "message_sid": message_sid,
+        },
+    ).mappings().first()
+    db.commit()
+    return dict(row) if row else None
+
+
+def fetch_whatsapp_history(db: Connection, conversation_id: UUID, limit: int = 20) -> list[dict[str, Any]]:
+    """Últimos `limit` mensajes de la conversación, del más antiguo al más nuevo."""
+    rows = db.execute(
+        text("""
+            SELECT emisor, contenido, intencion_detectada, created_at
+            FROM mensajes_whatsapp
+            WHERE conversacion_id = :conversation_id
+            ORDER BY created_at DESC
+            LIMIT :limit
+        """),
+        {"conversation_id": str(conversation_id), "limit": limit},
+    ).mappings().all()
+    return list(reversed([dict(r) for r in rows]))
+
+
+def _is_within_business_hours(fecha_hora: datetime) -> bool:
+    """Revisa día y hora (en hora de Chile) contra el horario del .env.
+    La hora de cierre no se incluye: una visita no puede empezar al cerrar."""
+    local_dt = fecha_hora.astimezone(SANTIAGO)
+    operating_days = {
+        int(day.strip())
+        for day in settings.killbichos_operating_days.split(",")
+        if day.strip().isdigit()
+    }
+    open_time = time.fromisoformat(settings.killbichos_open_time)
+    close_time = time.fromisoformat(settings.killbichos_close_time)
+    return local_dt.weekday() in operating_days and open_time <= local_dt.time() < close_time
+
+
+def _configured_operator_id(db: Connection, empresa_id: UUID) -> str | None:
+    """KILLBICHOS_OPERADOR_ID del .env, solo si es un operador activo de la
+    empresa. Si está vacío o no es válido, se asigna automáticamente."""
+    configured = settings.killbichos_operador_id.strip()
+    if not configured:
+        return None
+    try:
+        UUID(configured)
+    except ValueError:
+        logger.warning("KILLBICHOS_OPERADOR_ID=%s no es un UUID válido", configured)
+        return None
+    row = db.execute(
+        text("SELECT 1 FROM operadores WHERE id = :id AND empresa_id = :empresa_id AND activo = TRUE"),
+        {"id": configured, "empresa_id": str(empresa_id)},
+    ).first()
+    if row is None:
+        logger.warning("KILLBICHOS_OPERADOR_ID=%s no corresponde a un operador activo de la empresa", configured)
+        return None
+    return configured
+
+
+def _find_available_operator(
+    db: Connection, empresa_id: UUID, fecha_hora: datetime, fixed_operator_id: str | None
+) -> UUID | None:
+    """Operador libre para esa fecha y hora: sin otra visita a menos de
+    VISIT_MARGIN. Si hay un operador fijo (fixed_operator_id), solo se
+    considera ese; si no, entre los libres se elige el que tiene menos
+    visitas ese día."""
+    row = db.execute(
+        text(f"""
+            SELECT o.id
+            FROM operadores o
+            LEFT JOIN visitas v
+              ON v.operador_id = o.id
+             AND v.estado IN {_ACTIVE_VISIT_STATES}
+             AND (v.fecha_hora AT TIME ZONE 'America/Santiago')::date = :fecha_local
+            WHERE o.empresa_id = :empresa_id
+              AND o.activo = TRUE
+              AND (CAST(:operador_id AS uuid) IS NULL OR o.id = CAST(:operador_id AS uuid))
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM visitas c
+                  WHERE c.operador_id = o.id
+                    AND c.estado IN {_ACTIVE_VISIT_STATES}
+                    AND c.fecha_hora > CAST(:fecha_hora AS timestamptz) - CAST(:margen AS interval)
+                    AND c.fecha_hora < CAST(:fecha_hora AS timestamptz) + CAST(:margen AS interval)
+              )
+            GROUP BY o.id
+            ORDER BY COUNT(v.id), o.id
+            LIMIT 1
+        """),
+        {
+            "empresa_id": str(empresa_id),
+            "operador_id": fixed_operator_id,
+            "fecha_hora": fecha_hora,
+            "fecha_local": fecha_hora.astimezone(SANTIAGO).date(),
+            "margen": VISIT_MARGIN,
+        },
+    ).first()
+    return row[0] if row else None
+
+
+def _find_next_available_slot(
+    db: Connection, empresa_id: UUID, desde: datetime, fixed_operator_id: str | None
+) -> datetime | None:
+    """Primer horario en punto, posterior a `desde`, que esté dentro del
+    horario de atención y tenga un operador libre. Busca hasta
+    SUGGESTION_SEARCH_DAYS días; devuelve None si no encuentra (en UTC)."""
+    start = max(desde, datetime.now(UTC)).astimezone(SANTIAGO)
+    candidate = start.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
+    limit = start + timedelta(days=SUGGESTION_SEARCH_DAYS)
+    while candidate <= limit:
+        if _is_within_business_hours(candidate) and _find_available_operator(
+            db, empresa_id, candidate, fixed_operator_id
+        ):
+            return candidate.astimezone(UTC)
+        candidate += timedelta(hours=1)
+    return None
+
+
+def create_whatsapp_visit(
+    db: Connection,
+    empresa_id: UUID,
+    cliente_id: UUID,
+    fecha_hora: datetime,
+    notas: str | None = None,
+) -> dict[str, Any]:
+    """Crea la visita pedida por WhatsApp, ya asignada a un operador (la app
+    móvil solo muestra visitas con operador). Lanza HorarioNoDisponible, con
+    un horario alternativo si lo hay, cuando la hora está fuera de horario o
+    ningún operador está libre. `created` indica si la visita es nueva o si
+    ya existía (por ejemplo, porque el cliente repitió la confirmación)."""
+    existing = db.execute(
+        text(f"""
+            SELECT id, fecha_hora, estado, operador_id
+            FROM visitas
+            WHERE cliente_id = :cliente_id
+              AND fecha_hora = :fecha_hora
+              AND estado IN {_ACTIVE_VISIT_STATES}
+            LIMIT 1
+        """),
+        {"cliente_id": str(cliente_id), "fecha_hora": fecha_hora},
+    ).mappings().first()
+    if existing:
+        return {**dict(existing), "created": False}
+
+    fixed_operator_id = _configured_operator_id(db, empresa_id)
+    if not _is_within_business_hours(fecha_hora):
+        raise HorarioNoDisponible(
+            "La hora está fuera del horario de atención",
+            _find_next_available_slot(db, empresa_id, fecha_hora, fixed_operator_id),
+        )
+
+    operador_id = _find_available_operator(db, empresa_id, fecha_hora, fixed_operator_id)
+    if operador_id is None:
+        raise HorarioNoDisponible(
+            "Ningún operador está libre en ese horario",
+            _find_next_available_slot(db, empresa_id, fecha_hora, fixed_operator_id),
+        )
+
+    row = db.execute(
+        text("""
+            INSERT INTO visitas
+                (empresa_id, cliente_id, operador_id, fecha_hora, estado, origen_agendamiento, notas)
+            VALUES
+                (:empresa_id, :cliente_id, :operador_id, :fecha_hora,
+                 'agendada', 'whatsapp_ia', :notas)
+            RETURNING id, fecha_hora, estado, origen_agendamiento, notas, operador_id
+        """),
+        {
+            "empresa_id": str(empresa_id),
+            "cliente_id": str(cliente_id),
+            "operador_id": str(operador_id),
+            "fecha_hora": fecha_hora,
+            "notas": notas,
+        },
+    ).mappings().one()
+    db.commit()
+    return {**dict(row), "created": True}
