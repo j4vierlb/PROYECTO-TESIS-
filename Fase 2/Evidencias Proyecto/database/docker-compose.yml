@@ -13,6 +13,7 @@ services:
       - killbichos_data:/var/lib/postgresql/data
       - ./schema.sql:/docker-entrypoint-initdb.d/1_schema.sql
       - ./seed.sql:/docker-entrypoint-initdb.d/2_seed.sql
+      - ./demo_historial.sql:/docker-entrypoint-initdb.d/3_demo_historial.sql
 
 volumes:
   killbichos_data:

@@ -1,3 +1,14 @@
+# =============================================================================
+# schemas.py — Forma de los datos que entran y salen de la API
+# -----------------------------------------------------------------------------
+# Cada clase describe un JSON: qué campos tiene y de qué tipo es cada uno.
+# FastAPI usa estas clases (modelos de Pydantic) para tres cosas:
+#   1. Validar lo que llega: si falta un campo o viene mal, responde 422 solo.
+#   2. Armar la respuesta: solo se envían los campos declarados aquí.
+#   3. Generar la documentación de /docs automáticamente.
+# Los nombres van en snake_case (fecha_hora, operador_id), como se acordó.
+# =============================================================================
+
 from datetime import datetime
 from enum import Enum
 from uuid import UUID
@@ -7,6 +18,11 @@ from pydantic import BaseModel, Field, model_validator
 from app.security import ACCESS_TOKEN_MINUTES
 
 
+# ---------------------------------------------------------------------------
+# Valores fijos permitidos (Enums)
+# ---------------------------------------------------------------------------
+# Equivalen a la restricción CHECK de la tabla visitas en schema.sql: si llega
+# un estado que no está en esta lista, la API lo rechaza antes de tocar la base.
 class VisitStatus(str, Enum):
     agendada = "agendada"
     en_curso = "en_curso"
@@ -23,35 +39,53 @@ class DeviceAction(str, Enum):
     eliminar = "eliminar"
 
 
+# ---------------------------------------------------------------------------
+# Autenticación
+# ---------------------------------------------------------------------------
 class LoginRequest(BaseModel):
-    usuario: str = Field(min_length=3)
+    """Lo que la app manda a POST /auth/login."""
+    usuario: str = Field(min_length=3)  # el email del operador o del admin
     clave: str = Field(min_length=1)
 
 
 class TokenResponse(BaseModel):
-    access_token: str
-    refresh_token: str
+    """Lo que devuelve un login exitoso."""
+    access_token: str       # pase de sesión corto (8 h), se manda en cada request
+    refresh_token: str      # pase largo (30 días), para renovar el anterior
     token_type: str = "bearer"
-    expires_in: int = ACCESS_TOKEN_MINUTES * 60
+    expires_in: int = ACCESS_TOKEN_MINUTES * 60  # duración del access_token en segundos
 
 
+# ---------------------------------------------------------------------------
+# Visitas
+# ---------------------------------------------------------------------------
 class ClientSummary(BaseModel):
+    """Datos del cliente que van dentro de cada visita."""
     id: UUID
     nombre: str
     telefono_whatsapp: str
     direccion: str
+    # Coordenadas sueltas (no GeoJSON), como se acordó en el formato de la API.
     lat: float
     lng: float
 
 
 class VisitResponse(BaseModel):
+    """Una visita tal como la ve la app (agenda y detalle)."""
     id: UUID
     cliente: ClientSummary
     operador_id: UUID
-    fecha_hora: datetime
+    fecha_hora: datetime  # se envía en ISO 8601 UTC, ej: "2026-09-24T10:00:00Z"
     estado: VisitStatus
-    origen_agendamiento: str
-    notas: str | None = None
+    origen_agendamiento: str  # "whatsapp_ia" o "manual"
+    notas: str | None = None  # `| None` = el campo puede venir vacío (null)
+
+
+class VisitHistoryItem(VisitResponse):
+    """Visita del historial: incluye cuántas trampas quedaron instaladas
+    (las no retiradas) en su croquis."""
+    # Hereda todos los campos de VisitResponse y agrega este.
+    dispositivos_instalados: int
 
 
 class VisitUpdate(BaseModel):
@@ -61,18 +95,23 @@ class VisitUpdate(BaseModel):
     notas: str | None = None
 
 
+# ---------------------------------------------------------------------------
+# Croquis y dispositivos trampa
+# ---------------------------------------------------------------------------
 class DeviceResponse(BaseModel):
+    """Una trampa (cebadero, trampa de pegamento, etc.) dentro de un croquis."""
     id: UUID
-    codigo: str
-    tipo: str
+    codigo: str            # etiqueta física, ej: "T-01"
+    tipo: str              # cebadero, trampa_pegamento, trampa_luz u otro
     lat: float
     lng: float
-    sugerido_por_ia: bool
-    confirmado: bool
-    estado: str
+    sugerido_por_ia: bool  # True si la ubicación la propuso la IA
+    confirmado: bool       # True si el operador la validó en terreno
+    estado: str            # activo, retirado o revisar
 
 
 class CroquisResponse(BaseModel):
+    """El plano de una visita con la lista de sus trampas."""
     id: UUID
     visita_id: UUID
     cliente_id: UUID
@@ -88,9 +127,13 @@ class DeviceUpdate(BaseModel):
     - mover: obliga a mandar lat y lng (se valida abajo).
     - eliminar: solo marca el dispositivo como retirado, no lo borra."""
     accion: DeviceAction
+    # ge/le = "mayor o igual" / "menor o igual": rango válido de coordenadas
+    # en la Tierra. Una latitud de 500 se rechaza automáticamente.
     lat: float | None = Field(default=None, ge=-90, le=90)
     lng: float | None = Field(default=None, ge=-180, le=180)
 
+    # Validación que depende de dos campos a la vez: se ejecuta después de
+    # validar cada campo por separado (mode="after").
     @model_validator(mode="after")
     def validate_coordinates_for_move(self) -> "DeviceUpdate":
         if self.accion == DeviceAction.mover and (self.lat is None or self.lng is None):
@@ -98,9 +141,12 @@ class DeviceUpdate(BaseModel):
         return self
 
 
+# ---------------------------------------------------------------------------
+# Usuario de la sesión
+# ---------------------------------------------------------------------------
 class CurrentUser(BaseModel):
     """Usuario autenticado, resuelto a partir del JWT en cada request protegido."""
     id: UUID
     nombre: str
-    rol: str
+    rol: str  # "operador", "admin" o "coordinador"
     empresa_id: UUID
