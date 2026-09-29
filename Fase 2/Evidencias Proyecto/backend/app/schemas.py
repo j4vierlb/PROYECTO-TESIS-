@@ -95,6 +95,44 @@ class VisitUpdate(BaseModel):
     notas: str | None = None
 
 
+class ClientCreate(BaseModel):
+    nombre: str = Field(min_length=2, max_length=150)
+    telefono_whatsapp: str = Field(min_length=5, max_length=30)
+    direccion: str = Field(min_length=2)
+    lat: float = Field(ge=-90, le=90)
+    lng: float = Field(ge=-180, le=180)
+
+
+class ClientUpdate(BaseModel):
+    nombre: str | None = Field(default=None, min_length=2, max_length=150)
+    telefono_whatsapp: str | None = Field(default=None, min_length=5, max_length=30)
+    direccion: str | None = Field(default=None, min_length=2)
+    lat: float | None = Field(default=None, ge=-90, le=90)
+    lng: float | None = Field(default=None, ge=-180, le=180)
+
+
+class OperatorSummary(BaseModel):
+    id: UUID
+    nombre: str
+    email: str | None = None
+
+
+class VisitCreate(BaseModel):
+    cliente_id: UUID
+    operador_id: UUID | None = None
+    fecha_hora: datetime
+    notas: str | None = None
+
+
+class PanelVisitResponse(VisitResponse):
+    operador: OperatorSummary | None = None
+
+
+class PanelStats(BaseModel):
+    clientes: int
+    visitas_hoy: int
+    pendientes: int
+
 # ---------------------------------------------------------------------------
 # Croquis y dispositivos trampa
 # ---------------------------------------------------------------------------

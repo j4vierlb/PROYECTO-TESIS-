@@ -14,7 +14,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routers import auth, croquis, dispositivos, visitas
+from app.routers import auth, croquis, dispositivos, panel, visitas
 
 # Crea la aplicación. El título, la versión y la descripción aparecen en la
 # documentación automática que FastAPI genera en /docs (Swagger).
@@ -33,15 +33,14 @@ app.add_middleware(
     # Convierte "http://localhost:3000,http://localhost:5173" en una lista.
     allow_origins=[origin.strip() for origin in settings.allowed_origins.split(",") if origin.strip()],
     allow_credentials=True,
-    # Solo los métodos HTTP que la API realmente usa.
-    allow_methods=["GET", "POST", "PATCH"],
-    # Solo los encabezados necesarios: el token y el tipo de contenido (JSON).
+    allow_methods=["GET", "POST", "PATCH", "DELETE"],
     allow_headers=["Authorization", "Content-Type"],
 )
 
 # Registra cada grupo de endpoints en la aplicación.
-app.include_router(auth.router)          # POST /auth/login
+app.include_router(auth.router)
 app.include_router(visitas.router)       # agenda del día, historial y visitas
+app.include_router(panel.router)         # panel web: clientes y agendamiento
 app.include_router(croquis.router)       # GET /croquis/{visita_id}
 app.include_router(dispositivos.router)  # PATCH /dispositivos-trampa/{id}
 
