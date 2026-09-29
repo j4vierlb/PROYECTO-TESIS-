@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     # Dirección de PostgreSQL: driver+tipo://usuario:clave@servidor:puerto/base
     database_url: str = "postgresql+psycopg://killbichos:killbichos_dev@localhost:5432/killbichos"
     # Sitios web que pueden llamar a la API desde un navegador (ver CORS en main.py).
-    allowed_origins: str = "http://localhost:3000,http://localhost:5173"
+    allowed_origins: str = "http://localhost:3000,http://localhost:5173,http://127.0.0.1:5173"
 
     # --- Agente de WhatsApp (ver README, sección "Agente de WhatsApp + IA") ---
     # Clave y modelo de OpenAI. Vacía = el agente responde un mensaje de
