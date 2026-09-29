@@ -115,12 +115,14 @@ def update_client(client_id: UUID, payload: ClientUpdate, user: CurrentUser = De
 @router.delete("/clientes/{client_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_client(client_id: UUID, user: CurrentUser = Depends(require_web_user), db: Connection = Depends(get_db)):
     _client_row(db, client_id, user.empresa_id)
-    try:
-        db.execute(text("DELETE FROM clientes WHERE id = :id AND empresa_id = :empresa_id"), {"id": str(client_id), "empresa_id": str(user.empresa_id)})
-        db.commit()
-    except Exception as exc:
-        db.rollback()
-        raise HTTPException(status_code=409, detail="No se puede eliminar un cliente con visitas asociadas") from exc
+    has_visits = db.execute(
+        text("SELECT EXISTS (SELECT 1 FROM visitas WHERE cliente_id = :id AND empresa_id = :empresa_id)"),
+        {"id": str(client_id), "empresa_id": str(user.empresa_id)},
+    ).scalar_one()
+    if has_visits:
+        raise HTTPException(status_code=409, detail="No se puede eliminar un cliente con visitas asociadas")
+    db.execute(text("DELETE FROM clientes WHERE id = :id AND empresa_id = :empresa_id"), {"id": str(client_id), "empresa_id": str(user.empresa_id)})
+    db.commit()
 
 
 _VISITS = """
@@ -188,5 +190,10 @@ def update_panel_visit(visit_id: UUID, payload: VisitUpdate, user: CurrentUser =
 @router.delete("/panel/visitas/{visit_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_visit(visit_id: UUID, user: CurrentUser = Depends(require_web_user), db: Connection = Depends(get_db)):
     _visit_row(db, visit_id, user.empresa_id)
-    db.execute(text("DELETE FROM visitas WHERE id = :id AND empresa_id = :empresa_id"), {"id": str(visit_id), "empresa_id": str(user.empresa_id)})
+    # Las visitas forman parte del historial y pueden tener un croquis asociado.
+    # Se cancelan en lugar de borrarse para conservar la trazabilidad.
+    db.execute(
+        text("UPDATE visitas SET estado = 'cancelada' WHERE id = :id AND empresa_id = :empresa_id"),
+        {"id": str(visit_id), "empresa_id": str(user.empresa_id)},
+    )
     db.commit()
