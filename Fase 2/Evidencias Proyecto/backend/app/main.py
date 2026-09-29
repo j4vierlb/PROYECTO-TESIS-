@@ -10,11 +10,18 @@
 #   - ":app"      = la variable `app` definida más abajo
 # =============================================================================
 
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routers import auth, croquis, dispositivos, visitas
+from app.routers import auth, croquis, dispositivos, visitas, whatsapp
+
+# Muestra en consola los mensajes de log del backend (logger.info, .warning,
+# .exception). Sin esto, uvicorn solo imprime sus propios logs y los errores
+# del agente de WhatsApp no se verían.
+logging.basicConfig(level=logging.INFO, format="%(levelname)s:     %(name)s - %(message)s")
 
 # Crea la aplicación. El título, la versión y la descripción aparecen en la
 # documentación automática que FastAPI genera en /docs (Swagger).
@@ -44,6 +51,7 @@ app.include_router(auth.router)          # POST /auth/login
 app.include_router(visitas.router)       # agenda del día, historial y visitas
 app.include_router(croquis.router)       # GET /croquis/{visita_id}
 app.include_router(dispositivos.router)  # PATCH /dispositivos-trampa/{id}
+app.include_router(whatsapp.router)      # POST /webhooks/whatsapp (Twilio)
 
 
 @app.get("/health", tags=["sistema"])

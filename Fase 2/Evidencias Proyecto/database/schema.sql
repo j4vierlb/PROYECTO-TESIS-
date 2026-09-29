@@ -75,6 +75,7 @@ CREATE TABLE mensajes_whatsapp (
     emisor                VARCHAR(10) NOT NULL CHECK (emisor IN ('cliente', 'agente_ia', 'sistema')),
     contenido             TEXT NOT NULL,
     intencion_detectada   VARCHAR(50), -- ej: 'agendar_visita', 'consulta', 'reagendar'
+    message_sid           VARCHAR(100) UNIQUE, -- MessageSid de Twilio, para ignorar reintentos duplicados
     created_at            TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
