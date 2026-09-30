@@ -22,6 +22,7 @@ from app.database import get_db
 from app.dependencies import ensure_visit_access, get_current_user, require_operator
 from app.repositories import fetch_visit, fetch_visit_history, fetch_visits_for_today, update_visit_fields
 from app.schemas import ClientSummary, CurrentUser, VisitHistoryItem, VisitResponse, VisitUpdate
+from app.zona_horaria import hoy_chile
 
 # El router agrupa estos endpoints; main.py lo registra en la aplicación.
 # tags=["visitas"] los agrupa bajo ese título en /docs.
@@ -53,7 +54,8 @@ def _to_visit_response(row: dict) -> VisitResponse:
 def visits_today(user: CurrentUser = Depends(require_operator), db: Connection = Depends(get_db)) -> list[VisitResponse]:
     """Agenda del día. "me" = el operador dueño del token, así nadie puede
     pedir la agenda de otro operador cambiando un id en la URL."""
-    rows = fetch_visits_for_today(db, user.id)
+    # "Hoy" es el día de Chile, no el de UTC (ver zona_horaria.py).
+    rows = fetch_visits_for_today(db, user.id, hoy_chile())
     return [_to_visit_response(row) for row in rows]
 
 

@@ -11,6 +11,7 @@ from app.schemas import (
     ClientCreate, ClientSummary, ClientUpdate, CurrentUser, OperatorSummary,
     PanelStats, PanelVisitResponse, VisitCreate, VisitStatus, VisitUpdate,
 )
+from app.zona_horaria import hoy_chile
 
 router = APIRouter(tags=["panel web"])
 
@@ -60,10 +61,10 @@ def stats(user: CurrentUser = Depends(require_web_user), db: Connection = Depend
         SELECT
           (SELECT count(*) FROM clientes WHERE empresa_id = :empresa_id) AS clientes,
           (SELECT count(*) FROM visitas WHERE empresa_id = :empresa_id
-             AND (fecha_hora AT TIME ZONE 'UTC')::date = (now() AT TIME ZONE 'UTC')::date) AS visitas_hoy,
+             AND (fecha_hora AT TIME ZONE 'America/Santiago')::date = :hoy) AS visitas_hoy,
           (SELECT count(*) FROM visitas WHERE empresa_id = :empresa_id
              AND estado IN ('agendada', 'reagendada')) AS pendientes
-    """), {"empresa_id": str(user.empresa_id)}).mappings().one()
+    """), {"empresa_id": str(user.empresa_id), "hoy": hoy_chile()}).mappings().one()
     return PanelStats(**dict(row))
 
 
@@ -142,7 +143,9 @@ def list_panel_visits(fecha: date | None = None, operador_id: UUID | None = None
     filters = []
     params = {"empresa_id": str(user.empresa_id)}
     if fecha:
-        filters.append("(v.fecha_hora AT TIME ZONE 'UTC')::date = :fecha")
+        # La fecha elegida en el panel es un día de Chile: se compara con el
+        # día de cada visita convertido a la hora de Chile, no a UTC.
+        filters.append("(v.fecha_hora AT TIME ZONE 'America/Santiago')::date = :fecha")
         params["fecha"] = fecha
     if operador_id:
         filters.append("v.operador_id = :operador_id")

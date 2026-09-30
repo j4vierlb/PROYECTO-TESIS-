@@ -60,7 +60,7 @@ VALUES
     ('66666666-6666-6666-6666-666666666666', 'agente_ia', 'Claro, tengo disponibilidad el jueves a las 10:00 o el viernes a las 15:00. ¿Cuál prefieres?', NULL),
     ('66666666-6666-6666-6666-666666666666', 'cliente', 'El jueves a las 10 está bien', 'confirmar_horario');
 
--- Visita agendada para "hoy" a las 10:00 UTC, para que aparezca de entrada
+-- Visita agendada para "hoy" a las 10:00 hora de Chile, para que aparezca de entrada
 -- en GET /operadores/me/visitas-hoy al levantar el proyecto desde cero.
 INSERT INTO visitas (id, empresa_id, cliente_id, operador_id, fecha_hora, estado, origen_agendamiento)
 VALUES (
@@ -68,7 +68,7 @@ VALUES (
     '11111111-1111-1111-1111-111111111111',
     '44444444-4444-4444-4444-444444444444',
     '33333333-3333-3333-3333-333333333333',
-    date_trunc('day', now() AT TIME ZONE 'UTC') + interval '10 hours',
+    (date_trunc('day', now() AT TIME ZONE 'America/Santiago') + interval '10 hours') AT TIME ZONE 'America/Santiago',
     'agendada',
     'whatsapp_ia'
 );
