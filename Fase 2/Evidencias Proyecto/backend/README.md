@@ -4,10 +4,13 @@ API FastAPI conectada a PostgreSQL + PostGIS (carpeta `../database/`).
 
 ## Instalación y ejecución
 
-1. Levanta la base de datos (Docker):
+**Con Docker (recomendado):** desde la raíz del repo, `docker compose up --build` levanta la base, este backend y el panel web. Ver el `README.md` de la raíz.
+
+**Sin Docker, para desarrollar el backend** (con recarga automática al editar):
+
+1. Levanta solo la base de datos, desde la raíz del repo:
    ```bash
-   cd "Fase 2/Evidencias Proyecto/database"
-   docker compose up -d
+   docker compose up -d db
    ```
 2. Instala y corre el backend:
    ```bash
@@ -110,7 +113,7 @@ Copia `.env.example` a `.env` y completa. **Nunca subas el `.env` ni claves real
 Si tu base se creó antes de este cambio, agrega la columna nueva (una base creada desde cero con `schema.sql` ya la trae):
 
 ```bash
-docker exec -i killbichos_db psql -U killbichos -d killbichos < "Fase 2/Evidencias Proyecto/database/migracion_message_sid.sql"
+docker compose exec -T db psql -U killbichos -d killbichos < "Fase 2/Evidencias Proyecto/database/migracion_message_sid.sql"
 ```
 
 ### Prueba local rápida (sin Twilio)

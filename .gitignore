@@ -1,0 +1,7 @@
+# Variables de entorno con claves reales (Twilio, OpenAI, contraseñas).
+# Se copian desde .env.example y NUNCA se suben al repositorio.
+.env
+
+# Archivos que crea macOS en cada carpeta
+.DS_Store
+Icon?
