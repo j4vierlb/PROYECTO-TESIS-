@@ -15,7 +15,7 @@ VALUES
         '11111111-1111-1111-1111-111111111111',
         '55555555-5555-5555-5555-555555555555',
         '33333333-3333-3333-3333-333333333333',
-        date_trunc('day', now() AT TIME ZONE 'UTC') - interval '5 days' + interval '14 hours',
+        (date_trunc('day', now() AT TIME ZONE 'America/Santiago') - interval '5 days' + interval '14 hours') AT TIME ZONE 'America/Santiago',
         'completada',
         'whatsapp_ia',
         'Instalación inicial en bodega. Se dejaron 3 dispositivos en el perímetro.'
@@ -25,7 +25,7 @@ VALUES
         '11111111-1111-1111-1111-111111111111',
         '44444444-4444-4444-4444-444444444444',
         '33333333-3333-3333-3333-333333333333',
-        date_trunc('day', now() AT TIME ZONE 'UTC') - interval '12 days' + interval '15 hours',
+        (date_trunc('day', now() AT TIME ZONE 'America/Santiago') - interval '12 days' + interval '15 hours') AT TIME ZONE 'America/Santiago',
         'completada',
         'manual',
         'Revisión mensual. Sin actividad de roedores; se retiró una trampa dañada.'
