@@ -44,6 +44,10 @@ class _CroquisScreenState extends State<CroquisScreen> {
 
   Croquis? _croquis; // null mientras no ha cargado
   String? _loadError;
+  // true si el backend respondió 404: la visita todavía no tiene croquis
+  // (pasa con las visitas agendadas por WhatsApp). No es un error de red,
+  // así que no tiene sentido ofrecer "Reintentar".
+  bool _sinCroquis = false;
   bool _loading = true;
   // Id del dispositivo que se está actualizando (para mostrar el progreso).
   String? _updatingId;
@@ -63,13 +67,19 @@ class _CroquisScreenState extends State<CroquisScreen> {
     setState(() {
       _loading = true;
       _loadError = null;
+      _sinCroquis = false;
     });
     try {
       final croquis = await _apiClient.fetchCroquis(widget.visitaId);
       if (!mounted) return;
       setState(() => _croquis = croquis);
     } on ApiException catch (error) {
-      if (mounted) setState(() => _loadError = error.message);
+      if (mounted) {
+        setState(() {
+          _loadError = error.message;
+          _sinCroquis = error.statusCode == 404;
+        });
+      }
     } catch (_) {
       if (mounted) setState(() => _loadError = 'No se pudo cargar el croquis');
     } finally {
@@ -188,8 +198,34 @@ class _CroquisScreenState extends State<CroquisScreen> {
       return const Center(child: CircularProgressIndicator());
     }
     final croquis = _croquis;
-    // Error de carga (por ejemplo, la visita no tiene croquis): mensaje y
-    // botón para reintentar.
+    // La visita todavía no tiene croquis (ej: agendada por WhatsApp).
+    if (_sinCroquis) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.map_outlined, size: 48, color: AppColors.textSecondary),
+              SizedBox(height: 12),
+              Text(
+                'Esta visita todavía no tiene croquis',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+              ),
+              SizedBox(height: 6),
+              Text(
+                'Suele pasar con las visitas agendadas por WhatsApp.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    // Otro error de carga (sin red, servidor caído): mensaje y botón para
+    // reintentar.
     if (_loadError != null || croquis == null) {
       return Center(
         child: Padding(

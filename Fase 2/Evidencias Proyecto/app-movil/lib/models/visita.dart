@@ -14,28 +14,34 @@ class Cliente {
   final String id;
   final String nombre;
   final String telefonoWhatsapp;
-  final String direccion;
-  final double lat;
-  final double lng;
+  // Pueden venir vacíos (null): un cliente que llegó por WhatsApp se registra
+  // solo con su teléfono, antes de dar su dirección, y sin coordenadas.
+  final String? direccion;
+  final double? lat;
+  final double? lng;
 
   Cliente({
     required this.id,
     required this.nombre,
     required this.telefonoWhatsapp,
-    required this.direccion,
-    required this.lat,
-    required this.lng,
+    this.direccion,
+    this.lat,
+    this.lng,
   });
+
+  /// Dirección para mostrar en pantalla, con un texto si todavía no existe.
+  String get direccionTexto => (direccion == null || direccion!.trim().isEmpty) ? 'Sin dirección registrada' : direccion!;
 
   /// Crea un Cliente a partir del JSON del backend.
   factory Cliente.fromJson(Map<String, dynamic> json) => Cliente(
         id: json['id'] as String,
         nombre: json['nombre'] as String,
         telefonoWhatsapp: json['telefono_whatsapp'] as String,
-        direccion: json['direccion'] as String,
+        direccion: json['direccion'] as String?,
         // `num` acepta tanto 10 como 10.5; toDouble() lo deja siempre decimal.
-        lat: (json['lat'] as num).toDouble(),
-        lng: (json['lng'] as num).toDouble(),
+        // El `?` deja el valor en null si el backend no mandó coordenadas.
+        lat: (json['lat'] as num?)?.toDouble(),
+        lng: (json['lng'] as num?)?.toDouble(),
       );
 }
 

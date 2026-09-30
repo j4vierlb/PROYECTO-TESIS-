@@ -161,7 +161,7 @@ class _VisitaCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      visita.cliente.direccion,
+                      visita.cliente.direccionTexto,
                       style: Theme.of(context).textTheme.bodyMedium,
                       overflow: TextOverflow.ellipsis,
                     ),

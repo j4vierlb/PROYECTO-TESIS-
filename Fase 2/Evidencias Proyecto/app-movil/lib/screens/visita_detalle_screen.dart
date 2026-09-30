@@ -190,7 +190,7 @@ class _VisitaDetalleScreenState extends State<VisitaDetalleScreen> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  _InfoRow(icon: Icons.location_on_outlined, text: visita.cliente.direccion),
+                  _InfoRow(icon: Icons.location_on_outlined, text: visita.cliente.direccionTexto),
                   const SizedBox(height: 8),
                   _InfoRow(icon: Icons.schedule_outlined, text: formatFechaHora(visita.fechaHora)),
                   const SizedBox(height: 8),
