@@ -8,6 +8,11 @@
 #
 # ZoneInfo("America/Santiago") incluye el cambio de horario de verano/invierno
 # (UTC-3 / UTC-4), así que no hay que ajustar nada a mano cuando cambia.
+#
+# Los datos de zonas horarias los trae el sistema operativo, pero no siempre:
+# Windows no los tiene y algunas imágenes de Docker mínimas tampoco. Por eso
+# requirements.txt incluye el paquete "tzdata": Python lo usa como respaldo
+# cuando el sistema no los tiene. Sin él, el backend ni siquiera arrancaría.
 # =============================================================================
 
 from datetime import date, datetime

@@ -30,7 +30,7 @@ El login recibe JSON con `usuario` y `clave`, y entrega un `access_token` de 8 h
 
 ## Fechas y zona horaria
 
-Las fechas se guardan y se envían en **UTC** (ISO 8601), pero **"hoy" es el día de Chile** (`America/Santiago`): la agenda del técnico y la del panel comparan cada visita convertida a la hora de Chile. Si se calculara en UTC, desde las 21:00 hora de Chile (20:00 en invierno) la agenda mostraría las visitas del día siguiente. El cálculo está en `app/zona_horaria.py`.
+Las fechas se guardan y se envían en **UTC** (ISO 8601), pero **"hoy" es el día de Chile** (`America/Santiago`): la agenda del técnico y la del panel comparan cada visita convertida a la hora de Chile. Si se calculara en UTC, desde las 21:00 hora de Chile (20:00 en invierno) la agenda mostraría las visitas del día siguiente. El cálculo está en `app/zona_horaria.py`. El paquete `tzdata` (en `requirements.txt`) asegura los datos de zonas horarias aunque el sistema no los traiga, como en Windows o en imágenes de Docker mínimas.
 
 ## Pruebas
 
