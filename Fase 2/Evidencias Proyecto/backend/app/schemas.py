@@ -64,10 +64,14 @@ class ClientSummary(BaseModel):
     id: UUID
     nombre: str
     telefono_whatsapp: str
-    direccion: str
+    # Dirección y coordenadas pueden venir vacías (null): un cliente que llega
+    # por WhatsApp se registra solo con su teléfono, antes de dar su dirección,
+    # y nunca trae coordenadas. Exigirlas hacía que la agenda y el panel
+    # respondieran error 500 apenas existía uno de esos clientes.
+    direccion: str | None = None
     # Coordenadas sueltas (no GeoJSON), como se acordó en el formato de la API.
-    lat: float
-    lng: float
+    lat: float | None = None
+    lng: float | None = None
 
 
 class VisitResponse(BaseModel):
