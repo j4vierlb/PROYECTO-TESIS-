@@ -78,7 +78,7 @@ class VisitResponse(BaseModel):
     """Una visita tal como la ve la app (agenda y detalle)."""
     id: UUID
     cliente: ClientSummary
-    operador_id: UUID
+    operador_id: UUID | None = None
     fecha_hora: datetime  # se envía en ISO 8601 UTC, ej: "2026-09-24T10:00:00Z"
     estado: VisitStatus
     origen_agendamiento: str  # "whatsapp_ia" o "manual"
