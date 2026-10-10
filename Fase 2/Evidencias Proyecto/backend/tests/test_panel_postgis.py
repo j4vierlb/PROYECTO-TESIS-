@@ -1,0 +1,156 @@
+"""FastAPI + autenticación real + PostGIS aislado, con rollback por prueba.
+
+Activar explícitamente PANEL_TEST_DATABASE_URL apuntando a panel_regression.
+Sin esa variable se omiten estos casos. No se cambian routers ni esquemas.
+"""
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import unittest
+from datetime import date, datetime, timezone
+from unittest.mock import patch
+
+from fastapi.testclient import TestClient
+from sqlalchemy import text
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.main import app
+from panel_fixture import CLIENT_ID, EMAIL, OPERATOR_ID, OTHER_CLIENT_ID, PASSWORD, seed, test_engine
+
+
+@unittest.skipUnless(os.getenv('PANEL_TEST_DATABASE_URL'), 'Falta PANEL_TEST_DATABASE_URL de una base aislada')
+class PanelPostgisTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.engine = test_engine()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.engine.dispose()
+
+    def setUp(self):
+        self.connection = self.engine.connect()
+        self.transaction = self.connection.begin()
+        self.db = Session(bind=self.connection, join_transaction_mode='create_savepoint')
+        self.addCleanup(self.cleanup_database)
+        seed(self.db)
+        self.previous_overrides = app.dependency_overrides.copy()
+        # Solo se cambia la conexión. JWT, roles, routers, validación y SQL son reales.
+        app.dependency_overrides[get_db] = lambda: self.db
+        self.addCleanup(self.restore_overrides)
+        self.client = TestClient(app)
+        self.addCleanup(self.client.close)
+        response = self.client.post('/auth/login', json=dict(usuario=EMAIL, clave=PASSWORD))
+        self.assertEqual(response.status_code, 200)
+        self.client.headers['Authorization'] = f"Bearer {response.json()['access_token']}"
+
+    def restore_overrides(self):
+        app.dependency_overrides.clear()
+        app.dependency_overrides.update(self.previous_overrides)
+
+    def cleanup_database(self):
+        self.db.close()
+        self.transaction.rollback()
+        self.connection.close()
+
+    def frontend_payload(self, wall_time, operator=''):
+        utility = Path(__file__).resolve().parents[2] / 'frontend/src/panel-utils.js'
+        script = f"import {{visitPayload}} from {json.dumps(utility.as_uri())}; console.log(JSON.stringify(visitPayload(JSON.parse(process.argv[1]))))"
+        form = dict(cliente_id=CLIENT_ID, operador_id=operator, fecha_hora=wall_time)
+        output = subprocess.run([shutil.which('node') or 'node', '--input-type=module', '-e', script, json.dumps(form)],
+                                check=True, capture_output=True, text=True, timeout=15)
+        return json.loads(output.stdout)
+
+    def create_visit(self, wall_time='2026-09-29T10:00', operator=''):
+        payload = self.frontend_payload(wall_time, operator)
+        response = self.client.post('/panel/visitas', json=payload)
+        self.assertEqual(response.status_code, 201, response.text)
+        return response.json()
+
+    def saved_visit(self, visit):
+        return self.db.execute(text('SELECT operador_id, fecha_hora FROM visitas WHERE id = :id'),
+                               dict(id=visit['id'])).mappings().one()
+
+    def test_cliente_whatsapp_sin_ubicacion_se_lista_y_edita_sin_inventar_coordenadas(self):
+        response = self.client.get('/clientes')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()), 1)
+        self.assertIsNone(response.json()[0]['lat'])
+        response = self.client.patch(f'/clientes/{CLIENT_ID}', json=dict(
+            nombre='Cliente editado QA', direccion=None, lat=None, lng=None))
+        self.assertEqual(response.status_code, 200, response.text)
+        persisted = self.db.execute(text('SELECT nombre, direccion, ubicacion FROM clientes WHERE id = :id'),
+                                    dict(id=CLIENT_ID)).mappings().one()
+        self.assertEqual(persisted['nombre'], 'Cliente editado QA')
+        self.assertIsNone(persisted['direccion'])
+        self.assertIsNone(persisted['ubicacion'])
+
+    def test_cliente_con_coordenadas_cero_roundtrip_postgis(self):
+        response = self.client.post('/clientes', json=dict(
+            nombre='Coordenadas cero QA', telefono_whatsapp='+00000000003', direccion='Dirección QA', lat=0, lng=0))
+        self.assertEqual(response.status_code, 201, response.text)
+        self.assertEqual(response.json()['lat'], 0)
+        self.assertEqual(response.json()['lng'], 0)
+
+    def test_sin_asignar_se_guarda_null_y_reaparece_en_la_agenda(self):
+        visit = self.create_visit()
+        self.assertIsNone(visit['operador_id'])
+        self.assertIsNone(visit['operador'])
+        self.assertIsNone(self.saved_visit(visit)['operador_id'])
+        agenda = self.client.get('/panel/visitas?fecha=2026-09-29')
+        self.assertEqual(agenda.status_code, 200)
+        self.assertEqual(agenda.json()[0]['id'], visit['id'])
+        self.assertIsNone(agenda.json()[0]['cliente']['lat'])
+
+    def test_hora_de_verano_10_chile_persiste_13_utc(self):
+        visit = self.create_visit()
+        self.assertEqual(self.saved_visit(visit)['fecha_hora'], datetime(2026, 9, 29, 13, tzinfo=timezone.utc))
+
+    def test_hora_de_invierno_10_chile_persiste_14_utc(self):
+        visit = self.create_visit('2026-07-15T10:00')
+        self.assertEqual(self.saved_visit(visit)['fecha_hora'], datetime(2026, 7, 15, 14, tzinfo=timezone.utc))
+
+    def test_2330_chile_se_guarda_en_utc_del_dia_siguiente_sin_cambiar_dia_agenda(self):
+        visit = self.create_visit('2026-09-29T23:30')
+        self.assertEqual(self.saved_visit(visit)['fecha_hora'], datetime(2026, 9, 30, 2, 30, tzinfo=timezone.utc))
+        self.assertEqual(self.client.get('/panel/visitas?fecha=2026-09-29').json()[0]['id'], visit['id'])
+        self.assertEqual(self.client.get('/panel/visitas?fecha=2026-09-30').json(), [])
+
+    def test_operador_asignado_y_filtro(self):
+        assigned = self.create_visit(operator=OPERATOR_ID)
+        self.create_visit('2026-09-29T11:00')
+        response = self.client.get(f'/panel/visitas?fecha=2026-09-29&operador_id={OPERATOR_ID}')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([v['id'] for v in response.json()], [assigned['id']])
+        self.assertEqual(response.json()[0]['operador']['nombre'], 'Operador QA')
+
+    def test_operador_vacio_es_rechazado_sin_guardar_visita(self):
+        payload = self.frontend_payload('2026-09-29T10:00')
+        payload['operador_id'] = ''
+        self.assertEqual(self.client.post('/panel/visitas', json=payload).status_code, 422)
+        self.assertEqual(self.db.execute(text('SELECT count(*) FROM visitas')).scalar_one(), 0)
+
+    def test_estadisticas_cuentan_hoy_segun_chile(self):
+        self.create_visit('2026-09-29T23:30')
+        self.create_visit('2026-09-30T00:30')
+        with patch('app.routers.panel.hoy_chile', return_value=date(2026, 9, 29)):
+            response = self.client.get('/panel/stats')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), dict(clientes=1, visitas_hoy=1, pendientes=2))
+
+    def test_sin_token_no_se_puede_entrar_al_panel(self):
+        del self.client.headers['Authorization']
+        self.assertEqual(self.client.get('/clientes').status_code, 401)
+
+    def test_no_se_puede_agendar_cliente_de_otra_empresa(self):
+        payload = self.frontend_payload('2026-09-29T10:00')
+        payload['cliente_id'] = OTHER_CLIENT_ID
+        self.assertEqual(self.client.post('/panel/visitas', json=payload).status_code, 404)
+        self.assertEqual(self.db.execute(text('SELECT count(*) FROM visitas')).scalar_one(), 0)
+
+
+if __name__ == '__main__':
+    unittest.main()
