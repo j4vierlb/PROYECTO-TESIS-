@@ -1,0 +1,8 @@
+# Lo que NO se copia a la imagen de Docker.
+# .env: las claves llegan por docker-compose (env_file), nunca dentro de la imagen.
+.env
+.venv/
+__pycache__/
+*.pyc
+tests/
+README.md

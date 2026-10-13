@@ -4,10 +4,13 @@ API FastAPI conectada a PostgreSQL + PostGIS (carpeta `../database/`).
 
 ## Instalación y ejecución
 
-1. Levanta la base de datos (Docker):
+**Con Docker (recomendado):** desde la raíz del repo, `docker compose up --build` levanta la base, este backend y el panel web. Ver el `README.md` de la raíz.
+
+**Sin Docker, para desarrollar el backend** (con recarga automática al editar):
+
+1. Levanta solo la base de datos, desde la raíz del repo:
    ```bash
-   cd "Fase 2/Evidencias Proyecto/database"
-   docker compose up -d
+   docker compose up -d db
    ```
 2. Instala y corre el backend:
    ```bash
@@ -27,6 +30,18 @@ Swagger queda disponible en <http://127.0.0.1:8000/docs>.
 - Administrador: `admin@killbichos.cl` / `demo1234`
 
 El login recibe JSON con `usuario` y `clave`, y entrega un `access_token` de 8 horas y un `refresh_token` de 30 días.
+
+## Fechas y zona horaria
+
+Las fechas se guardan y se envían en **UTC** (ISO 8601), pero **"hoy" es el día de Chile** (`America/Santiago`): la agenda del técnico y la del panel comparan cada visita convertida a la hora de Chile. Si se calculara en UTC, desde las 21:00 hora de Chile (20:00 en invierno) la agenda mostraría las visitas del día siguiente. El cálculo está en `app/zona_horaria.py`. El paquete `tzdata` (en `requirements.txt`) asegura los datos de zonas horarias aunque el sistema no los traiga, como en Windows o en imágenes de Docker mínimas.
+
+## Pruebas
+
+Desde esta carpeta (no necesitan base de datos):
+
+```bash
+python -m unittest discover tests
+```
 
 ## Estructura
 
@@ -98,7 +113,7 @@ Copia `.env.example` a `.env` y completa. **Nunca subas el `.env` ni claves real
 Si tu base se creó antes de este cambio, agrega la columna nueva (una base creada desde cero con `schema.sql` ya la trae):
 
 ```bash
-docker exec -i killbichos_db psql -U killbichos -d killbichos < "Fase 2/Evidencias Proyecto/database/migracion_message_sid.sql"
+docker compose exec -T db psql -U killbichos -d killbichos < "Fase 2/Evidencias Proyecto/database/migracion_message_sid.sql"
 ```
 
 ### Prueba local rápida (sin Twilio)

@@ -1,12 +1,12 @@
 -- Restablece los datos de prueba a su estado inicial, sin borrar la base.
 -- Sirve para repetir una demo: la visita vuelve a quedar agendada para HOY
--- a las 10:00 UTC y las trampas vuelven a estar sin confirmar, en su lugar.
+-- a las 10:00 (hora de Chile) y las trampas vuelven a estar sin confirmar, en su lugar.
 --
 -- Uso:
 --   docker exec -i killbichos_db psql -U killbichos -d killbichos < reset_demo.sql
 
 UPDATE visitas
-SET fecha_hora = date_trunc('day', now() AT TIME ZONE 'UTC') + interval '10 hours',
+SET fecha_hora = (date_trunc('day', now() AT TIME ZONE 'America/Santiago') + interval '10 hours') AT TIME ZONE 'America/Santiago',
     estado = 'agendada',
     notas = NULL
 WHERE id = '77777777-7777-7777-7777-777777777777';

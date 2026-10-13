@@ -17,7 +17,7 @@
 # =============================================================================
 
 import logging
-from datetime import datetime, time, timedelta, timezone
+from datetime import date, datetime, time, timedelta, timezone
 from typing import Any
 from uuid import UUID
 from zoneinfo import ZoneInfo
@@ -56,22 +56,23 @@ def fetch_visit(db: Connection, visit_id: UUID) -> dict[str, Any]:
     return dict(row)
 
 
-def fetch_visits_for_today(db: Connection, operador_id: UUID) -> list[dict[str, Any]]:
-    """Visitas del operador cuya fecha cae en el día actual, comparando
-    siempre en UTC (mismo huso horario en que se guarda fecha_hora), para
-    que el resultado no dependa de la zona horaria del servidor."""
-    # (fecha AT TIME ZONE 'UTC')::date = "el día de esa fecha, en UTC".
-    # Se compara con el día de hoy, también en UTC. ORDER BY la hora.
+def fetch_visits_for_today(db: Connection, operador_id: UUID, dia: date) -> list[dict[str, Any]]:
+    """Visitas del operador que caen en `dia`, entendido como día de Chile
+    (lo calcula zona_horaria.hoy_chile). fecha_hora se guarda en UTC, así
+    que antes de comparar se convierte a la hora de Chile: si no, desde las
+    21:00 la agenda mostraría las visitas del día siguiente."""
+    # (fecha AT TIME ZONE 'America/Santiago')::date = "el día de esa fecha
+    # en Chile". Se compara con el día pedido. ORDER BY la hora.
     rows = db.execute(
         text(
             _VISIT_SELECT
             + """
             WHERE v.operador_id = :operador_id
-              AND (v.fecha_hora AT TIME ZONE 'UTC')::date = (now() AT TIME ZONE 'UTC')::date
+              AND (v.fecha_hora AT TIME ZONE 'America/Santiago')::date = :dia
             ORDER BY v.fecha_hora
             """
         ),
-        {"operador_id": str(operador_id)},
+        {"operador_id": str(operador_id), "dia": dia},
     ).mappings().all()
     return [dict(row) for row in rows]
 

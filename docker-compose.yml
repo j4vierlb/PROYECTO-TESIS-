@@ -1,0 +1,80 @@
+# =============================================================================
+# docker-compose.yml — Levanta todo Kill Bichos IA con un solo comando
+# -----------------------------------------------------------------------------
+#   cp .env.example .env
+#   docker compose up --build
+#
+#   Panel web:  http://localhost:8080   (admin@killbichos.cl / demo1234)
+#   Backend:    http://localhost:8000/docs
+#   Base:       localhost:5432
+#
+# La app móvil (Flutter) NO va en Docker: se instala en el teléfono y se
+# conecta al backend de aquí (ver README.md).
+# =============================================================================
+
+name: killbichos
+
+services:
+  # --- Base de datos: PostgreSQL con PostGIS (coordenadas) ---
+  db:
+    image: postgis/postgis:16-3.4
+    # La imagen oficial de PostGIS solo se publica para procesadores Intel
+    # (amd64). En un Mac con chip Apple corre emulada: funciona, más lento.
+    platform: linux/amd64
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-killbichos}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD en el archivo .env}
+      POSTGRES_DB: ${POSTGRES_DB:-killbichos}
+    ports:
+      - "5432:5432"
+    volumes:
+      # Los datos quedan en un volumen de Docker: sobreviven a "docker compose
+      # down". Para empezar de cero: docker compose down -v
+      - db_data:/var/lib/postgresql/data
+      # Scripts que PostgreSQL ejecuta UNA sola vez, al crear la base vacía,
+      # en orden alfabético (por eso llevan número).
+      - "./Fase 2/Evidencias Proyecto/database/schema.sql:/docker-entrypoint-initdb.d/1_schema.sql:ro"
+      - "./Fase 2/Evidencias Proyecto/database/seed.sql:/docker-entrypoint-initdb.d/2_seed.sql:ro"
+      - "./Fase 2/Evidencias Proyecto/database/demo_historial.sql:/docker-entrypoint-initdb.d/3_demo_historial.sql:ro"
+      - "./Fase 2/Evidencias Proyecto/database/migracion_message_sid.sql:/docker-entrypoint-initdb.d/4_migracion_message_sid.sql:ro"
+    healthcheck:
+      # "Lista" solo cuando acepta conexiones por red. Mientras corre los
+      # scripts de arriba solo escucha internamente, así que el backend no
+      # arranca antes de que la base esté completa.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+
+  # --- Backend: API FastAPI ---
+  backend:
+    build: "./Fase 2/Evidencias Proyecto/backend"
+    restart: unless-stopped
+    # Todas las variables del .env (JWT, CORS, OpenAI, Twilio, horario...).
+    env_file: .env
+    environment:
+      # Dentro de Docker la base se llama "db" (el nombre del servicio), no localhost.
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-killbichos}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-killbichos}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      # 0.0.0.0 permite que la app del iPhone llegue desde la WiFi.
+      - "8000:8000"
+
+  # --- Panel web: React compilado, servido con nginx ---
+  web:
+    build:
+      context: "./Fase 2/Evidencias Proyecto/frontend"
+      args:
+        # Dirección del backend que usa el NAVEGADOR (por eso localhost, no "backend").
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+volumes:
+  db_data:

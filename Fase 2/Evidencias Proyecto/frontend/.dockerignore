@@ -1,0 +1,4 @@
+# Lo que NO se copia a la imagen: se genera dentro del contenedor.
+node_modules/
+dist/
+.env
