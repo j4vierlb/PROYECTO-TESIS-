@@ -133,16 +133,16 @@ En Windows (PowerShell) usa `curl.exe` en lugar de `curl` y escribe el comando e
 
 ### Prueba real con WhatsApp (Twilio Sandbox + ngrok)
 
-1. Crea una cuenta gratuita en <https://www.twilio.com> y copia el Account SID y el Auth Token al `.env`.
+1. Crea una cuenta gratuita en <https://www.twilio.com> y copia el Account SID y el Auth Token al `.env`. **Ojo con cuál:** si levantas todo con Docker (`docker compose up` desde la raíz del repo), el backend lee el `.env` **de la raíz**; `backend/.env` solo se usa al correr `uvicorn` directamente.
 2. En la consola de Twilio entra a **Messaging → Try it out → Send a WhatsApp message**. Desde tu WhatsApp envía el mensaje `join <código>` que aparece ahí al número del Sandbox, para unir tu teléfono.
-3. Levanta el backend (`uvicorn app.main:app --reload`) y, en otra terminal, expónlo a internet con ngrok:
+3. Levanta el backend (`uvicorn app.main:app --reload`, o `docker compose up` desde la raíz) y, en otra terminal, expónlo a internet con ngrok:
 
    ```bash
    ngrok http 8000
    ```
 
 4. Copia la URL `https://...ngrok-free.app` que muestra ngrok. En Twilio, pestaña **Sandbox settings**, pon en **When a message comes in** la URL `https://TU-URL-NGROK/webhooks/whatsapp` con método `POST`.
-5. Pon esa misma URL, exacta, en `TWILIO_WEBHOOK_URL`, deja `TWILIO_VALIDATE_SIGNATURE=true` y reinicia el backend.
+5. Pon esa misma URL, exacta, en `TWILIO_WEBHOOK_URL`, deja `TWILIO_VALIDATE_SIGNATURE=true` y reinicia el backend (con Docker: `docker compose up -d backend`, para que relea el `.env`).
 6. Escribe al número del Sandbox desde tu WhatsApp.
 
 La URL de ngrok cambia cada vez que lo reinicias: actualízala en Twilio y en el `.env`. En producción `TWILIO_VALIDATE_SIGNATURE` debe quedar en `true`; con `false` cualquiera podría enviar mensajes falsos al webhook.

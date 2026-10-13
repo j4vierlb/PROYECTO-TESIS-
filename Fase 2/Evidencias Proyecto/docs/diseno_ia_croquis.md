@@ -1,4 +1,4 @@
-# Diseño de la IA del croquis (borrador v0.1)
+# Diseño de la IA del croquis (borrador v0.2)
 
 Objetivo: que la IA **proponga** dónde poner las trampas de un cliente y el operador, en terreno, las **confirme, mueva o retire** desde la app. La IA nunca deja un croquis como definitivo.
 
@@ -12,14 +12,50 @@ Lo que ya existe y se reutiliza:
 
 | Dato | De dónde sale | Obligatorio |
 |---|---|---|
-| Coordenadas del predio (`lat`, `lng`) | `clientes.ubicacion` (geocodificando `clientes.direccion` si está vacía) | Sí |
-| Imagen satelital del predio, 640×640 px, zoom 19–20 | API de mapas estáticos (Google Static Maps o Mapbox); se guarda la URL en `croquis.imagen_satelital_url` | Sí |
+| Coordenadas del predio (`lat`, `lng`) | `clientes.ubicacion`; si está vacía, se geocodifica `clientes.direccion` (ver 1.1) | Sí |
+| Imagen satelital del predio, 640×640 px, zoom 19–20 | Google Static Maps (misma cuenta de Google Maps que la app); se guarda la URL en `croquis.imagen_satelital_url` | Sí |
 | Límites geográficos de la imagen (esquinas N/S/E/O) | Se calculan en el backend a partir del centro y el zoom | Sí (no va a la IA, sirve para convertir) |
 | Tipo de recinto | Lo indica el operador o el panel: casa, restaurante, bodega, local comercial, industria | Sí |
 | Plaga objetivo | roedores, cucarachas, moscas, otra | Sí |
 | Superficie aproximada (m²) y n° de accesos | Operador / panel | No |
 | Croquis anterior del cliente | Última versión en `croquis` + sus `dispositivos_trampa` con `estado` (`activo`, `revisar`, `retirado`) | No (solo si hay) |
 | Notas del operador | Texto libre ("hay un desagüe en el patio trasero") | No |
+
+### 1.1 Coordenadas: geocodificación de la dirección (falta hoy)
+
+Los clientes que llegan por WhatsApp solo tienen `direccion` (texto); `clientes.ubicacion` queda en `null`, y hoy **nada en el sistema convierte la dirección en coordenadas**. Sin coordenadas no hay foto satelital ni croquis, así que esto es un requisito previo de la IA.
+
+**Cómo:** Google Geocoding API, con la cuenta de Google Maps que ya usa la app.
+
+- Nueva variable `GOOGLE_MAPS_API_KEY` en el `.env` de la raíz (y en `.env.example`, vacía).
+- La clave de la app está pensada para Android/iOS; si tiene *restricción de aplicación*, Google rechaza las llamadas desde el backend. Opciones: quitarle esa restricción y dejarla limitada por API, o (mejor) crear una segunda clave **en el mismo proyecto de Google Cloud**, restringida a *Geocoding API* y *Maps Static API*. En ambos casos hay que **habilitar Geocoding API y Maps Static API** en el proyecto.
+- Costo: ambas APIs tienen cuota gratis mensual; con el volumen de Kill Bichos (decenas de clientes al mes, una geocodificación por cliente) debería ser 0 USD. Verificar la cuota vigente en la consola.
+
+**Módulo** `app/geocoding.py` → `geocodificar(direccion) -> (lat, lng, precision) | None`:
+
+- Llama a `https://maps.googleapis.com/maps/api/geocode/json` con `address`, `components=country:CL`, `region=cl` y `language=es`.
+- Si la dirección no trae comuna, se agrega ", Región Metropolitana" para no caer en otra ciudad con la misma calle.
+- Timeout corto (5 s). Si falla, devuelve `None` y no rompe nada: el cliente queda sin coordenadas como hoy.
+
+**Validaciones antes de guardar en `clientes.ubicacion`:**
+
+1. `status == "OK"` y un solo resultado (o el primero si todos están a < 100 m).
+2. `geometry.location_type` = `ROOFTOP` o `RANGE_INTERPOLATED`. Si es `GEOMETRIC_CENTER` o `APPROXIMATE` (solo encontró la calle o la comuna), **no se guarda**: una foto centrada en el lugar equivocado produce un croquis inútil.
+3. Si `partial_match = true`, tampoco se guarda (Google adivinó parte de la dirección).
+4. El punto debe caer dentro del rectángulo de la Región Metropolitana (lat −34,3 a −32,9; lng −71,8 a −69,8).
+
+**Cuándo se geocodifica:**
+
+| Momento | Qué pasa |
+|---|---|
+| El agente de WhatsApp guarda o cambia la dirección del cliente | Se geocodifica **después** de responder al cliente (tarea en segundo plano), para no demorar el WhatsApp. |
+| El panel crea o edita un cliente con dirección y sin coordenadas | Igual; el panel sigue permitiendo ingresar lat/lng a mano. |
+| `POST /croquis/{visita_id}/sugerencia` y el cliente sigue sin coordenadas | Se intenta una vez más; si falla, responde `422 "El cliente no tiene coordenadas: corrígelas en el panel o desde la app"`. |
+| Se cambia la dirección | Se vuelve a geocodificar (la ubicación anterior ya no sirve). Si no cambia, nunca se repite: el resultado queda guardado. |
+
+**Corrección en terreno:** la geocodificación puede quedar a unos metros del predio real. Endpoint nuevo `PATCH /clientes/{id}/ubicacion` (solo operador o coordinador) para que el operador, al llegar, fije la ubicación con el GPS del teléfono o moviendo el pin en el mapa de la pantalla de croquis. Si la ubicación cambia más de 30 m, la sugerencia de la IA se vuelve a generar.
+
+**Pruebas:** con la API simulada (sin red): dirección exacta → guarda; `APPROXIMATE` → no guarda; `partial_match` → no guarda; fuera de la RM → no guarda; timeout → `None` y el WhatsApp responde igual. Más una prueba manual con 5 direcciones reales de Macul comparando con Google Maps.
 
 ## 2. Qué propone
 
@@ -77,7 +113,7 @@ Respuesta: el mismo `CroquisResponse` de `GET /croquis/{visita_id}`, así la app
 
 ## 7. Preguntas abiertas para el equipo
 
-1. ¿Proveedor de imagen satelital? Google Static Maps (mejor imagen en Santiago, requiere tarjeta) vs Mapbox (cuota gratis mayor).
+1. ~~¿Proveedor de imagen satelital?~~ Resuelto: Google (Static Maps + Geocoding), porque ya tenemos la cuenta de Google Maps de la app. Falta confirmar quién crea la clave del backend y habilita las dos APIs.
 2. ¿Kill Bichos tiene una norma interna de distancia entre cebaderos? Si la hay, reemplaza el "1 cada 15 m".
 3. ¿Quién completa tipo de recinto y plaga: el agente de WhatsApp al agendar, el panel, o el operador al llegar?
 4. ¿La sugerencia se genera al agendar (antes de la visita) o al abrir el croquis en terreno? Generarla antes permite que el operador la vea camino al cliente.
@@ -86,5 +122,6 @@ Respuesta: el mismo `CroquisResponse` de `GET /croquis/{visita_id}`, así la app
 ## 8. Siguientes pasos
 
 1. Responder las preguntas abiertas.
-2. Probar el prompt a mano con 3–5 imágenes reales de clientes de Macul y comparar con croquis hechos por un técnico.
-3. Implementar `app/ai/croquis_agent.py` + el endpoint, con el plan B por reglas desde el inicio.
+2. Implementar `app/geocoding.py` (1.1) y conectarlo al agente de WhatsApp y al panel: es requisito para todo lo demás.
+3. Probar el prompt a mano con 3–5 imágenes reales de clientes de Macul y comparar con croquis hechos por un técnico.
+4. Implementar `app/ai/croquis_agent.py` + el endpoint, con el plan B por reglas desde el inicio.
