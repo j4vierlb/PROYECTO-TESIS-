@@ -87,7 +87,7 @@ def get_visit(visit_id: UUID, user: CurrentUser = Depends(get_current_user), db:
     """Detalle de una visita. {visit_id} en la URL llega como parámetro, y
     FastAPI valida que sea un UUID (si no, 422)."""
     visit = fetch_visit(db, visit_id)  # 404 si no existe
-    ensure_visit_access(user, visit)   # 403 si es de otro operador
+    ensure_visit_access(user, visit)   # 403 si es de otra empresa o de otro operador
     return _to_visit_response(visit)
 
 

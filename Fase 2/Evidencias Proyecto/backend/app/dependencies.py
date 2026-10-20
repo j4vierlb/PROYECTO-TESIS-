@@ -76,9 +76,15 @@ def require_web_user(user: CurrentUser = Depends(get_current_user)) -> CurrentUs
 
 
 def ensure_visit_access(user: CurrentUser, visit: dict) -> None:
-    """Un operador solo puede ver/editar sus propias visitas; un admin puede
-    ver cualquiera. Se reutiliza en los routers de visitas y croquis, ya que
-    el croquis hereda el control de acceso de su visita."""
+    """Nadie accede a visitas de otra empresa. Dentro de la propia empresa,
+    un operador solo puede ver/editar sus propias visitas, y un admin o
+    coordinador puede ver cualquiera. Se reutiliza en los routers de visitas
+    y croquis, ya que el croquis hereda el control de acceso de su visita.
+    `visit` viene de repositories.fetch_visit (incluye empresa_id)."""
+    # Primero la empresa: aplica a todos los roles. Sin esto, un admin de otra
+    # empresa podía leer cualquier visita (y su croquis) con solo conocer el id.
+    if visit["empresa_id"] != user.empresa_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="La visita no pertenece a la empresa")
     if user.rol == "operador" and visit["operador_id"] != user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="La visita no pertenece al operador")
 
