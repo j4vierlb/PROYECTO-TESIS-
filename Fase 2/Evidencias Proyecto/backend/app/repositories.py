@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 # Es la parte común de las consultas de visitas: une cada visita con los
 # datos de su cliente (JOIN). Cada función le agrega su propio WHERE.
 _VISIT_SELECT = """
-    SELECT v.id, v.operador_id, v.fecha_hora, v.estado, v.origen_agendamiento, v.notas,
+    SELECT v.id, v.empresa_id, v.operador_id, v.fecha_hora, v.estado, v.origen_agendamiento, v.notas,
            c.id AS cliente_id, c.nombre AS cliente_nombre, c.telefono_whatsapp, c.direccion,
            ST_Y(c.ubicacion::geometry) AS lat, ST_X(c.ubicacion::geometry) AS lng
     FROM visitas v
