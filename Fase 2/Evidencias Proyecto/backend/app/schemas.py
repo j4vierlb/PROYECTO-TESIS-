@@ -164,6 +164,36 @@ class CroquisResponse(BaseModel):
     dispositivos: list[DeviceResponse]
 
 
+class TipoRecinto(str, Enum):
+    casa = "casa"
+    restaurante = "restaurante"
+    bodega = "bodega"
+    local_comercial = "local_comercial"
+    industria = "industria"
+
+
+class Plaga(str, Enum):
+    roedores = "roedores"
+    cucarachas = "cucarachas"
+    moscas = "moscas"
+    otra = "otra"
+
+
+class CroquisSuggestionRequest(BaseModel):
+    """Lo que manda la app o el panel a POST /croquis/{visita_id}/sugerencia."""
+    tipo_recinto: TipoRecinto
+    plaga: Plaga
+    superficie_m2: float | None = Field(default=None, gt=0, le=20_000)
+    notas: str | None = Field(default=None, max_length=500)
+
+
+class CroquisSuggestionResponse(CroquisResponse):
+    """El croquis recién creado, más lo que explicó la IA (no se guarda)."""
+    origen: str                     # "ia" o "reglas" (plan B)
+    resumen: str | None = None
+    advertencias: list[str] = []
+
+
 class DeviceUpdate(BaseModel):
     """- confirmar: no necesita lat/lng.
     - mover: obliga a mandar lat y lng (se valida abajo).

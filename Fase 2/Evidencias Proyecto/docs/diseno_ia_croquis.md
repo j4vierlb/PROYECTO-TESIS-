@@ -1,4 +1,4 @@
-# Diseño de la IA del croquis (borrador v0.2)
+# Diseño de la IA del croquis (v0.3)
 
 Objetivo: que la IA **proponga** dónde poner las trampas de un cliente y el operador, en terreno, las **confirme, mueva o retire** desde la app. La IA nunca deja un croquis como definitivo.
 
@@ -119,9 +119,25 @@ Respuesta: el mismo `CroquisResponse` de `GET /croquis/{visita_id}`, así la app
 4. ¿La sugerencia se genera al agendar (antes de la visita) o al abrir el croquis en terreno? Generarla antes permite que el operador la vea camino al cliente.
 5. Sin señal en terreno: la app ya tiene base local; ¿se descarga la sugerencia junto con la agenda del día?
 
-## 8. Siguientes pasos
+## 8. Estado de la implementación (19/10/2026)
+
+Implementado y con pruebas automáticas (APIs simuladas, sin red):
+
+- `app/geocoding.py`: geocodificación (1.1), conectada al webhook de WhatsApp en segundo plano. Si al pedir la sugerencia el cliente sigue sin coordenadas, se reintenta una vez.
+- `app/ai/croquis_agent.py`: foto satelital (Static Maps, 640×640, zoom 20 ≈ 80 × 80 m), llamada a OpenAI con la imagen en base64, conversión píxel → lat/lng (Web Mercator), validaciones de la sección 3 y plan B por reglas.
+- `POST /croquis/{visita_id}/sugerencia` (sección 5) en `routers/croquis.py`. Responde 201 con el croquis más `origen` (`ia` o `reglas`), `resumen` y `advertencias`. Responde 409 si la visita ya tiene croquis, está cancelada o el cliente no tiene ubicación.
+
+Decisiones tomadas al implementar:
+
+- **Superficie por defecto**: si no se indica, se suponen 200 m² (casa típica) para calcular el máximo de dispositivos y el plan B.
+- **La URL guardada en `imagen_satelital_url` no lleva la clave**. La app debe agregar su propia clave o pedir la imagen a un endpoint del backend (pendiente).
+- **La clave de Google no se escribe en los logs**: se silenció el log de httpx y los errores se registran sin la URL.
+- **`zona`, `motivo` y `confianza` no se guardan**: la tabla `dispositivos_trampa` no tiene esas columnas. La confianza solo se usa para quedarse con las mejores si la IA propone de más. Guardarlas requiere una migración del esquema.
+- Las trampas `revisar` del croquis anterior se copian igual que las `activo`. La sugerencia de retirarlas queda pendiente.
+
+## 9. Siguientes pasos
 
 1. Responder las preguntas abiertas.
-2. Implementar `app/geocoding.py` (1.1) y conectarlo al agente de WhatsApp y al panel: es requisito para todo lo demás.
-3. Probar el prompt a mano con 3–5 imágenes reales de clientes de Macul y comparar con croquis hechos por un técnico.
-4. Implementar `app/ai/croquis_agent.py` + el endpoint, con el plan B por reglas desde el inicio.
+2. Probar con 3–5 direcciones reales de clientes de Macul (con `GOOGLE_MAPS_API_KEY` y `OPENAI_API_KEY`) y comparar con croquis hechos por un técnico; anotar los tokens que registra el log.
+3. Botón en la app y en el panel para pedir la sugerencia, y mostrar `advertencias`.
+4. Endpoint para marcar `validado_por_operador = true`.

@@ -204,6 +204,112 @@ def remove_device(db: Connection, device_id: UUID) -> None:
     db.commit()
 
 
+def croquis_exists_for_visit(db: Connection, visit_id: UUID) -> bool:
+    return db.execute(
+        text("SELECT 1 FROM croquis WHERE visita_id = :visita_id"), {"visita_id": str(visit_id)}
+    ).first() is not None
+
+
+def fetch_previous_croquis(db: Connection, cliente_id: UUID) -> tuple[int, list[dict[str, Any]]]:
+    """Versión del último croquis del cliente (0 si no tiene) y sus trampas
+    que siguen instaladas (activo o revisar)."""
+    row = db.execute(
+        text("SELECT id, version FROM croquis WHERE cliente_id = :cliente_id ORDER BY version DESC LIMIT 1"),
+        {"cliente_id": str(cliente_id)},
+    ).mappings().first()
+    if row is None:
+        return 0, []
+    devices = db.execute(
+        text(_DEVICE_SELECT + " WHERE croquis_id = :croquis_id AND estado <> 'retirado' ORDER BY codigo"),
+        {"croquis_id": str(row["id"])},
+    ).mappings().all()
+    return row["version"], [dict(d) for d in devices]
+
+
+def save_client_location(db: Connection, cliente_id: UUID, lat: float, lng: float) -> None:
+    """Guarda las coordenadas del cliente si todavía no tiene."""
+    db.execute(
+        text("""
+            UPDATE clientes SET ubicacion = ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography
+            WHERE id = :id AND ubicacion IS NULL
+        """),
+        {"id": str(cliente_id), "lat": lat, "lng": lng},
+    )
+    db.commit()
+
+
+def _next_codes(used: set[str], count: int) -> list[str]:
+    """Códigos correlativos T-01, T-02... que no estén ocupados."""
+    codes, n = [], 1
+    while len(codes) < count:
+        code = f"T-{n:02d}"
+        if code not in used:
+            codes.append(code)
+        n += 1
+    return codes
+
+
+def insert_suggested_croquis(
+    db: Connection,
+    visit: dict[str, Any],
+    version: int,
+    imagen_satelital_url: str | None,
+    previous_devices: list[dict[str, Any]],
+    new_devices: list[dict[str, Any]],
+) -> None:
+    """Crea el croquis sugerido de la visita: copia las trampas que siguen
+    instaladas del croquis anterior y agrega las nuevas sin confirmar.
+
+    Bloquea la visita (FOR UPDATE) para que dos pedidos simultáneos no creen
+    dos croquis: el segundo espera y luego recibe 409."""
+    db.execute(text("SELECT 1 FROM visitas WHERE id = :id FOR UPDATE"), {"id": str(visit["id"])})
+    if croquis_exists_for_visit(db, visit["id"]):
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="La visita ya tiene croquis")
+
+    croquis_id = db.execute(
+        text("""
+            INSERT INTO croquis (cliente_id, visita_id, operador_id, version, imagen_satelital_url,
+                                 sugerido_por_ia, validado_por_operador)
+            VALUES (:cliente_id, :visita_id, :operador_id, :version, :imagen, TRUE, FALSE)
+            RETURNING id
+        """),
+        {
+            "cliente_id": str(visit["cliente_id"]),
+            "visita_id": str(visit["id"]),
+            "operador_id": str(visit["operador_id"]) if visit["operador_id"] else None,
+            "version": version,
+            "imagen": imagen_satelital_url,
+        },
+    ).scalar_one()
+
+    codes = _next_codes({d["codigo"] for d in previous_devices if d["codigo"]}, len(new_devices))
+    # Las anteriores se copian tal cual (mismo código, tipo, estado y confirmación).
+    rows = previous_devices + [
+        {**d, "codigo": code, "sugerido_por_ia": True, "confirmado": False, "estado": "activo"}
+        for d, code in zip(new_devices, codes)
+    ]
+    for row in rows:
+        db.execute(
+            text("""
+                INSERT INTO dispositivos_trampa (croquis_id, codigo, tipo, ubicacion, sugerido_por_ia, confirmado, estado)
+                VALUES (:croquis_id, :codigo, :tipo, ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography,
+                        :sugerido_por_ia, :confirmado, :estado)
+            """),
+            {
+                "croquis_id": str(croquis_id),
+                "codigo": row["codigo"],
+                "tipo": row["tipo"],
+                "lat": row["lat"],
+                "lng": row["lng"],
+                "sugerido_por_ia": row["sugerido_por_ia"],
+                "confirmado": row["confirmado"],
+                "estado": row["estado"],
+            },
+        )
+    db.commit()
+
+
 # ---------------------------------------------------------------------------
 # Consultas relacionadas a autenticación
 # ---------------------------------------------------------------------------

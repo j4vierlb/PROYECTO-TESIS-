@@ -54,13 +54,15 @@ app/
 ├── schemas.py          # modelos Pydantic (request/response)
 ├── dependencies.py      # auth: get_current_user, require_operator
 ├── repositories.py       # consultas SQL a Postgres/PostGIS
+├── geocoding.py          # dirección → lat/lng (Google Geocoding API)
 ├── ai/
-│   └── agent.py          # agente conversacional (OpenAI) para WhatsApp
+│   ├── agent.py          # agente conversacional (OpenAI) para WhatsApp
+│   └── croquis_agent.py  # sugerencia de trampas con la foto satelital
 └── routers/
     ├── auth.py
     ├── panel.py       # CRUD de clientes, agenda y operadores del panel web
     ├── visitas.py
-    ├── croquis.py
+    ├── croquis.py        # GET /croquis/{id} y POST /croquis/{id}/sugerencia
     ├── dispositivos.py
     └── whatsapp.py       # webhook de Twilio: POST /webhooks/whatsapp
 ```

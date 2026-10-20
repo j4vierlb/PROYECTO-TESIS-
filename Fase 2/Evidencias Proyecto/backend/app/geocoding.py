@@ -69,7 +69,7 @@ def _with_region(address: str) -> str:
     return f"{address}, Región Metropolitana"
 
 
-def _distance_meters(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
+def distance_meters(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
     """Distancia aproximada (fórmula de haversine)."""
     radius = 6_371_000
     phi1, phi2 = math.radians(lat1), math.radians(lat2)
@@ -77,6 +77,14 @@ def _distance_meters(lat1: float, lng1: float, lat2: float, lng2: float) -> floa
     dlmb = math.radians(lng2 - lng1)
     a = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlmb / 2) ** 2
     return 2 * radius * math.asin(math.sqrt(a))
+
+
+def describe_error(exc: Exception) -> str:
+    """Describe un error de httpx SIN la URL: las de Google llevan la clave
+    en "?key=..." y no debe quedar escrita en los logs."""
+    if isinstance(exc, httpx.HTTPStatusError):
+        return f"HTTP {exc.response.status_code}"
+    return type(exc).__name__
 
 
 def _location(result: dict) -> tuple[float, float]:
@@ -107,7 +115,7 @@ def _pick_result(data: dict, address: str) -> tuple[float, float, str] | None:
     lat, lng = _location(first)
 
     if len(results) > 1:
-        far = [r for r in results[1:] if _distance_meters(lat, lng, *_location(r)) >= MAX_SPREAD_METERS]
+        far = [r for r in results[1:] if distance_meters(lat, lng, *_location(r)) >= MAX_SPREAD_METERS]
         if far:
             logger.info("Dirección ambigua (%d resultados distintos), no se guarda: %r", len(results), address)
             return None
@@ -154,9 +162,9 @@ def geocodificar(direccion: str | None, http: httpx.Client | None = None) -> tup
             response = http.get(GEOCODE_URL, params=params, timeout=TIMEOUT_SECONDS)
         response.raise_for_status()
         return _pick_result(response.json(), address)
-    except Exception:
+    except Exception as exc:
         # Timeout, sin red, JSON raro... El cliente queda sin coordenadas como antes.
-        logger.exception("Falló la geocodificación de %r", address)
+        logger.warning("Falló la geocodificación de %r: %s", address, describe_error(exc))
         return None
 
 
