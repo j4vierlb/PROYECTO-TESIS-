@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { App } from '../src/main.jsx'
@@ -7,6 +7,7 @@ import { App } from '../src/main.jsx'
 const client = { id: '33333333-3333-3333-3333-333333333333', nombre: 'Cliente WhatsApp', telefono_whatsapp: '+56912345678', direccion: null, lat: null, lng: null }
 const operator = { id: '44444444-4444-4444-4444-444444444444', nombre: 'Operador de prueba' }
 let visits, operators, clients, writes
+const existingVisit = (changes = {}) => ({ id: 'visita-test', fecha_hora: '2026-09-29T13:00:00Z', cliente: client, operador_id: null, operador: null, estado: 'agendada', notas: null, origen_agendamiento: 'manual', ...changes })
 
 beforeEach(() => {
   localStorage.token = 'sesion-de-prueba'
@@ -22,7 +23,12 @@ beforeEach(() => {
       if (path === '/panel/visitas') {
         visits.push({ ...body, id: 'visita-test', cliente: client, operador: body.operador_id ? operator : null, estado: 'agendada' })
       }
+      if (path.startsWith('/panel/visitas/')) {
+        visits = visits.map(visit => ({ ...visit, ...body, operador: body.operador_id ? operator : body.operador_id === null ? null : visit.operador, estado: body.fecha_hora ? 'reagendada' : body.estado || visit.estado }))
+        return new Response(JSON.stringify(visits[0]), { status: 200 })
+      }
       if (path.startsWith('/clientes/')) clients = [{ ...client, ...body }]
+      if (path === '/clientes') clients = [...clients, { ...body, id: 'cliente-nuevo' }]
       return new Response(JSON.stringify(body), { status: 201 })
     }
     const body = { '/panel/visitas': visits, '/panel/operadores': operators, '/panel/stats': { clientes: 1, visitas_hoy: visits.length, pendientes: visits.length }, '/clientes': clients }[path]
@@ -31,6 +37,220 @@ beforeEach(() => {
 })
 
 describe('Regresión del panel: interacción con el formulario y respuestas API', () => {
+  it('crea clientes manuales sin exigir coordenadas', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: /Clientes/ }))
+    await user.click(screen.getByRole('button', { name: /Nuevo cliente/ }))
+    await user.type(screen.getByLabelText('Nombre'), 'Nuevo sin GPS')
+    await user.type(screen.getByLabelText('Teléfono WhatsApp'), '+00000000009')
+    await user.type(screen.getByLabelText('Dirección'), 'Dirección QA 1234')
+    await user.click(screen.getByRole('button', { name: 'Guardar cliente' }))
+    await waitFor(() => expect(writes[0]?.body).toEqual({ nombre: 'Nuevo sin GPS', telefono_whatsapp: '+00000000009', direccion: 'Dirección QA 1234', lat: null, lng: null }))
+    expect(await screen.findByText('Nuevo sin GPS')).toBeVisible()
+  })
+
+  it('el filtro Sin asignar oculta visitas con operador', async () => {
+    visits = [existingVisit(), existingVisit({ id: 'otra-visita', cliente: { ...client, nombre: 'Cliente asignado' }, operador_id: operator.id, operador: operator })]
+    const user = userEvent.setup()
+    render(<App />)
+    await screen.findByText('Cliente asignado')
+    await user.selectOptions(screen.getByLabelText('Filtrar por operador'), 'unassigned')
+    await waitFor(() => expect(screen.queryByText('Cliente asignado')).not.toBeInTheDocument())
+    expect(screen.getByText('Cliente WhatsApp')).toBeVisible()
+  })
+
+  it('el login no trae credenciales de demostración precargadas', () => {
+    localStorage.clear()
+    render(<App />)
+    expect(screen.getByLabelText('Correo')).toHaveValue('')
+    expect(screen.getByLabelText('Contraseña')).toHaveValue('')
+  })
+
+  it('comprueba permisos del panel antes de aceptar un login', async () => {
+    localStorage.clear()
+    const base = globalThis.fetch
+    vi.stubGlobal('fetch', vi.fn((url, options) => new URL(url).pathname === '/auth/login' ? Promise.resolve(new Response(JSON.stringify({ access_token: 'token-admin' }), { status: 200 })) : base(url, options)))
+    const user = userEvent.setup()
+    render(<App />)
+    await user.type(screen.getByLabelText('Correo'), 'admin@panel.test')
+    await user.type(screen.getByLabelText('Contraseña'), 'ClaveQA123')
+    await user.click(screen.getByRole('button', { name: 'Ingresar al panel' }))
+    expect(await screen.findByRole('button', { name: /Nueva visita/ })).toBeVisible()
+    expect(localStorage.token).toBe('token-admin')
+  })
+
+  it('una cuenta sin permiso administrativo permanece en el login', async () => {
+    localStorage.clear()
+    vi.stubGlobal('fetch', vi.fn(async url => new URL(url).pathname === '/auth/login'
+      ? new Response(JSON.stringify({ access_token: 'token-operador' }), { status: 200 })
+      : new Response(JSON.stringify({ detail: 'Se requiere un usuario del panel' }), { status: 403 })))
+    const user = userEvent.setup()
+    render(<App />)
+    await user.type(screen.getByLabelText('Correo'), 'operador@panel.test')
+    await user.type(screen.getByLabelText('Contraseña'), 'ClaveQA123')
+    await user.click(screen.getByRole('button', { name: 'Ingresar al panel' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('Se requiere un usuario del panel')
+    expect(screen.getByRole('button', { name: 'Ingresar al panel' })).toBeEnabled()
+    expect(localStorage.token).toBeUndefined()
+  })
+
+  it('el cierre de sesión sigue disponible en la navegación', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: 'Cerrar sesión' }))
+    expect(screen.getByRole('button', { name: 'Ingresar al panel' })).toBeVisible()
+    expect(localStorage.token).toBeUndefined()
+  })
+  it('reprograma una visita y asigna operador con UTC correcto', async () => {
+    visits = [existingVisit()]
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(await screen.findByRole('button', { name: 'Editar visita' }))
+    expect(screen.getByLabelText('Fecha y hora (Chile)')).toHaveValue('2026-09-29T10:00')
+    await user.selectOptions(screen.getByLabelText('Operador'), operator.id)
+    fireEvent.change(screen.getByLabelText('Fecha y hora (Chile)'), { target: { value: '2026-07-15T11:00' } })
+    await user.type(screen.getByLabelText('Notas'), 'Avisar al llegar')
+    await user.click(screen.getByRole('button', { name: 'Guardar cambios' }))
+    await waitFor(() => expect(writes[0]).toEqual({ path: '/panel/visitas/visita-test', body: { operador_id: operator.id, fecha_hora: '2026-07-15T15:00:00.000Z', notas: 'Avisar al llegar' } }))
+    expect(await screen.findByText('11:00')).toBeVisible()
+    expect(screen.getByText('Reagendada', { selector: 'span' })).toBeVisible()
+    expect(screen.getByLabelText('Fecha de la agenda')).toHaveValue('2026-07-15')
+  })
+
+  it('permite quitar el operador sin cambiar la fecha', async () => {
+    visits = [existingVisit({ operador_id: operator.id, operador: operator })]
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(await screen.findByRole('button', { name: 'Editar visita' }))
+    await user.selectOptions(screen.getByLabelText('Operador'), '')
+    await user.click(screen.getByRole('button', { name: 'Guardar cambios' }))
+    await waitFor(() => expect(writes[0]?.body).toEqual({ operador_id: null, notas: null }))
+    expect(await within(screen.getByRole('region', { name: 'Visitas del día' })).findByText('Sin asignar')).toBeVisible()
+  })
+
+  it('Reagendada abre la edición en lugar de cambiar solo el estado', async () => {
+    visits = [existingVisit()]
+    const user = userEvent.setup()
+    render(<App />)
+    await user.selectOptions(await screen.findByLabelText('Estado de visita de Cliente WhatsApp'), 'reagendada')
+    expect(screen.getByRole('dialog', { name: 'Editar visita' })).toBeVisible()
+    expect(writes).toHaveLength(0)
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('un conflicto al guardar conserva los datos del formulario', async () => {
+    visits = [existingVisit()]
+    const base = globalThis.fetch
+    vi.stubGlobal('fetch', vi.fn((url, options) => options?.method === 'PATCH' ? Promise.resolve(new Response(JSON.stringify({ detail: 'El operador tiene otra visita' }), { status: 409 })) : base(url, options)))
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(await screen.findByRole('button', { name: 'Editar visita' }))
+    await user.type(screen.getByLabelText('Notas'), 'No perder esta nota')
+    await user.click(screen.getByRole('button', { name: 'Guardar cambios' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('El operador tiene otra visita')
+    expect(screen.getByLabelText('Notas')).toHaveValue('No perder esta nota')
+    expect(screen.getByRole('button', { name: 'Guardar cambios' })).toBeEnabled()
+  })
+
+  it('muestra el rechazo de un cambio de estado sin fallar la pantalla', async () => {
+    visits = [existingVisit()]
+    const base = globalThis.fetch
+    vi.stubGlobal('fetch', vi.fn((url, options) => options?.method === 'PATCH' ? Promise.resolve(new Response(JSON.stringify({ detail: 'Horario ocupado' }), { status: 409 })) : base(url, options)))
+    const user = userEvent.setup()
+    render(<App />)
+    await user.selectOptions(await screen.findByLabelText('Estado de visita de Cliente WhatsApp'), 'en_curso')
+    expect(await screen.findByRole('alert')).toHaveTextContent('Horario ocupado')
+    expect(screen.getByLabelText('Estado de visita de Cliente WhatsApp')).toHaveValue('agendada')
+  })
+
+  it('una sesión vencida vuelve al login con una explicación', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ detail: 'Token expirado' }), { status: 401 })))
+    render(<App />)
+    expect(await screen.findByRole('button', { name: 'Ingresar al panel' })).toBeVisible()
+    expect(screen.getByRole('status')).toHaveTextContent('Tu sesión venció')
+    expect(localStorage.token).toBeUndefined()
+  })
+
+  it('Clientes informa errores de carga y permite reintentar', async () => {
+    const base = globalThis.fetch
+    let fail = true
+    vi.stubGlobal('fetch', vi.fn((url, options) => new URL(url).pathname === '/clientes' && fail ? Promise.reject(new TypeError('Failed to fetch')) : base(url, options)))
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: /Clientes/ }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo conectar')
+    fail = false
+    await user.click(screen.getByRole('button', { name: 'Reintentar' }))
+    expect(await screen.findByText('Cliente WhatsApp')).toBeVisible()
+  })
+
+  it('no cambia fecha ni operador de una visita finalizada al editar notas', async () => {
+    visits = [existingVisit({ estado: 'completada' })]
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(await screen.findByRole('button', { name: 'Editar visita' }))
+    expect(screen.getByLabelText('Fecha y hora (Chile)')).toBeDisabled()
+    expect(screen.getByLabelText('Operador')).toBeDisabled()
+    await user.type(screen.getByLabelText('Notas'), 'Informe revisado')
+    await user.click(screen.getByRole('button', { name: 'Guardar cambios' }))
+    await waitFor(() => expect(writes[0]?.body).toEqual({ notas: 'Informe revisado' }))
+  })
+
+  it('confirma el borrado y muestra el 409 si el cliente tiene visitas', async () => {
+    const base = globalThis.fetch
+    vi.stubGlobal('fetch', vi.fn((url, options) => options?.method === 'DELETE' ? Promise.resolve(new Response(JSON.stringify({ detail: 'No se puede eliminar un cliente con visitas asociadas' }), { status: 409 })) : base(url, options)))
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: /Clientes/ }))
+    await user.click(await screen.findByRole('button', { name: 'Eliminar' }))
+    expect(screen.getByRole('dialog', { name: 'Eliminar cliente' })).toBeVisible()
+    expect(globalThis.fetch.mock.calls.some(([, options]) => options?.method === 'DELETE')).toBe(false)
+    await user.click(screen.getByRole('button', { name: 'Confirmar eliminación' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('visitas asociadas')
+  })
+
+  it('un doble envío mientras guarda crea una sola visita', async () => {
+    const base = globalThis.fetch
+    let resolve
+    vi.stubGlobal('fetch', vi.fn((url, options) => options?.method === 'POST' ? new Promise(done => { resolve = done }) : base(url, options)))
+    const user = userEvent.setup()
+    render(<App />)
+    await waitFor(() => expect(screen.getByRole('button', { name: /Nueva visita/ })).toBeEnabled())
+    await user.click(screen.getByRole('button', { name: /Nueva visita/ }))
+    const dialog = screen.getByRole('dialog')
+    fireEvent.submit(dialog); fireEvent.submit(dialog)
+    expect(globalThis.fetch.mock.calls.filter(([, options]) => options?.method === 'POST')).toHaveLength(1)
+    resolve(new Response(JSON.stringify(existingVisit()), { status: 201 }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+  })
+
+  it('una respuesta antigua no reemplaza el nuevo día seleccionado', async () => {
+    const base = globalThis.fetch
+    let resolveFirst, reads = 0
+    vi.stubGlobal('fetch', vi.fn((url, options) => {
+      if (new URL(url).pathname !== '/panel/visitas') return base(url, options)
+      if (reads++ === 0) return new Promise(resolve => { resolveFirst = resolve })
+      return Promise.resolve(new Response(JSON.stringify([existingVisit({ cliente: { ...client, nombre: 'Día nuevo' } })]), { status: 200 }))
+    }))
+    render(<App />)
+    await waitFor(() => expect(resolveFirst).toBeDefined())
+    fireEvent.change(screen.getByLabelText('Fecha de la agenda'), { target: { value: '2026-11-03' } })
+    expect(await screen.findByText('Día nuevo')).toBeVisible()
+    resolveFirst(new Response(JSON.stringify([existingVisit({ cliente: { ...client, nombre: 'Día anterior' } })]), { status: 200 }))
+    await waitFor(() => expect(screen.queryByText('Día anterior')).not.toBeInTheDocument())
+    expect(screen.getByText('Día nuevo')).toBeVisible()
+  })
+
+  it('no permite agendar sin clientes registrados', async () => {
+    clients = []
+    const user = userEvent.setup()
+    render(<App />)
+    await waitFor(() => expect(screen.getByRole('button', { name: /Nueva visita/ })).toBeEnabled())
+    await user.click(screen.getByRole('button', { name: /Nueva visita/ }))
+    expect(screen.getByRole('button', { name: 'Agendar visita' })).toBeDisabled()
+  })
   it('Clientes se abre y permite guardar clientes sin ubicación ni dirección', async () => {
     const user = userEvent.setup()
     render(<App />)
@@ -67,7 +287,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
     fireEvent.change(dateInput, { target: { value: '2026-09-29T10:00' } })
     await user.click(screen.getByRole('button', { name: 'Agendar visita' }))
     await waitFor(() => expect(writes[0]?.body).toEqual({ cliente_id: client.id, operador_id: null, fecha_hora: '2026-09-29T13:00:00.000Z' }))
-    expect(await screen.findByText('Sin asignar')).toBeVisible()
+    expect(await within(screen.getByRole('region', { name: 'Visitas del día' })).findByText('Sin asignar')).toBeVisible()
     expect(screen.getByText('10:00')).toBeVisible()
     expect(screen.queryByText('13:00')).not.toBeInTheDocument()
   })
@@ -80,7 +300,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
     await user.click(screen.getByRole('button', { name: /Nueva visita/ }))
     await user.click(screen.getByRole('button', { name: 'Agendar visita' }))
     await waitFor(() => expect(writes[0]?.body.operador_id).toBeNull())
-    expect(await screen.findByText('Sin asignar')).toBeVisible()
+    expect(await within(screen.getByRole('region', { name: 'Visitas del día' })).findByText('Sin asignar')).toBeVisible()
   })
 
   it('agrupa UTC en hora chilena y ordena los horarios', async () => {
@@ -91,7 +311,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
     const { container } = render(<App />)
     await screen.findByText('23:30')
     expect([...container.querySelectorAll('.time')].map(el => el.firstChild.textContent)).toEqual(['10:00', '23:30'])
-    expect(screen.getByText('Sin asignar')).toBeVisible()
+    expect(within(screen.getByRole('region', { name: 'Visitas del día' })).getByText('Sin asignar')).toBeVisible()
   })
 
   it('la nueva visita usa la fecha seleccionada en la agenda', async () => {

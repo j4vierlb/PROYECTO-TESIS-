@@ -75,6 +75,7 @@ services:
       args:
         # Dirección del backend que usa el NAVEGADOR (por eso localhost, no "backend").
         VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
+        VITE_GOOGLE_MAPS_API_KEY: ${VITE_GOOGLE_MAPS_API_KEY:-}
     restart: unless-stopped
     depends_on:
       - backend

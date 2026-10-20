@@ -1,0 +1,504 @@
+{
+  "date": "2026-10-20T00:17:05.944331-03:00",
+  "database": "croquis_regression",
+  "tests": 30,
+  "passed": 22,
+  "failed": 8,
+  "errors": 0,
+  "skipped": 0,
+  "success": false,
+  "cases": [
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_A_to_A_croquis",
+      "result": "passed",
+      "role": "admin",
+      "source_company": "A",
+      "target_company": "A",
+      "resource": "croquis",
+      "method": "GET",
+      "path": "/croquis/50000000-0000-0000-0000-000000000001",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_A_to_A_photo",
+      "result": "passed",
+      "role": "admin",
+      "source_company": "A",
+      "target_company": "A",
+      "resource": "photo",
+      "method": "GET",
+      "path": "/dispositivos-trampa/70000000-0000-0000-0000-000000000001/foto",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_A_to_A_visit",
+      "result": "passed",
+      "role": "admin",
+      "source_company": "A",
+      "target_company": "A",
+      "resource": "visit",
+      "method": "GET",
+      "path": "/visitas/50000000-0000-0000-0000-000000000001",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_A_to_B_croquis",
+      "result": "failed",
+      "role": "admin",
+      "source_company": "A",
+      "target_company": "B",
+      "resource": "croquis",
+      "method": "GET",
+      "path": "/croquis/50000000-0000-0000-0000-000000000005",
+      "expected_status": [
+        403,
+        404
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": true
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_A_to_B_photo",
+      "result": "passed",
+      "role": "admin",
+      "source_company": "A",
+      "target_company": "B",
+      "resource": "photo",
+      "method": "GET",
+      "path": "/dispositivos-trampa/70000000-0000-0000-0000-000000000005/foto",
+      "expected_status": [
+        403,
+        404
+      ],
+      "actual_status": 403,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_A_to_B_visit",
+      "result": "failed",
+      "role": "admin",
+      "source_company": "A",
+      "target_company": "B",
+      "resource": "visit",
+      "method": "GET",
+      "path": "/visitas/50000000-0000-0000-0000-000000000005",
+      "expected_status": [
+        403,
+        404
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": true
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_B_to_A_croquis",
+      "result": "failed",
+      "role": "admin",
+      "source_company": "B",
+      "target_company": "A",
+      "resource": "croquis",
+      "method": "GET",
+      "path": "/croquis/50000000-0000-0000-0000-000000000001",
+      "expected_status": [
+        403,
+        404
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": true
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_B_to_A_photo",
+      "result": "passed",
+      "role": "admin",
+      "source_company": "B",
+      "target_company": "A",
+      "resource": "photo",
+      "method": "GET",
+      "path": "/dispositivos-trampa/70000000-0000-0000-0000-000000000001/foto",
+      "expected_status": [
+        403,
+        404
+      ],
+      "actual_status": 403,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_B_to_A_visit",
+      "result": "failed",
+      "role": "admin",
+      "source_company": "B",
+      "target_company": "A",
+      "resource": "visit",
+      "method": "GET",
+      "path": "/visitas/50000000-0000-0000-0000-000000000001",
+      "expected_status": [
+        403,
+        404
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": true
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_B_to_B_croquis",
+      "result": "passed",
+      "role": "admin",
+      "source_company": "B",
+      "target_company": "B",
+      "resource": "croquis",
+      "method": "GET",
+      "path": "/croquis/50000000-0000-0000-0000-000000000005",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_B_to_B_photo",
+      "result": "passed",
+      "role": "admin",
+      "source_company": "B",
+      "target_company": "B",
+      "resource": "photo",
+      "method": "GET",
+      "path": "/dispositivos-trampa/70000000-0000-0000-0000-000000000005/foto",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_B_to_B_visit",
+      "result": "passed",
+      "role": "admin",
+      "source_company": "B",
+      "target_company": "B",
+      "resource": "visit",
+      "method": "GET",
+      "path": "/visitas/50000000-0000-0000-0000-000000000005",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_anonymous_to_A_croquis",
+      "result": "passed",
+      "role": "anonymous",
+      "source_company": null,
+      "target_company": "A",
+      "resource": "croquis",
+      "method": "GET",
+      "path": "/croquis/50000000-0000-0000-0000-000000000001",
+      "expected_status": [
+        401
+      ],
+      "actual_status": 401,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_anonymous_to_A_photo",
+      "result": "passed",
+      "role": "anonymous",
+      "source_company": null,
+      "target_company": "A",
+      "resource": "photo",
+      "method": "GET",
+      "path": "/dispositivos-trampa/70000000-0000-0000-0000-000000000001/foto",
+      "expected_status": [
+        401
+      ],
+      "actual_status": 401,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_anonymous_to_A_visit",
+      "result": "passed",
+      "role": "anonymous",
+      "source_company": null,
+      "target_company": "A",
+      "resource": "visit",
+      "method": "GET",
+      "path": "/visitas/50000000-0000-0000-0000-000000000001",
+      "expected_status": [
+        401
+      ],
+      "actual_status": 401,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_anonymous_to_B_croquis",
+      "result": "passed",
+      "role": "anonymous",
+      "source_company": null,
+      "target_company": "B",
+      "resource": "croquis",
+      "method": "GET",
+      "path": "/croquis/50000000-0000-0000-0000-000000000005",
+      "expected_status": [
+        401
+      ],
+      "actual_status": 401,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_anonymous_to_B_photo",
+      "result": "passed",
+      "role": "anonymous",
+      "source_company": null,
+      "target_company": "B",
+      "resource": "photo",
+      "method": "GET",
+      "path": "/dispositivos-trampa/70000000-0000-0000-0000-000000000005/foto",
+      "expected_status": [
+        401
+      ],
+      "actual_status": 401,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_anonymous_to_B_visit",
+      "result": "passed",
+      "role": "anonymous",
+      "source_company": null,
+      "target_company": "B",
+      "resource": "visit",
+      "method": "GET",
+      "path": "/visitas/50000000-0000-0000-0000-000000000005",
+      "expected_status": [
+        401
+      ],
+      "actual_status": 401,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_A_to_A_croquis",
+      "result": "passed",
+      "role": "coordinador",
+      "source_company": "A",
+      "target_company": "A",
+      "resource": "croquis",
+      "method": "GET",
+      "path": "/croquis/50000000-0000-0000-0000-000000000001",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_A_to_A_photo",
+      "result": "passed",
+      "role": "coordinador",
+      "source_company": "A",
+      "target_company": "A",
+      "resource": "photo",
+      "method": "GET",
+      "path": "/dispositivos-trampa/70000000-0000-0000-0000-000000000001/foto",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_A_to_A_visit",
+      "result": "passed",
+      "role": "coordinador",
+      "source_company": "A",
+      "target_company": "A",
+      "resource": "visit",
+      "method": "GET",
+      "path": "/visitas/50000000-0000-0000-0000-000000000001",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_A_to_B_croquis",
+      "result": "failed",
+      "role": "coordinador",
+      "source_company": "A",
+      "target_company": "B",
+      "resource": "croquis",
+      "method": "GET",
+      "path": "/croquis/50000000-0000-0000-0000-000000000005",
+      "expected_status": [
+        403,
+        404
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": true
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_A_to_B_photo",
+      "result": "passed",
+      "role": "coordinador",
+      "source_company": "A",
+      "target_company": "B",
+      "resource": "photo",
+      "method": "GET",
+      "path": "/dispositivos-trampa/70000000-0000-0000-0000-000000000005/foto",
+      "expected_status": [
+        403,
+        404
+      ],
+      "actual_status": 403,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_A_to_B_visit",
+      "result": "failed",
+      "role": "coordinador",
+      "source_company": "A",
+      "target_company": "B",
+      "resource": "visit",
+      "method": "GET",
+      "path": "/visitas/50000000-0000-0000-0000-000000000005",
+      "expected_status": [
+        403,
+        404
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": true
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_B_to_A_croquis",
+      "result": "failed",
+      "role": "coordinador",
+      "source_company": "B",
+      "target_company": "A",
+      "resource": "croquis",
+      "method": "GET",
+      "path": "/croquis/50000000-0000-0000-0000-000000000001",
+      "expected_status": [
+        403,
+        404
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": true
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_B_to_A_photo",
+      "result": "passed",
+      "role": "coordinador",
+      "source_company": "B",
+      "target_company": "A",
+      "resource": "photo",
+      "method": "GET",
+      "path": "/dispositivos-trampa/70000000-0000-0000-0000-000000000001/foto",
+      "expected_status": [
+        403,
+        404
+      ],
+      "actual_status": 403,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_B_to_A_visit",
+      "result": "failed",
+      "role": "coordinador",
+      "source_company": "B",
+      "target_company": "A",
+      "resource": "visit",
+      "method": "GET",
+      "path": "/visitas/50000000-0000-0000-0000-000000000001",
+      "expected_status": [
+        403,
+        404
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": true
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_B_to_B_croquis",
+      "result": "passed",
+      "role": "coordinador",
+      "source_company": "B",
+      "target_company": "B",
+      "resource": "croquis",
+      "method": "GET",
+      "path": "/croquis/50000000-0000-0000-0000-000000000005",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_B_to_B_photo",
+      "result": "passed",
+      "role": "coordinador",
+      "source_company": "B",
+      "target_company": "B",
+      "resource": "photo",
+      "method": "GET",
+      "path": "/dispositivos-trampa/70000000-0000-0000-0000-000000000005/foto",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_B_to_B_visit",
+      "result": "passed",
+      "role": "coordinador",
+      "source_company": "B",
+      "target_company": "B",
+      "resource": "visit",
+      "method": "GET",
+      "path": "/visitas/50000000-0000-0000-0000-000000000005",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": false
+    }
+  ]
+}
