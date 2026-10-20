@@ -38,6 +38,7 @@ services:
       - "./Fase 2/Evidencias Proyecto/database/seed.sql:/docker-entrypoint-initdb.d/2_seed.sql:ro"
       - "./Fase 2/Evidencias Proyecto/database/demo_historial.sql:/docker-entrypoint-initdb.d/3_demo_historial.sql:ro"
       - "./Fase 2/Evidencias Proyecto/database/migracion_message_sid.sql:/docker-entrypoint-initdb.d/4_migracion_message_sid.sql:ro"
+      - "./Fase 2/Evidencias Proyecto/database/migracion_croquis_terreno.sql:/docker-entrypoint-initdb.d/5_migracion_croquis_terreno.sql:ro"
     healthcheck:
       # "Lista" solo cuando acepta conexiones por red. Mientras corre los
       # scripts de arriba solo escucha internamente, así que el backend no
@@ -62,6 +63,10 @@ services:
     ports:
       # 0.0.0.0 permite que la app del iPhone llegue desde la WiFi.
       - "8000:8000"
+    volumes:
+      # Fotos de las trampas que suben los técnicos. Van en un volumen para
+      # que no se pierdan al reconstruir el contenedor del backend.
+      - uploads_data:/app/uploads
 
   # --- Panel web: React compilado, servido con nginx ---
   web:
@@ -78,3 +83,4 @@ services:
 
 volumes:
   db_data:
+  uploads_data:
