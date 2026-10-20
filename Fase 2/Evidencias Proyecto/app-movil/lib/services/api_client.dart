@@ -38,6 +38,55 @@ class ApiClient {
     defaultValue: 'http://192.168.1.139:8000',
   );
 
+  /// Se llama cuando la sesión ya no se puede renovar (pasaron más de 30
+  /// días o la cuenta fue desactivada). main.dart la usa para volver al login.
+  static void Function()? onSesionVencida;
+
+  // Si varias pantallas detectan a la vez el token vencido, todas esperan la
+  // MISMA renovación en vez de pedir una cada una.
+  static Future<bool>? _renovando;
+
+  /// POST /auth/refresh — pide tokens nuevos con el refresh_token guardado.
+  /// true si se renovó; false si el backend lo rechazó (sesión vencida), y en
+  /// ese caso borra los tokens. Sin internet lanza la excepción de red.
+  Future<bool> refreshSession() {
+    return _renovando ??= _pedirRenovacion().whenComplete(() => _renovando = null);
+  }
+
+  Future<bool> _pedirRenovacion() async {
+    final refreshToken = await AuthStorage.instance.getRefreshToken();
+    if (refreshToken == null) return false;
+    final response = await http
+        .post(
+          Uri.parse('$baseUrl/auth/refresh'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'refresh_token': refreshToken}),
+        )
+        .timeout(const Duration(seconds: 15));
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      await AuthStorage.instance.saveTokens(
+        accessToken: data['access_token'] as String,
+        refreshToken: data['refresh_token'] as String,
+      );
+      return true;
+    }
+    if (response.statusCode == 401) {
+      await AuthStorage.instance.clear();
+      return false;
+    }
+    // Otro error (servidor caído, 500...): no se borra la sesión.
+    throw ApiException(response.statusCode, _extractDetail(response.body));
+  }
+
+  /// Ante un 401 en una petición: intenta renovar la sesión una vez. Si no se
+  /// puede, avisa a la app (vuelve al login) y lanza el error.
+  Future<void> _renovarOCerrarSesion() async {
+    if (await refreshSession()) return;
+    onSesionVencida?.call();
+    throw ApiException(401, 'Tu sesión venció. Vuelve a iniciar sesión.');
+  }
+
   /// POST /auth/login. Si las credenciales son correctas, guarda los tokens
   /// de forma segura; si no, lanza ApiException con el mensaje del backend.
   Future<void> login(String usuario, String clave) async {
@@ -150,7 +199,7 @@ class ApiClient {
   /// POST /dispositivos-trampa/{id}/foto — sube la foto de referencia de la
   /// trampa (archivo JPEG tomado con la cámara). Devuelve la trampa con su
   /// nueva `fotoUrl`.
-  Future<DispositivoTrampa> uploadFoto(String dispositivoId, String rutaArchivo) async {
+  Future<DispositivoTrampa> uploadFoto(String dispositivoId, String rutaArchivo, {bool reintento = false}) async {
     final token = await AuthStorage.instance.getAccessToken();
     if (token == null) {
       throw ApiException(401, 'No hay sesión activa');
@@ -162,6 +211,11 @@ class ApiClient {
     // Subir una foto por datos móviles puede tardar más que una petición normal.
     final streamed = await request.send().timeout(const Duration(seconds: 60));
     final response = await http.Response.fromStream(streamed);
+    // Token vencido: se renueva y se sube otra vez (una sola vez).
+    if (response.statusCode == 401 && !reintento) {
+      await _renovarOCerrarSesion();
+      return uploadFoto(dispositivoId, rutaArchivo, reintento: true);
+    }
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw ApiException(response.statusCode, _extractDetail(response.body));
     }
@@ -183,7 +237,12 @@ class ApiClient {
   /// Request autenticado con el access_token guardado. Centraliza el manejo
   /// de "sin sesión", del tiempo de espera y de los errores {"detail": "..."}
   /// para todos los endpoints protegidos.
-  Future<String> _authenticatedRequest(String method, String path, {Map<String, dynamic>? body}) async {
+  Future<String> _authenticatedRequest(
+    String method,
+    String path, {
+    Map<String, dynamic>? body,
+    bool reintento = false,
+  }) async {
     final token = await AuthStorage.instance.getAccessToken();
     if (token == null) {
       throw ApiException(401, 'No hay sesión activa');
@@ -202,6 +261,13 @@ class ApiClient {
     // de dejar al operador esperando indefinidamente.
     final streamed = await request.send().timeout(const Duration(seconds: 15));
     final response = await http.Response.fromStream(streamed);
+
+    // 401 = el access_token venció (dura 8 horas): se renueva con el
+    // refresh_token y se repite la misma petición una sola vez.
+    if (response.statusCode == 401 && !reintento) {
+      await _renovarOCerrarSesion();
+      return _authenticatedRequest(method, path, body: body, reintento: true);
+    }
 
     // Cualquier 2xx es éxito (200 OK, 201 creado).
     if (response.statusCode < 200 || response.statusCode >= 300) {
