@@ -2,7 +2,9 @@
 // main.dart — Punto de entrada de la app móvil
 // -----------------------------------------------------------------------------
 // Es lo primero que se ejecuta al abrir la app. Crea la aplicación, le aplica
-// el tema visual (colores amarillo/negro de la marca) y muestra el login.
+// el tema visual (colores amarillo/negro de la marca) y decide la primera
+// pantalla: la agenda si hay una sesión guardada, o el login si no
+// (ver services/session.dart).
 //
 // Mapa de carpetas de lib/:
 //   screens/   las pantallas (login, agenda, historial, detalle, croquis)
@@ -17,23 +19,40 @@
 
 import 'package:flutter/material.dart';
 
+import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
+import 'services/api_client.dart';
+import 'services/session.dart';
 import 'theme/app_theme.dart';
+
+/// Permite navegar desde fuera de una pantalla: lo usa el aviso de "sesión
+/// vencida" del ApiClient para volver al login desde donde esté el técnico.
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 /// Función que Flutter ejecuta al iniciar: dibuja el widget raíz de la app.
 void main() {
+  // Si la sesión ya no se puede renovar, se vuelve al login borrando las
+  // pantallas anteriores (con "atrás" no se puede volver a la agenda).
+  ApiClient.onSesionVencida = () => navigatorKey.currentState?.pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (route) => false,
+      );
   runApp(const KillBichosApp());
 }
 
 /// Widget raíz. En Flutter todo lo que se ve en pantalla es un "widget";
 /// este es el que contiene a todos los demás.
 class KillBichosApp extends StatelessWidget {
-  const KillBichosApp({super.key});
+  /// Decide si hay sesión al abrir. Se puede reemplazar en las pruebas.
+  final Future<bool> Function() restaurarSesion;
+
+  const KillBichosApp({super.key, this.restaurarSesion = SessionService.restaurar});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Kill Bichos IA',
+      navigatorKey: navigatorKey,
       // Oculta la cinta roja "DEBUG" de la esquina superior derecha.
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
@@ -41,7 +60,47 @@ class KillBichosApp extends StatelessWidget {
       // principal (Hoy / Historial) con pushReplacement, y cerrar sesión
       // vuelve al login. No se usa go_router para mantener el ejemplo simple
       // de un proyecto de tesis con pocas pantallas.
-      home: const LoginScreen(),
+      home: _InicioSesion(restaurarSesion: restaurarSesion),
+    );
+  }
+}
+
+/// Primera pantalla: mientras revisa la sesión guardada muestra el logo y
+/// después abre la agenda o el login.
+class _InicioSesion extends StatefulWidget {
+  final Future<bool> Function() restaurarSesion;
+
+  const _InicioSesion({required this.restaurarSesion});
+
+  @override
+  State<_InicioSesion> createState() => _InicioSesionState();
+}
+
+class _InicioSesionState extends State<_InicioSesion> {
+  // Se guarda el Future para no repetir la revisión cada vez que se redibuja.
+  late final Future<bool> _haySesion = widget.restaurarSesion().catchError((_) => false);
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: _haySesion,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset('assets/images/logo.png', height: 96),
+                  const SizedBox(height: 24),
+                  const CircularProgressIndicator(),
+                ],
+              ),
+            ),
+          );
+        }
+        return snapshot.data == true ? const HomeScreen() : const LoginScreen();
+      },
     );
   }
 }
