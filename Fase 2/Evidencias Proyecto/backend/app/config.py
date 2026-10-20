@@ -49,6 +49,11 @@ class Settings(BaseSettings):
     killbichos_close_time: str = "18:00"
     killbichos_operating_days: str = "0,1,2,3,4,5"
 
+    # --- Google Maps en el backend (ver docs/diseno_ia_croquis.md, 1.1) ---
+    # Clave con Geocoding API (y Maps Static API para el croquis) habilitadas.
+    # Vacía = no se geocodifica: los clientes de WhatsApp quedan sin coordenadas.
+    google_maps_api_key: str = ""
+
     # env_file=".env": busca los valores en ese archivo.
     # extra="ignore": si el .env trae variables que no se usan aquí, no falla.
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")

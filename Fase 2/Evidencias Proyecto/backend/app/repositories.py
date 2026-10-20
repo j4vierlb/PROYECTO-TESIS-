@@ -316,10 +316,11 @@ def fetch_or_create_whatsapp_client(
 
 
 def update_whatsapp_client_address(db: Connection, cliente_id: UUID, address: str) -> None:
-    """Guarda la dirección que el cliente entregó por WhatsApp. La ubicación
-    (lat/lng) queda vacía hasta que alguien la geolocalice."""
+    """Guarda la dirección que el cliente entregó por WhatsApp y borra la
+    ubicación anterior, que ya no corresponde. La nueva la calcula
+    geocoding.geocodificar_cliente en segundo plano."""
     db.execute(
-        text("UPDATE clientes SET direccion = :direccion WHERE id = :cliente_id"),
+        text("UPDATE clientes SET direccion = :direccion, ubicacion = NULL WHERE id = :cliente_id"),
         {"direccion": address, "cliente_id": str(cliente_id)},
     )
     db.commit()

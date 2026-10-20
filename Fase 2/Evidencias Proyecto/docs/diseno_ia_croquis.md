@@ -42,7 +42,7 @@ Los clientes que llegan por WhatsApp solo tienen `direccion` (texto); `clientes.
 1. `status == "OK"` y un solo resultado (o el primero si todos están a < 100 m).
 2. `geometry.location_type` = `ROOFTOP` o `RANGE_INTERPOLATED`. Si es `GEOMETRIC_CENTER` o `APPROXIMATE` (solo encontró la calle o la comuna), **no se guarda**: una foto centrada en el lugar equivocado produce un croquis inútil.
 3. Si `partial_match = true`, tampoco se guarda (Google adivinó parte de la dirección).
-4. El punto debe caer dentro del rectángulo de la Región Metropolitana (lat −34,3 a −32,9; lng −71,8 a −69,8).
+4. El punto debe caer dentro del rectángulo de la Región Metropolitana (lat −34,3 a −32,9; lng −71,8 a −69,8) **y** Google debe informar la Región Metropolitana como `administrative_area_level_1`. El rectángulo solo no basta: Valparaíso y Viña del Mar también caen dentro.
 
 **Cuándo se geocodifica:**
 
