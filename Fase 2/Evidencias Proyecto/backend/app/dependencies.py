@@ -81,3 +81,29 @@ def ensure_visit_access(user: CurrentUser, visit: dict) -> None:
     el croquis hereda el control de acceso de su visita."""
     if user.rol == "operador" and visit["operador_id"] != user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="La visita no pertenece al operador")
+
+
+# Estados en los que la visita ya terminó: su croquis queda solo de consulta.
+_CLOSED_VISIT_STATES = {"completada", "cancelada"}
+
+
+def ensure_visit_open(visit_estado: str | None) -> None:
+    """Corta con 409 si la visita ya está completada o cancelada: su croquis
+    no se puede modificar (mismo criterio que usa la app en modo lectura)."""
+    if visit_estado in _CLOSED_VISIT_STATES:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="La visita ya está cerrada: su croquis es solo de consulta",
+        )
+
+
+def ensure_device_access(user: CurrentUser, device: dict) -> None:
+    """Una trampa hereda el control de acceso de la visita de su croquis
+    (`device` viene de repositories.fetch_device_context):
+    - un operador solo accede a las trampas de sus propias visitas;
+    - un usuario del panel, a las de su propia empresa."""
+    if user.rol == "operador":
+        if device["operador_id"] != user.id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="La trampa no pertenece al operador")
+    elif device["empresa_id"] != user.empresa_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="La trampa no pertenece a la empresa")
