@@ -45,6 +45,9 @@ dependencies:
   # Mapa del croquis con los dispositivos-trampa. Requiere una API key de
   # Google Maps configurada en iOS/Android (ver README).
   google_maps_flutter: ^2.10.0
+  image_picker: ^1.2.4
+  geolocator: ^14.0.2
+  http_parser: ^4.1.2
 
 dev_dependencies:
   flutter_test:

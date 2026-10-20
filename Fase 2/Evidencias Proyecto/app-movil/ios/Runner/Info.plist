@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Para tomar una foto de referencia de cada trampa que instalas.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Para elegir una foto ya tomada como referencia de una trampa.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Para ubicar en el croquis la trampa que acabas de instalar, usando tu posición.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

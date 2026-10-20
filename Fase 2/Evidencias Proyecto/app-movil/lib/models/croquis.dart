@@ -16,6 +16,9 @@ class DispositivoTrampa {
   final bool sugeridoPorIa; // true si la ubicación la propuso la IA
   final bool confirmado; // true si el operador la validó en terreno
   final String estado; // activo, retirado o revisar
+  // Dirección relativa de la foto de referencia en el backend
+  // (ej: "/dispositivos-trampa/<id>/foto?v=..."), o null si no tiene.
+  final String? fotoUrl;
 
   DispositivoTrampa({
     required this.id,
@@ -26,6 +29,7 @@ class DispositivoTrampa {
     required this.sugeridoPorIa,
     required this.confirmado,
     required this.estado,
+    this.fotoUrl,
   });
 
   /// Crea una trampa a partir del JSON del backend.
@@ -38,6 +42,7 @@ class DispositivoTrampa {
         sugeridoPorIa: json['sugerido_por_ia'] as bool,
         confirmado: json['confirmado'] as bool,
         estado: json['estado'] as String,
+        fotoUrl: json['foto_url'] as String?,
       );
 }
 
