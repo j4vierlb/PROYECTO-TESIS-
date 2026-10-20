@@ -31,6 +31,8 @@ Swagger queda disponible en <http://127.0.0.1:8000/docs>.
 
 El login recibe JSON con `usuario` y `clave`, y entrega un `access_token` de 8 horas y un `refresh_token` de 30 días.
 
+`POST /auth/refresh` recibe `{"refresh_token": "..."}` y entrega un par nuevo de tokens, sin pedir la clave. Responde 401 si el token es falso, venció, es un `access_token` o la cuenta fue desactivada. La app lo usa para no pedir el login cada vez que se abre: mientras el técnico la use al menos una vez cada 30 días, no vuelve a escribir su clave.
+
 ## Fechas y zona horaria
 
 Las fechas se guardan y se envían en **UTC** (ISO 8601), pero **"hoy" es el día de Chile** (`America/Santiago`): la agenda del técnico y la del panel comparan cada visita convertida a la hora de Chile. Si se calculara en UTC, desde las 21:00 hora de Chile (20:00 en invierno) la agenda mostraría las visitas del día siguiente. El cálculo está en `app/zona_horaria.py`. El paquete `tzdata` (en `requirements.txt`) asegura los datos de zonas horarias aunque el sistema no los traiga, como en Windows o en imágenes de Docker mínimas.
