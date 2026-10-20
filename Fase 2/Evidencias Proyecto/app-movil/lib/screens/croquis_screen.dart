@@ -105,6 +105,10 @@ class _CroquisScreenState extends State<CroquisScreen> {
       }
       if (!mounted) return;
       setState(() => _croquis = croquis);
+      // Si la sesión se renovó al cargar, las fotos deben pedirse con el
+      // token nuevo.
+      final headers = await _apiClient.authHeaders();
+      if (mounted) setState(() => _fotoHeaders = headers);
     } on ApiException catch (error) {
       if (mounted) {
         setState(() {

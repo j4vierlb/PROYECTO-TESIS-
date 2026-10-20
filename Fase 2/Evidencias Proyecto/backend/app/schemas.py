@@ -56,6 +56,11 @@ class LoginRequest(BaseModel):
     clave: str = Field(min_length=1)
 
 
+class RefreshRequest(BaseModel):
+    """Lo que la app manda a POST /auth/refresh para renovar la sesión."""
+    refresh_token: str = Field(min_length=1)
+
+
 class TokenResponse(BaseModel):
     """Lo que devuelve un login exitoso."""
     access_token: str       # pase de sesión corto (8 h), se manda en cada request
