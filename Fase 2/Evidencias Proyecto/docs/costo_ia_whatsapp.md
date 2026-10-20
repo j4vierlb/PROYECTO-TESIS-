@@ -1,6 +1,17 @@
-# Costo por mensaje del agente de WhatsApp (gpt-4.1-mini)
+# Costo de OpenAI: agente de WhatsApp e IA del croquis (gpt-4.1-mini)
 
-Estimación hecha el 09/10/2026 sobre el código actual de [`backend/app/ai/agent.py`](../backend/app/ai/agent.py).
+Estimación hecha el 09/10/2026 sobre [`backend/app/ai/agent.py`](../backend/app/ai/agent.py) y actualizada el 19/10/2026 con la IA del croquis ([`backend/app/ai/croquis_agent.py`](../backend/app/ai/croquis_agent.py)).
+
+## Quién paga y tope de gasto
+
+| | |
+|---|---|
+| **Quién paga** | **Kill Bichos.** La cuenta de OpenAI y la clave `OPENAI_API_KEY` de producción son de la empresa, con su medio de pago. El equipo usa su propia clave solo para desarrollo y pruebas. |
+| **Gasto estimado** | **~1 USD/mes (~950 CLP)**: WhatsApp ~0,50 USD + croquis ~0,25–0,45 USD (detalle abajo). |
+| **Tope mensual** | **US$10/mes**, configurado en *Settings → Limits* de la cuenta de OpenAI (unas 10 veces lo estimado). |
+| **Alerta** | Correo a Kill Bichos al llegar a **US$5** en el mes. |
+
+**Si se llega al tope**, OpenAI rechaza las llamadas y el sistema sigue funcionando sin IA. El bot de WhatsApp responde el mensaje de contingencia ("un operador te contactará") y el croquis usa el plan B por reglas. El tope protege ante un abuso (miles de mensajes al bot) o un error que haga llamadas en bucle.
 
 ## Precios de OpenAI (gpt-4.1-mini)
 
@@ -27,7 +38,7 @@ Cada mensaje del cliente genera **una** llamada a OpenAI. Tokens medidos con `ti
 
 La caché de OpenAI solo se activa desde 1.024 tokens de entrada, así que con el historial limitado a 20 mensajes casi nunca aplica. Se calcula sin caché.
 
-## Costo
+## Costo del agente de WhatsApp
 
 | Caso | Entrada | Salida | USD | CLP |
 |---|---|---|---|---|
@@ -39,11 +50,34 @@ La caché de OpenAI solo se activa desde 1.024 tokens de entrada, así que con e
 
 Con 300 conversaciones al mes (≈10 al día): ~0,50 USD/mes (~470 CLP) en OpenAI.
 
+## Costo de la IA del croquis
+
+Una llamada por croquis (`POST /croquis/{visita_id}/sugerencia`). Si se usa el plan B por reglas, no se llama a OpenAI y no hay costo.
+
+| Parte | Tokens |
+|---|---|
+| Foto satelital 640×640 | ~650 |
+| `SYSTEM_PROMPT` + datos del predio y trampas existentes | ~600 |
+| **Entrada total** | **~1.250** |
+| **Salida** (JSON con 7–15 trampas, cada una con zona y motivo) | **~600** |
+
+1.250 × 0,40 + 600 × 1,60 por millón ≈ **0,0015 USD (~1,4 CLP) por croquis**.
+
+Con 150–300 croquis al mes (uno por visita): ~0,25–0,45 USD/mes.
+
+## Total mensual estimado
+
+| Uso | Cantidad al mes | USD/mes |
+|---|---|---|
+| WhatsApp | 300 conversaciones | ~0,50 |
+| Croquis | 150–300 | ~0,25–0,45 |
+| **Total OpenAI** | | **~1 USD (~950 CLP)** |
+
 ## Lo que no incluye
 
 - **Twilio / WhatsApp**: el Sandbox es gratis. En producción Twilio cobra una tarifa por mensaje más la tarifa de Meta por conversación, que suele ser mayor que el costo de la IA. Revisar <https://www.twilio.com/whatsapp/pricing> antes de cotizar.
-- **IA del croquis**: costo aparte (incluye imagen); ver [diseno_ia_croquis.md](diseno_ia_croquis.md).
+- **Google Maps** (geocodificación y foto satelital del croquis): se cobra aparte en Google Cloud; con este volumen debería quedar dentro de la cuota gratuita mensual. Confirmar en <https://mapsplatform.google.com/pricing/>.
 
 ## Cómo verificarlo con datos reales
 
-La respuesta de OpenAI trae `usage.prompt_tokens` y `usage.completion_tokens`. Registrarlos durante la prueba HU-18 permite reemplazar esta estimación por el promedio real.
+La respuesta de OpenAI trae `usage.prompt_tokens` y `usage.completion_tokens`. Registrarlos durante la prueba HU-18 permite reemplazar esta estimación por el promedio real. La IA del croquis ya los escribe en el log (`Croquis IA: tokens entrada=… salida=…`).
