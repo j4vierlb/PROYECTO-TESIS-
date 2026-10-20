@@ -49,6 +49,11 @@ class Settings(BaseSettings):
     killbichos_close_time: str = "18:00"
     killbichos_operating_days: str = "0,1,2,3,4,5"
 
+    # Carpeta donde se guardan las fotos de las trampas (en Docker es un
+    # volumen: /app/uploads) y tamaño máximo de cada foto.
+    upload_dir: str = "uploads"
+    max_photo_bytes: int = 5 * 1024 * 1024  # 5 MB
+
     # env_file=".env": busca los valores en ese archivo.
     # extra="ignore": si el .env trae variables que no se usan aquí, no falla.
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")

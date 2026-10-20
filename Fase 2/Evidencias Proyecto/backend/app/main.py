@@ -48,8 +48,8 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(visitas.router)       # agenda del día, historial y visitas
 app.include_router(panel.router)         # panel web: clientes y agendamiento
-app.include_router(croquis.router)       # GET /croquis/{visita_id}
-app.include_router(dispositivos.router)  # PATCH /dispositivos-trampa/{id}
+app.include_router(croquis.router)       # croquis de la visita y agregar trampas
+app.include_router(dispositivos.router)  # acciones y fotos de una trampa
 app.include_router(whatsapp.router)      # POST /webhooks/whatsapp (Twilio)
 
 

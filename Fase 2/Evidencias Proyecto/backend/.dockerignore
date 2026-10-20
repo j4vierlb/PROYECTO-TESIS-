@@ -6,3 +6,5 @@ __pycache__/
 *.pyc
 tests/
 README.md
+# Fotos subidas en local: no van dentro de la imagen.
+uploads/

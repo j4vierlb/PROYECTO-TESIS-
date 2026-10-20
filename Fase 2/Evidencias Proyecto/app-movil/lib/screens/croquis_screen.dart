@@ -1,16 +1,23 @@
 // =============================================================================
 // screens/croquis_screen.dart — Croquis de una visita (trampas instaladas)
 // -----------------------------------------------------------------------------
-// Pide el croquis al backend (GET /croquis/{visita_id}) y muestra sus trampas:
-//   - Lista: cada trampa con su estado y los botones Confirmar / Retirar.
-//   - Mapa (opcional): pines de colores que se pueden arrastrar para mover una
-//     trampa. Solo aparece si se compiló con MAPS_ENABLED=true (necesita la
-//     API key de Google Maps; sin ella la app se cae al dibujar el mapa).
+// Pide el croquis al backend (GET /croquis/{visita_id}) y muestra sus trampas.
+// Si la visita todavía no tiene croquis, lo crea (POST /croquis/{visita_id}),
+// trayendo las trampas activas de la visita anterior del mismo cliente.
+//   - Lista: cada trampa con su estado, su foto y los botones Confirmar /
+//     Retirar / Foto.
+//   - Mapa (opcional): vista satelital con pines de colores que se pueden
+//     arrastrar para mover una trampa. Solo aparece si se compiló con
+//     MAPS_ENABLED=true (necesita la API key de Google Maps).
+//   - "＋ Agregar trampa": el técnico registra una trampa que instaló, con su
+//     ubicación GPS o tocando el mapa, y luego le puede sacar una foto.
 // Si la visita está completada (readOnly), todo es solo de consulta.
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../config/app_config.dart';
 import '../models/croquis.dart';
@@ -55,12 +62,29 @@ class _CroquisScreenState extends State<CroquisScreen> {
   // Se incrementa para reconstruir el mapa y devolver un pin a su lugar
   // si el operador cancela un movimiento.
   int _mapVersion = 0;
+  // true mientras el operador debe tocar el mapa para ubicar una trampa nueva.
+  bool _modoAgregar = false;
+  // true mientras se guarda una trampa nueva (GPS o mapa).
+  bool _agregando = false;
+  // true si el usuario dio permiso de ubicación: el mapa muestra el punto azul.
+  bool _ubicacionPermitida = false;
+  // Header con el token para descargar las fotos (no son públicas).
+  Map<String, String> _fotoHeaders = const {};
 
   @override
   void initState() {
     super.initState();
     _load();
+    _apiClient.authHeaders().then((headers) {
+      if (mounted) setState(() => _fotoHeaders = headers);
+    });
+    Geolocator.checkPermission().then((permiso) {
+      if (mounted) setState(() => _ubicacionPermitida = _permisoOk(permiso));
+    });
   }
+
+  bool _permisoOk(LocationPermission permiso) =>
+      permiso == LocationPermission.always || permiso == LocationPermission.whileInUse;
 
   /// Pide el croquis al backend.
   Future<void> _load() async {
@@ -70,7 +94,15 @@ class _CroquisScreenState extends State<CroquisScreen> {
       _sinCroquis = false;
     });
     try {
-      final croquis = await _apiClient.fetchCroquis(widget.visitaId);
+      Croquis croquis;
+      try {
+        croquis = await _apiClient.fetchCroquis(widget.visitaId);
+      } on ApiException catch (error) {
+        // 404 = la visita todavía no tiene croquis. Si la visita sigue
+        // abierta, se crea ahora; si está completada, solo se informa.
+        if (error.statusCode != 404 || widget.readOnly) rethrow;
+        croquis = await _apiClient.createCroquis(widget.visitaId);
+      }
       if (!mounted) return;
       setState(() => _croquis = croquis);
     } on ApiException catch (error) {
@@ -177,6 +209,236 @@ class _CroquisScreenState extends State<CroquisScreen> {
     }
   }
 
+  /// Reemplaza una trampa de la lista por su versión actualizada.
+  void _reemplazar(DispositivoTrampa actualizado) {
+    final croquis = _croquis!;
+    setState(() {
+      _croquis = croquis.copyWithDispositivos([
+        for (final item in croquis.dispositivos) item.id == actualizado.id ? actualizado : item,
+      ]);
+      _mapVersion++;
+    });
+  }
+
+  /// "＋ Agregar trampa": el operador elige cómo ubicarla.
+  Future<void> _elegirComoAgregar() async {
+    final opcion = await showModalBottomSheet<String>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const ListTile(title: Text('¿Dónde instalaste la trampa?', style: TextStyle(fontWeight: FontWeight.w700))),
+            ListTile(
+              leading: const Icon(Icons.my_location),
+              title: const Text('Aquí, donde estoy parado'),
+              subtitle: const Text('Usa la ubicación GPS del teléfono'),
+              onTap: () => Navigator.of(context).pop('gps'),
+            ),
+            if (AppConfig.mapsEnabled)
+              ListTile(
+                leading: const Icon(Icons.touch_app_outlined),
+                title: const Text('Marcarla en el mapa'),
+                subtitle: const Text('Toca el lugar en la vista satelital'),
+                onTap: () => Navigator.of(context).pop('mapa'),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (!mounted || opcion == null) return;
+    if (opcion == 'gps') {
+      await _agregarConGps();
+    } else {
+      setState(() {
+        _showMap = true;
+        _modoAgregar = true;
+      });
+    }
+  }
+
+  /// Pide permiso de ubicación (si hace falta) y agrega la trampa en la
+  /// posición actual del teléfono.
+  Future<void> _agregarConGps() async {
+    if (!await Geolocator.isLocationServiceEnabled()) {
+      _mostrarMensaje('Activa la ubicación (GPS) del teléfono');
+      return;
+    }
+    var permiso = await Geolocator.checkPermission();
+    if (permiso == LocationPermission.denied) {
+      permiso = await Geolocator.requestPermission();
+    }
+    if (!_permisoOk(permiso)) {
+      _mostrarMensaje(permiso == LocationPermission.deniedForever
+          ? 'Sin permiso de ubicación: actívalo en Ajustes'
+          : 'Sin permiso de ubicación no se puede usar el GPS');
+      return;
+    }
+    if (!mounted) return;
+    setState(() {
+      _ubicacionPermitida = true;
+      _agregando = true;
+    });
+    Position posicion;
+    try {
+      posicion = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high, timeLimit: Duration(seconds: 20)),
+      );
+    } catch (_) {
+      _mostrarMensaje('No se pudo obtener la ubicación. Prueba al aire libre o márcala en el mapa.');
+      if (mounted) setState(() => _agregando = false);
+      return;
+    }
+    if (!mounted) return;
+    setState(() => _agregando = false);
+    // Con poca precisión (bajo techo) se avisa, pero se deja continuar.
+    final aviso = posicion.accuracy > 25 ? 'GPS con precisión de ±${posicion.accuracy.round()} m' : '';
+    await _agregarEn(LatLng(posicion.latitude, posicion.longitude), aviso: aviso);
+  }
+
+  /// Pide el tipo de trampa y la guarda en `posicion`. Después ofrece sacarle
+  /// una foto de referencia.
+  Future<void> _agregarEn(LatLng posicion, {String aviso = ''}) async {
+    final tipo = await showModalBottomSheet<String>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: const Text('¿Qué instalaste?', style: TextStyle(fontWeight: FontWeight.w700)),
+              subtitle: aviso.isEmpty ? null : Text(aviso),
+            ),
+            for (final tipo in const ['cebadero', 'trampa_pegamento', 'trampa_luz', 'otro'])
+              ListTile(
+                leading: const Icon(Icons.pest_control_outlined),
+                title: Text(_tipoLabel(tipo)),
+                onTap: () => Navigator.of(context).pop(tipo),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (!mounted || tipo == null) return;
+
+    setState(() => _agregando = true);
+    try {
+      final nueva = await _apiClient.addDispositivo(
+        widget.visitaId,
+        tipo: tipo,
+        lat: posicion.latitude,
+        lng: posicion.longitude,
+      );
+      if (!mounted) return;
+      final croquis = _croquis!;
+      setState(() {
+        _croquis = croquis.copyWithDispositivos([...croquis.dispositivos, nueva]);
+        _mapVersion++;
+        _agregando = false;
+      });
+      final sacarFoto = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('${nueva.codigo} agregada'),
+          content: const Text('¿Le sacas una foto de referencia ahora?'),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Después')),
+            FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Sacar foto')),
+          ],
+        ),
+      );
+      if (sacarFoto == true) await _tomarFoto(nueva, origen: ImageSource.camera);
+    } on ApiException catch (error) {
+      _mostrarMensaje(error.message);
+    } catch (_) {
+      _mostrarMensaje('No se pudo conectar con el servidor');
+    } finally {
+      if (mounted) setState(() => _agregando = false);
+    }
+  }
+
+  /// Saca (o elige) una foto y la sube como referencia de la trampa. Si no se
+  /// indica `origen`, pregunta si usar la cámara o la galería.
+  Future<void> _tomarFoto(DispositivoTrampa dispositivo, {ImageSource? origen}) async {
+    origen ??= await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_camera_outlined),
+              title: const Text('Sacar foto'),
+              onTap: () => Navigator.of(context).pop(ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: const Text('Elegir de la galería'),
+              onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (!mounted || origen == null) return;
+
+    // Se reduce la foto (ancho máx. 1600 px, calidad 70%) para que suba
+    // rápido por datos móviles y no supere el límite de 5 MB del backend.
+    final XFile? foto;
+    try {
+      foto = await ImagePicker().pickImage(source: origen, maxWidth: 1600, imageQuality: 70);
+    } catch (_) {
+      _mostrarMensaje('No se pudo abrir la cámara. Revisa el permiso en Ajustes.');
+      return;
+    }
+    if (foto == null || !mounted) return; // canceló
+
+    setState(() => _updatingId = dispositivo.id);
+    try {
+      final actualizado = await _apiClient.uploadFoto(dispositivo.id, foto.path);
+      if (!mounted) return;
+      _reemplazar(actualizado);
+      _mostrarMensaje('Foto de ${dispositivo.codigo} guardada');
+    } on ApiException catch (error) {
+      _mostrarMensaje(error.message);
+    } catch (_) {
+      _mostrarMensaje('No se pudo subir la foto');
+    } finally {
+      if (mounted) setState(() => _updatingId = null);
+    }
+  }
+
+  /// Muestra la foto en pantalla completa (se puede hacer zoom).
+  void _verFoto(DispositivoTrampa dispositivo) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => Dialog(
+        insetPadding: const EdgeInsets.all(12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text('${dispositivo.codigo} · ${_tipoLabel(dispositivo.tipo)}'),
+              trailing: IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(context).pop()),
+            ),
+            Flexible(
+              child: InteractiveViewer(
+                child: Image.network(
+                  _apiClient.fotoUrlCompleta(dispositivo.fotoUrl!),
+                  headers: _fotoHeaders,
+                  errorBuilder: (_, _, _) => const Padding(
+                    padding: EdgeInsets.all(32),
+                    child: Text('No se pudo cargar la foto'),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   /// Muestra un mensaje breve en la parte inferior (SnackBar).
   void _mostrarMensaje(String texto) {
     if (!mounted) return;
@@ -187,9 +449,21 @@ class _CroquisScreenState extends State<CroquisScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // El botón "Agregar trampa" solo aparece con el croquis cargado y la
+    // visita abierta (ni en modo lectura ni mientras se marca en el mapa).
+    final puedeAgregar = _croquis != null && !widget.readOnly && !_modoAgregar;
     return Scaffold(
       appBar: AppBar(title: const Text('Croquis')),
       body: _buildBody(context),
+      floatingActionButton: puedeAgregar
+          ? FloatingActionButton.extended(
+              onPressed: _agregando ? null : _elegirComoAgregar,
+              icon: _agregando
+                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Icon(Icons.add_location_alt_outlined),
+              label: Text(_agregando ? 'Guardando…' : 'Agregar trampa'),
+            )
+          : null,
     );
   }
 
@@ -209,13 +483,13 @@ class _CroquisScreenState extends State<CroquisScreen> {
               Icon(Icons.map_outlined, size: 48, color: AppColors.textSecondary),
               SizedBox(height: 12),
               Text(
-                'Esta visita todavía no tiene croquis',
+                'Esta visita no tiene croquis',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
               ),
               SizedBox(height: 6),
               Text(
-                'Suele pasar con las visitas agendadas por WhatsApp.',
+                'No se registraron trampas en esta visita.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: AppColors.textSecondary),
               ),
@@ -256,7 +530,10 @@ class _CroquisScreenState extends State<CroquisScreen> {
                 ButtonSegment(value: true, label: Text('Mapa'), icon: Icon(Icons.map_outlined)),
               ],
               selected: {_showMap},
-              onSelectionChanged: (selection) => setState(() => _showMap = selection.first),
+              onSelectionChanged: (selection) => setState(() {
+                _showMap = selection.first;
+                if (!_showMap) _modoAgregar = false;
+              }),
             ),
           )
         else
@@ -276,10 +553,21 @@ class _CroquisScreenState extends State<CroquisScreen> {
   /// Vista de lista: una tarjeta por trampa.
   Widget _buildList(Croquis croquis) {
     if (croquis.dispositivos.isEmpty) {
-      return const Center(child: Text('Este croquis aún no tiene trampas'));
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            widget.readOnly
+                ? 'Este croquis no tiene trampas'
+                : 'Aún no hay trampas.\nToca "Agregar trampa" cuando instales una.',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
     }
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      // Espacio abajo para que el botón flotante no tape la última tarjeta.
+      padding: const EdgeInsets.fromLTRB(0, 8, 0, 96),
       itemCount: croquis.dispositivos.length,
       itemBuilder: (context, index) {
         final dispositivo = croquis.dispositivos[index];
@@ -290,6 +578,10 @@ class _CroquisScreenState extends State<CroquisScreen> {
           readOnly: widget.readOnly,
           onConfirmar: () => _confirmar(dispositivo),
           onRetirar: () => _retirar(dispositivo),
+          onFoto: () => _tomarFoto(dispositivo),
+          onVerFoto: () => _verFoto(dispositivo),
+          fotoUrl: dispositivo.fotoUrl == null ? null : _apiClient.fotoUrlCompleta(dispositivo.fotoUrl!),
+          fotoHeaders: _fotoHeaders,
         );
       },
     );
@@ -297,11 +589,23 @@ class _CroquisScreenState extends State<CroquisScreen> {
 
   /// Vista de mapa: un pin por trampa (requiere la API key de Google Maps).
   Widget _buildMap(Croquis croquis) {
-    return GoogleMap(
+    final mapa = GoogleMap(
       // Cambiar la key obliga a Flutter a reconstruir el mapa desde cero.
       key: ValueKey(_mapVersion),
-      // zoom 18 = nivel de detalle de calle/edificio.
-      initialCameraPosition: CameraPosition(target: _centerFor(croquis.dispositivos), zoom: 18),
+      // Satelital con nombres de calles: se ven techos, patios y muros.
+      mapType: MapType.hybrid,
+      // zoom 19 = nivel de detalle de casa/patio.
+      initialCameraPosition: CameraPosition(target: _centerFor(croquis.dispositivos), zoom: 19),
+      // Punto azul con la posición del técnico (si dio permiso de ubicación).
+      myLocationEnabled: _ubicacionPermitida,
+      myLocationButtonEnabled: _ubicacionPermitida,
+      // En modo agregar, tocar el mapa ubica la trampa nueva.
+      onTap: _modoAgregar
+          ? (posicion) {
+              setState(() => _modoAgregar = false);
+              _agregarEn(posicion);
+            }
+          : null,
       markers: {
         for (final dispositivo in croquis.dispositivos)
           Marker(
@@ -319,6 +623,38 @@ class _CroquisScreenState extends State<CroquisScreen> {
           ),
       },
     );
+    if (!_modoAgregar) return mapa;
+    // Instrucción encima del mapa mientras se espera el toque.
+    return Stack(
+      children: [
+        mapa,
+        Positioned(
+          top: 12,
+          left: 12,
+          right: 12,
+          child: Material(
+            elevation: 3,
+            borderRadius: BorderRadius.circular(10),
+            color: AppColors.yellow,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 6, 6, 6),
+              child: Row(
+                children: [
+                  const Expanded(
+                    child: Text('Toca el mapa donde instalaste la trampa',
+                        style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.black)),
+                  ),
+                  TextButton(
+                    onPressed: () => setState(() => _modoAgregar = false),
+                    child: const Text('Cancelar', style: TextStyle(color: AppColors.black)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   /// Verde = confirmada por el operador, amarillo = sugerencia de la IA
@@ -332,7 +668,8 @@ class _CroquisScreenState extends State<CroquisScreen> {
   /// Texto del globo del pin según el estado de la trampa.
   String _estadoTexto(DispositivoTrampa dispositivo) {
     if (dispositivo.estado == 'retirado') return 'Retirada';
-    return dispositivo.confirmado ? 'Confirmada' : 'Sugerida por IA · sin confirmar';
+    if (dispositivo.confirmado) return 'Confirmada';
+    return dispositivo.sugeridoPorIa ? 'Sugerida por IA · sin confirmar' : 'De la visita anterior · revisar';
   }
 
   /// Nombre legible del tipo de trampa ("trampa_luz" -> "Trampa de luz").
@@ -368,6 +705,10 @@ class _DispositivoCard extends StatelessWidget {
   // VoidCallback = función sin parámetros que se llama al tocar el botón.
   final VoidCallback onConfirmar;
   final VoidCallback onRetirar;
+  final VoidCallback onFoto; // sacar o cambiar la foto de referencia
+  final VoidCallback onVerFoto; // abrir la foto en grande
+  final String? fotoUrl; // dirección completa de la foto, o null
+  final Map<String, String> fotoHeaders; // token para descargar la foto
 
   const _DispositivoCard({
     required this.dispositivo,
@@ -376,6 +717,10 @@ class _DispositivoCard extends StatelessWidget {
     required this.readOnly,
     required this.onConfirmar,
     required this.onRetirar,
+    required this.onFoto,
+    required this.onVerFoto,
+    required this.fotoUrl,
+    required this.fotoHeaders,
   });
 
   @override
@@ -421,6 +766,29 @@ class _DispositivoCard extends StatelessWidget {
                 dispositivo.sugeridoPorIa ? 'Ubicación sugerida por la IA' : 'Ubicación definida por el operador',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
+              // Miniatura de la foto de referencia; al tocarla se ve en grande.
+              if (fotoUrl != null) ...[
+                const SizedBox(height: 10),
+                GestureDetector(
+                  onTap: onVerFoto,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      fotoUrl!,
+                      headers: fotoHeaders,
+                      height: 140,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => Container(
+                        height: 60,
+                        alignment: Alignment.center,
+                        color: const Color(0xFFECECE6),
+                        child: const Text('No se pudo cargar la foto'),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
               // Botones solo si la trampa sigue activa y la visita no está
               // completada.
               if (!retirada && !readOnly) ...[
@@ -450,6 +818,13 @@ class _DispositivoCard extends StatelessWidget {
                           label: const Text('Retirar'),
                           style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(44)),
                         ),
+                      ),
+                      const SizedBox(width: 10),
+                      // Foto de referencia: sacar una nueva o reemplazar la actual.
+                      IconButton.outlined(
+                        onPressed: onFoto,
+                        tooltip: fotoUrl == null ? 'Sacar foto' : 'Cambiar foto',
+                        icon: const Icon(Icons.photo_camera_outlined),
                       ),
                     ],
                   ),

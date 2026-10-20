@@ -9,6 +9,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 import '../models/croquis.dart';
 import '../models/visita.dart';
@@ -122,6 +123,60 @@ class ApiClient {
     return DispositivoTrampa.fromJson(jsonDecode(body) as Map<String, dynamic>);
   }
 
+  /// POST /croquis/{visita_id} — crea el croquis de la visita si todavía no
+  /// tiene (trae copiadas las trampas activas de la visita anterior del
+  /// cliente). Si ya existía, el backend lo devuelve sin duplicarlo.
+  Future<Croquis> createCroquis(String visitaId) async {
+    final body = await _authenticatedRequest('POST', '/croquis/$visitaId');
+    return Croquis.fromJson(jsonDecode(body) as Map<String, dynamic>);
+  }
+
+  /// POST /croquis/{visita_id}/dispositivos — agrega una trampa instalada en
+  /// terreno. El backend le asigna el código (T-01, T-02...).
+  Future<DispositivoTrampa> addDispositivo(
+    String visitaId, {
+    required String tipo,
+    required double lat,
+    required double lng,
+  }) async {
+    final body = await _authenticatedRequest(
+      'POST',
+      '/croquis/$visitaId/dispositivos',
+      body: {'tipo': tipo, 'lat': lat, 'lng': lng},
+    );
+    return DispositivoTrampa.fromJson(jsonDecode(body) as Map<String, dynamic>);
+  }
+
+  /// POST /dispositivos-trampa/{id}/foto — sube la foto de referencia de la
+  /// trampa (archivo JPEG tomado con la cámara). Devuelve la trampa con su
+  /// nueva `fotoUrl`.
+  Future<DispositivoTrampa> uploadFoto(String dispositivoId, String rutaArchivo) async {
+    final token = await AuthStorage.instance.getAccessToken();
+    if (token == null) {
+      throw ApiException(401, 'No hay sesión activa');
+    }
+    // Formulario "multipart": la forma estándar de enviar un archivo por HTTP.
+    final request = http.MultipartRequest('POST', Uri.parse('$baseUrl/dispositivos-trampa/$dispositivoId/foto'))
+      ..headers['Authorization'] = 'Bearer $token'
+      ..files.add(await http.MultipartFile.fromPath('foto', rutaArchivo, contentType: MediaType('image', 'jpeg')));
+    // Subir una foto por datos móviles puede tardar más que una petición normal.
+    final streamed = await request.send().timeout(const Duration(seconds: 60));
+    final response = await http.Response.fromStream(streamed);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw ApiException(response.statusCode, _extractDetail(response.body));
+    }
+    return DispositivoTrampa.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+  }
+
+  /// Dirección completa de una foto (fotoUrl viene relativa) y el header con
+  /// el token, porque las fotos no son públicas: Image.network los necesita.
+  String fotoUrlCompleta(String fotoUrl) => '$baseUrl$fotoUrl';
+
+  Future<Map<String, String>> authHeaders() async {
+    final token = await AuthStorage.instance.getAccessToken();
+    return {if (token != null) 'Authorization': 'Bearer $token'};
+  }
+
   /// Atajo para los GET autenticados.
   Future<String> _authenticatedGet(String path) => _authenticatedRequest('GET', path);
 
@@ -148,7 +203,8 @@ class ApiClient {
     final streamed = await request.send().timeout(const Duration(seconds: 15));
     final response = await http.Response.fromStream(streamed);
 
-    if (response.statusCode != 200) {
+    // Cualquier 2xx es éxito (200 OK, 201 creado).
+    if (response.statusCode < 200 || response.statusCode >= 300) {
       throw ApiException(response.statusCode, _extractDetail(response.body));
     }
     return response.body;
