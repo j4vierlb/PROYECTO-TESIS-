@@ -31,16 +31,40 @@ Swagger queda disponible en <http://127.0.0.1:8000/docs>.
 
 El login recibe JSON con `usuario` y `clave`, y entrega un `access_token` de 8 horas y un `refresh_token` de 30 días.
 
+`POST /auth/refresh` recibe `{"refresh_token": "..."}` y entrega un par nuevo de tokens, sin pedir la clave. Responde 401 si el token es falso, venció, es un `access_token` o la cuenta fue desactivada. La app lo usa para no pedir el login cada vez que se abre: mientras el técnico la use al menos una vez cada 30 días, no vuelve a escribir su clave.
+
 ## Fechas y zona horaria
 
 Las fechas se guardan y se envían en **UTC** (ISO 8601), pero **"hoy" es el día de Chile** (`America/Santiago`): la agenda del técnico y la del panel comparan cada visita convertida a la hora de Chile. Si se calculara en UTC, desde las 21:00 hora de Chile (20:00 en invierno) la agenda mostraría las visitas del día siguiente. El cálculo está en `app/zona_horaria.py`. El paquete `tzdata` (en `requirements.txt`) asegura los datos de zonas horarias aunque el sistema no los traiga, como en Windows o en imágenes de Docker mínimas.
 
+## Croquis en terreno (trampas y fotos)
+
+| Endpoint | Quién | Qué hace |
+|---|---|---|
+| `GET /croquis/{visita_id}` | operador de la visita o panel | El croquis con sus trampas; cada trampa trae `foto_url` (o `null`) |
+| `POST /croquis/{visita_id}` | operador de la visita | Crea el croquis si no existe (201) o devuelve el que ya hay (200). Copia, sin confirmar, las trampas activas de la visita anterior del mismo cliente |
+| `POST /croquis/{visita_id}/dispositivos` | operador de la visita | Agrega una trampa instalada en terreno: `{"tipo": "cebadero", "lat": -33.48, "lng": -70.59}`. El código (T-01, T-02...) lo asigna el backend |
+| `PATCH /dispositivos-trampa/{id}` | operador de la visita | Confirmar, mover o retirar |
+| `POST /dispositivos-trampa/{id}/foto` | operador de la visita | Sube la foto (campo `foto`, multipart). Solo JPEG o PNG (se revisan los bytes), máximo 5 MB |
+| `GET /dispositivos-trampa/{id}/foto` | operador de la visita o panel de la misma empresa | Descarga la foto. No es pública: requiere el token |
+
+Si la visita está **completada o cancelada**, todo lo que modifica el croquis responde **409**: queda solo de consulta. Las fotos se guardan en `UPLOAD_DIR` (en Docker, el volumen `uploads_data` montado en `/app/uploads`), y en la base solo queda el nombre del archivo.
+
 ## Pruebas
 
-Desde esta carpeta (no necesitan base de datos):
+Desde esta carpeta. Las unitarias no necesitan base de datos:
 
 ```bash
 python -m unittest discover tests
+```
+
+Las de integración usan PostgreSQL/PostGIS real en una base **aislada** y se saltan si no se indica la variable. Nunca usar la base de trabajo: cada prueba se deshace al final, pero igual exigen un nombre de base fijo:
+
+```bash
+# Croquis en terreno: base croquis_regression con schema.sql + migracion_croquis_terreno.sql
+CROQUIS_TEST_DATABASE_URL=postgresql+psycopg://usuario:clave@127.0.0.1:15434/croquis_regression python -m unittest discover tests
+# Panel web: base panel_regression (ver ../pruebas/Panel_regresion_2026-10-09.md)
+PANEL_TEST_DATABASE_URL=postgresql+psycopg://usuario:clave@127.0.0.1:15432/panel_regression python -m unittest discover tests
 ```
 
 ## Estructura
@@ -55,6 +79,7 @@ app/
 ├── dependencies.py      # auth: get_current_user, require_operator
 ├── repositories.py       # consultas SQL a Postgres/PostGIS
 ├── geocoding.py          # dirección → lat/lng (Google Geocoding API)
+├── fotos.py              # guardar/leer fotos de trampas (validación de imagen y tamaño)
 ├── ai/
 │   ├── agent.py          # agente conversacional (OpenAI) para WhatsApp
 │   └── croquis_agent.py  # sugerencia de trampas con la foto satelital
@@ -62,8 +87,8 @@ app/
     ├── auth.py
     ├── panel.py       # CRUD de clientes, agenda y operadores del panel web
     ├── visitas.py
-    ├── croquis.py        # GET /croquis/{id} y POST /croquis/{id}/sugerencia
-    ├── dispositivos.py
+    ├── croquis.py        # ver y crear croquis, agregar trampas y POST /croquis/{id}/sugerencia (IA)
+    ├── dispositivos.py   # confirmar/mover/retirar trampas y sus fotos
     └── whatsapp.py       # webhook de Twilio: POST /webhooks/whatsapp
 ```
 

@@ -39,6 +39,14 @@ class DeviceAction(str, Enum):
     eliminar = "eliminar"
 
 
+class DeviceType(str, Enum):
+    """Tipos de trampa: los mismos del CHECK de dispositivos_trampa."""
+    cebadero = "cebadero"
+    trampa_pegamento = "trampa_pegamento"
+    trampa_luz = "trampa_luz"
+    otro = "otro"
+
+
 # ---------------------------------------------------------------------------
 # Autenticación
 # ---------------------------------------------------------------------------
@@ -46,6 +54,11 @@ class LoginRequest(BaseModel):
     """Lo que la app manda a POST /auth/login."""
     usuario: str = Field(min_length=3)  # el email del operador o del admin
     clave: str = Field(min_length=1)
+
+
+class RefreshRequest(BaseModel):
+    """Lo que la app manda a POST /auth/refresh para renovar la sesión."""
+    refresh_token: str = Field(min_length=1)
 
 
 class TokenResponse(BaseModel):
@@ -150,6 +163,27 @@ class DeviceResponse(BaseModel):
     sugerido_por_ia: bool  # True si la ubicación la propuso la IA
     confirmado: bool       # True si el operador la validó en terreno
     estado: str            # activo, retirado o revisar
+    # Dirección (relativa al backend) para ver la foto de referencia de la
+    # trampa, o null si no tiene. Se pide con el mismo token de la sesión.
+    foto_url: str | None = None
+
+    @classmethod
+    def from_row(cls, row: dict) -> "DeviceResponse":
+        """Convierte una fila de dispositivos_trampa (con lat/lng) en la
+        respuesta de la API. `?v=` cambia cuando se sube otra foto, para que
+        la app no muestre la anterior guardada en su caché."""
+        foto_path = row.get("foto_path")
+        return cls(
+            id=row["id"],
+            codigo=row["codigo"],
+            tipo=row["tipo"],
+            lat=row["lat"],
+            lng=row["lng"],
+            sugerido_por_ia=row["sugerido_por_ia"],
+            confirmado=row["confirmado"],
+            estado=row["estado"],
+            foto_url=f"/dispositivos-trampa/{row['id']}/foto?v={foto_path[:8]}" if foto_path else None,
+        )
 
 
 class CroquisResponse(BaseModel):
@@ -192,6 +226,15 @@ class CroquisSuggestionResponse(CroquisResponse):
     origen: str                     # "ia" o "reglas" (plan B)
     resumen: str | None = None
     advertencias: list[str] = []
+
+
+class DeviceCreate(BaseModel):
+    """Body de POST /croquis/{visita_id}/dispositivos: una trampa que el
+    operador instala en terreno. El código (T-01, T-02...) lo asigna el
+    backend, para que nunca se repita dentro del croquis."""
+    tipo: DeviceType
+    lat: float = Field(ge=-90, le=90)
+    lng: float = Field(ge=-180, le=180)
 
 
 class DeviceUpdate(BaseModel):

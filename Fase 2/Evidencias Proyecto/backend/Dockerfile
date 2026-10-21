@@ -23,7 +23,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app ./app
 
 # El servidor no corre como administrador (root) del contenedor.
-RUN useradd --create-home --uid 1000 appuser
+# uploads/ guarda las fotos de las trampas; se crea aquí a nombre de appuser
+# para que el volumen de docker-compose herede ese dueño y se pueda escribir.
+RUN useradd --create-home --uid 1000 appuser \
+    && mkdir -p /app/uploads \
+    && chown appuser:appuser /app/uploads
 USER appuser
 
 EXPOSE 8000

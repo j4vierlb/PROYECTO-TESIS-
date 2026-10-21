@@ -54,6 +54,11 @@ class Settings(BaseSettings):
     # Vacía = no se geocodifica: los clientes de WhatsApp quedan sin coordenadas.
     google_maps_api_key: str = ""
 
+    # Carpeta donde se guardan las fotos de las trampas (en Docker es un
+    # volumen: /app/uploads) y tamaño máximo de cada foto.
+    upload_dir: str = "uploads"
+    max_photo_bytes: int = 5 * 1024 * 1024  # 5 MB
+
     # env_file=".env": busca los valores en ese archivo.
     # extra="ignore": si el .env trae variables que no se usan aquí, no falla.
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")

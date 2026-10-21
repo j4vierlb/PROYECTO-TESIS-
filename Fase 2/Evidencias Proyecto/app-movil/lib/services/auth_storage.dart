@@ -29,7 +29,8 @@ class AuthStorage {
   /// Token que se envía en cada request. null si no hay sesión.
   Future<String?> getAccessToken() => _storage.read(key: _accessTokenKey);
 
-  /// Token de renovación (todavía no se usa: falta el endpoint /auth/refresh).
+  /// Token de renovación (30 días): con él se piden tokens nuevos en
+  /// POST /auth/refresh sin volver a escribir la clave.
   Future<String?> getRefreshToken() => _storage.read(key: _refreshTokenKey);
 
   /// Borra la sesión (se usa al cerrar sesión).
