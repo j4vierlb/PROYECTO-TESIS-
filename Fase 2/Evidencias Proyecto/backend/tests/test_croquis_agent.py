@@ -55,6 +55,20 @@ class GeometriaTest(unittest.TestCase):
         self.assertAlmostEqual(distance_meters(LAT, LNG, lat_e, lng_e), 12.5, delta=0.5)
 
 
+class EsriTest(unittest.TestCase):
+    def test_la_foto_de_esri_coincide_con_la_conversion_de_pixeles(self):
+        # El rectángulo pedido debe coincidir con las esquinas de la imagen
+        # según pixel_to_latlng (la misma proyección que se usa para convertir).
+        from urllib.parse import parse_qs, urlparse
+        xmin, ymin, xmax, ymax = map(float, parse_qs(urlparse(croquis_agent.esri_image_url(LAT, LNG)).query)["bbox"][0].split(","))
+        lat_n, lng_w = pixel_to_latlng(0, 0, LAT, LNG, croquis_agent.ESRI_ZOOM)
+        R = croquis_agent.EARTH_RADIUS_M
+        import math
+        self.assertAlmostEqual(xmin, R * math.radians(lng_w), delta=0.05)
+        self.assertAlmostEqual(ymax, R * math.log(math.tan(math.pi / 4 + math.radians(lat_n) / 2)), delta=0.05)
+        self.assertAlmostEqual(xmax - xmin, ymax - ymin, delta=0.05)
+
+
 class ReglasTest(unittest.TestCase):
     def test_max_dispositivos(self):
         self.assertEqual(max_devices(200), 7)        # perímetro ~56,6 m → 4 + 3
@@ -127,7 +141,7 @@ def _http(openai_content=None, map_status=200, openai_status=200, calls=None):
     def handler(request: httpx.Request) -> httpx.Response:
         if calls is not None:
             calls.append(request)
-        if "staticmap" in request.url.path:
+        if "staticmap" in request.url.path or "export" in request.url.path:
             return httpx.Response(map_status, content=b"\x89PNG fake", headers={"content-type": "image/png"})
         body = {"choices": [{"message": {"content": json.dumps(openai_content)}}], "usage": {}}
         return httpx.Response(openai_status, json=body)
@@ -160,14 +174,14 @@ class SugerirDispositivosTest(unittest.TestCase):
         self.assertTrue(image_url.startswith("data:image/png;base64,"))
         self.assertNotIn("clave-google", calls[1].content.decode())
 
-    def test_sin_clave_de_google_usa_reglas_sin_llamar_a_nadie(self):
+    def test_sin_clave_de_google_usa_la_foto_de_esri(self):
         calls = []
+        answer = {"resumen": "x", "dispositivos": [_device()], "advertencias": []}
         with patch.object(croquis_agent.settings, "google_maps_api_key", ""):
-            result = sugerir_dispositivos(LAT, LNG, CONTEXTO, http=_http(calls=calls))
-        self.assertEqual(result.origen, "reglas")
-        self.assertEqual(len(result.dispositivos), max_devices(200))
-        self.assertIsNone(result.imagen_satelital_url)
-        self.assertEqual(calls, [])
+            result = sugerir_dispositivos(LAT, LNG, CONTEXTO, http=_http(answer, calls=calls))
+        self.assertEqual(result.origen, "ia")
+        self.assertIn("arcgisonline.com", str(calls[0].url))
+        self.assertIn("arcgisonline.com", result.imagen_satelital_url)
 
     def test_falla_la_foto_usa_reglas(self):
         result = sugerir_dispositivos(LAT, LNG, CONTEXTO, http=_http(map_status=403))

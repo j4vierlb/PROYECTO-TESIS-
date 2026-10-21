@@ -97,3 +97,26 @@ class Croquis {
             .toList(),
       );
 }
+
+/// Respuesta de POST /croquis/{visita_id}/sugerencia: el croquis con las
+/// trampas nuevas que propuso la IA, más su explicación (no se guarda).
+class SugerenciaCroquis {
+  final Croquis croquis;
+  final String origen; // "ia" o "reglas" (plan B si la IA no estaba disponible)
+  final String? resumen;
+  final List<String> advertencias;
+
+  SugerenciaCroquis({
+    required this.croquis,
+    required this.origen,
+    this.resumen,
+    required this.advertencias,
+  });
+
+  factory SugerenciaCroquis.fromJson(Map<String, dynamic> json) => SugerenciaCroquis(
+        croquis: Croquis.fromJson(json),
+        origen: json['origen'] as String,
+        resumen: json['resumen'] as String?,
+        advertencias: (json['advertencias'] as List<dynamic>? ?? const []).cast<String>(),
+      );
+}

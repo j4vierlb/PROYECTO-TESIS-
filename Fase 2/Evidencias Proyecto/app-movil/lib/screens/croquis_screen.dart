@@ -11,6 +11,9 @@
 //     MAPS_ENABLED=true (necesita la API key de Google Maps).
 //   - "＋ Agregar trampa": el técnico registra una trampa que instaló, con su
 //     ubicación GPS o tocando el mapa, y luego le puede sacar una foto.
+//   - "Sugerir con IA" (botón de la barra): la IA mira la foto satelital del
+//     predio y propone trampas nuevas, que quedan sin confirmar hasta que el
+//     técnico las revise (POST /croquis/{visita_id}/sugerencia).
 // Si la visita está completada (readOnly), todo es solo de consulta.
 // =============================================================================
 
@@ -66,6 +69,8 @@ class _CroquisScreenState extends State<CroquisScreen> {
   bool _modoAgregar = false;
   // true mientras se guarda una trampa nueva (GPS o mapa).
   bool _agregando = false;
+  // true mientras la IA prepara la sugerencia de trampas.
+  bool _sugiriendo = false;
   // true si el usuario dio permiso de ubicación: el mapa muestra el punto azul.
   bool _ubicacionPermitida = false;
   // Header con el token para descargar las fotos (no son públicas).
@@ -443,6 +448,73 @@ class _CroquisScreenState extends State<CroquisScreen> {
     );
   }
 
+  /// "Sugerir con IA": pide los datos del predio, llama a la IA y agrega al
+  /// croquis las trampas que propone (sin confirmar). Al final muestra el
+  /// resumen y las advertencias de la IA.
+  Future<void> _sugerirConIa() async {
+    final datos = await showDialog<_DatosSugerencia>(
+      context: context,
+      builder: (context) => const _SugerenciaDialog(),
+    );
+    if (!mounted || datos == null) return;
+
+    final antes = _croquis?.dispositivos.length ?? 0;
+    setState(() => _sugiriendo = true);
+    try {
+      final sugerencia = await _apiClient.sugerirTrampas(
+        widget.visitaId,
+        tipoRecinto: datos.tipoRecinto,
+        plaga: datos.plaga,
+        superficieM2: datos.superficieM2,
+        notas: datos.notas,
+      );
+      if (!mounted) return;
+      setState(() {
+        _croquis = sugerencia.croquis;
+        _mapVersion++;
+      });
+      final nuevas = sugerencia.croquis.dispositivos.length - antes;
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(nuevas > 0 ? '$nuevas trampas sugeridas' : 'Sin trampas nuevas'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (sugerencia.origen == 'reglas')
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 8),
+                    child: Text('La IA no estaba disponible: se usó una ubicación por reglas.',
+                        style: TextStyle(fontWeight: FontWeight.w700)),
+                  ),
+                if (sugerencia.resumen != null) Text(sugerencia.resumen!),
+                for (final advertencia in sugerencia.advertencias)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text('⚠ $advertencia', style: const TextStyle(color: AppColors.textSecondary)),
+                  ),
+                const SizedBox(height: 12),
+                const Text('Revisa cada trampa en terreno: confírmala, muévela o retírala.',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
+              ],
+            ),
+          ),
+          actions: [
+            FilledButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Entendido')),
+          ],
+        ),
+      );
+    } on ApiException catch (error) {
+      _mostrarMensaje(error.message);
+    } catch (_) {
+      _mostrarMensaje('No se pudo obtener la sugerencia. Revisa la conexión.');
+    } finally {
+      if (mounted) setState(() => _sugiriendo = false);
+    }
+  }
+
   /// Muestra un mensaje breve en la parte inferior (SnackBar).
   void _mostrarMensaje(String texto) {
     if (!mounted) return;
@@ -457,7 +529,22 @@ class _CroquisScreenState extends State<CroquisScreen> {
     // visita abierta (ni en modo lectura ni mientras se marca en el mapa).
     final puedeAgregar = _croquis != null && !widget.readOnly && !_modoAgregar;
     return Scaffold(
-      appBar: AppBar(title: const Text('Croquis')),
+      appBar: AppBar(
+        title: const Text('Croquis'),
+        actions: [
+          if (puedeAgregar)
+            _sugiriendo
+                ? const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                  )
+                : IconButton(
+                    onPressed: _agregando ? null : _sugerirConIa,
+                    tooltip: 'Sugerir trampas con IA',
+                    icon: const Icon(Icons.auto_awesome),
+                  ),
+        ],
+      ),
       body: _buildBody(context),
       floatingActionButton: puedeAgregar
           ? FloatingActionButton.extended(
@@ -563,7 +650,7 @@ class _CroquisScreenState extends State<CroquisScreen> {
           child: Text(
             widget.readOnly
                 ? 'Este croquis no tiene trampas'
-                : 'Aún no hay trampas.\nToca "Agregar trampa" cuando instales una.',
+                : 'Aún no hay trampas.\nToca ✨ para que la IA sugiera dónde ponerlas,\no "Agregar trampa" cuando instales una.',
             textAlign: TextAlign.center,
           ),
         ),
@@ -837,6 +924,120 @@ class _DispositivoCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Datos del predio que el técnico entrega para pedir la sugerencia.
+class _DatosSugerencia {
+  final String tipoRecinto;
+  final String plaga;
+  final double? superficieM2;
+  final String? notas;
+
+  const _DatosSugerencia({required this.tipoRecinto, required this.plaga, this.superficieM2, this.notas});
+}
+
+/// Formulario corto antes de llamar a la IA. Los valores coinciden con los
+/// Enum TipoRecinto y Plaga del backend (schemas.py).
+class _SugerenciaDialog extends StatefulWidget {
+  const _SugerenciaDialog();
+
+  @override
+  State<_SugerenciaDialog> createState() => _SugerenciaDialogState();
+}
+
+class _SugerenciaDialogState extends State<_SugerenciaDialog> {
+  static const _recintos = {
+    'casa': 'Casa',
+    'restaurante': 'Restaurante',
+    'bodega': 'Bodega',
+    'local_comercial': 'Local comercial',
+    'industria': 'Industria',
+  };
+  static const _plagas = {
+    'roedores': 'Roedores',
+    'cucarachas': 'Cucarachas',
+    'moscas': 'Moscas',
+    'otra': 'Otra',
+  };
+
+  String _tipoRecinto = 'casa';
+  String _plaga = 'roedores';
+  final _superficie = TextEditingController();
+  final _notas = TextEditingController();
+
+  @override
+  void dispose() {
+    _superficie.dispose();
+    _notas.dispose();
+    super.dispose();
+  }
+
+  void _enviar() {
+    // Acepta "180" o "180,5"; si no es un número válido, se envía sin superficie.
+    final superficie = double.tryParse(_superficie.text.trim().replaceAll(',', '.'));
+    final notas = _notas.text.trim();
+    Navigator.of(context).pop(_DatosSugerencia(
+      tipoRecinto: _tipoRecinto,
+      plaga: _plaga,
+      superficieM2: (superficie != null && superficie > 0) ? superficie : null,
+      notas: notas.isEmpty ? null : notas,
+    ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Sugerir trampas con IA'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            DropdownButtonFormField<String>(
+              initialValue: _tipoRecinto,
+              decoration: const InputDecoration(labelText: 'Tipo de recinto'),
+              items: [
+                for (final entry in _recintos.entries) DropdownMenuItem(value: entry.key, child: Text(entry.value)),
+              ],
+              onChanged: (valor) => setState(() => _tipoRecinto = valor ?? _tipoRecinto),
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              initialValue: _plaga,
+              decoration: const InputDecoration(labelText: 'Plaga'),
+              items: [
+                for (final entry in _plagas.entries) DropdownMenuItem(value: entry.key, child: Text(entry.value)),
+              ],
+              onChanged: (valor) => setState(() => _plaga = valor ?? _plaga),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _superficie,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(labelText: 'Superficie aprox. (m²)', hintText: 'Opcional'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _notas,
+              maxLength: 500,
+              maxLines: 2,
+              decoration: const InputDecoration(
+                labelText: 'Notas',
+                hintText: 'Ej: basura en el patio trasero',
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancelar')),
+        FilledButton.icon(
+          onPressed: _enviar,
+          icon: const Icon(Icons.auto_awesome, size: 18),
+          label: const Text('Sugerir'),
+        ),
+      ],
     );
   }
 }

@@ -28,8 +28,14 @@ from app.geocoding import describe_error, distance_meters
 logger = logging.getLogger(__name__)
 
 STATIC_MAP_URL = "https://maps.googleapis.com/maps/api/staticmap"
+# Sin clave de Google se usa Esri World Imagery, que no pide clave. Usa la misma
+# proyección (Web Mercator), así que la conversión píxel -> lat/lng es la misma.
+# Pensado para desarrollo y pruebas: en producción, Google o una cuenta ArcGIS.
+ESRI_EXPORT_URL = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export"
+EARTH_RADIUS_M = 6_378_137  # radio de la esfera de Web Mercator (EPSG:3857)
 IMAGE_SIZE = 640        # px, máximo de Static Maps sin plan premium
-ZOOM = 20               # ~0,12 m por píxel en Santiago: la imagen cubre ~80 × 80 m
+ZOOM = 20               # Google: ~0,12 m por píxel en Santiago, la imagen cubre ~80 × 80 m
+ESRI_ZOOM = 19          # Esri no tiene zoom 20 en Santiago: ~0,25 m/px, cubre ~160 × 160 m
 TILE_SIZE = 256         # tamaño del "mundo" de Google en zoom 0
 
 MAX_DISTANCE_METERS = 60    # una trampa más lejos del centro no es de este predio
@@ -59,7 +65,12 @@ Criterios:
   zonas de basura y accesos. Separación de 10 a 15 m entre cebaderos.
 - Cucarachas: trampas de pegamento cerca de cocinas, desagües y bodegas.
 - Moscas: trampas de luz cerca de accesos y zonas de basura, lejos de ventanas.
-- Ubica los dispositivos dentro del predio central de la imagen, no en predios vecinos ni en la calle.
+- El predio del cliente está en el CENTRO de la imagen (píxel 320, 320). Se te indica
+  un radio aproximado en píxeles según su superficie: ubica todo dentro de ese radio.
+- Coloca los dispositivos en bordes y rincones: junto a muros, rejas, cercos,
+  vegetación, contenedores de basura y accesos. Nunca en medio de espacios abiertos.
+- No ubiques dispositivos sobre canchas deportivas, calles, estacionamientos abiertos,
+  piscinas ni techos de edificios vecinos.
 - No repitas dispositivos donde ya hay uno instalado (se te indican sus píxeles).
 - Si la imagen no permite ver algo importante, dilo en advertencias.
 
@@ -166,6 +177,7 @@ def validate_devices(
     lng: float,
     superficie_m2: float | None,
     existentes: list[dict],
+    zoom: int = ZOOM,
 ) -> tuple[list[dict], list[str]]:
     """Aplica las validaciones de la sección 3 del diseño. Devuelve los
     dispositivos válidos (tipo, lat, lng) y las advertencias de la IA."""
@@ -185,7 +197,7 @@ def validate_devices(
             continue
         if not all(isinstance(v, (int, float)) and 0 <= v < IMAGE_SIZE for v in (x, y)):
             continue
-        d_lat, d_lng = pixel_to_latlng(x, y, lat, lng)
+        d_lat, d_lng = pixel_to_latlng(x, y, lat, lng, zoom)
         if distance_meters(lat, lng, d_lat, d_lng) > MAX_DISTANCE_METERS:
             continue
         candidates.append({"tipo": tipo, "lat": d_lat, "lng": d_lng})
@@ -202,9 +214,47 @@ def validate_devices(
 # ---------------------------------------------------------------------------
 # Llamadas externas
 # ---------------------------------------------------------------------------
+def esri_image_url(lat: float, lng: float, zoom: int = ESRI_ZOOM) -> str:
+    """Foto de Esri equivalente a la de Google: mismo centro, zoom y tamaño.
+    Se pide el rectángulo en metros de Web Mercator que cubre la imagen."""
+    x = EARTH_RADIUS_M * math.radians(lng)
+    y = EARTH_RADIUS_M * math.log(math.tan(math.pi / 4 + math.radians(lat) / 2))
+    meters_per_px = 2 * math.pi * EARTH_RADIUS_M / (TILE_SIZE * 2 ** zoom)
+    half = IMAGE_SIZE / 2 * meters_per_px
+    params = {
+        "bbox": f"{x - half:.2f},{y - half:.2f},{x + half:.2f},{y + half:.2f}",
+        "bboxSR": 3857,
+        "imageSR": 3857,
+        "size": f"{IMAGE_SIZE},{IMAGE_SIZE}",
+        "format": "jpg",
+        "f": "image",
+    }
+    return f"{ESRI_EXPORT_URL}?{urlencode(params)}"
+
+
+def meters_per_pixel(lat: float, zoom: int) -> float:
+    """Metros reales que mide un píxel de la imagen a esa latitud."""
+    return 156_543.03 * math.cos(math.radians(lat)) / 2 ** zoom
+
+
+def predio_radius_px(superficie_m2: float | None, lat: float, zoom: int) -> int:
+    """Radio del predio en píxeles, suponiéndolo cuadrado (media diagonal) más
+    5 m de margen porque la coordenada geocodificada puede no caer en su centro."""
+    half_diagonal = math.sqrt(superficie_m2 or DEFAULT_AREA_M2) * math.sqrt(2) / 2
+    return round((half_diagonal + 5) / meters_per_pixel(lat, zoom))
+
+
+def image_zoom() -> int:
+    """Zoom de la foto según el proveedor que se va a usar."""
+    return ZOOM if settings.google_maps_api_key else ESRI_ZOOM
+
+
 def static_map_url(lat: float, lng: float, with_key: bool = False) -> str:
-    """URL de la foto satelital. La versión sin clave es la que se guarda en
-    croquis.imagen_satelital_url: la clave del backend no debe salir de aquí."""
+    """URL de la foto satelital (Google si hay clave; si no, Esri). La versión
+    sin clave es la que se guarda en croquis.imagen_satelital_url: la clave del
+    backend no debe salir de aquí."""
+    if not settings.google_maps_api_key:
+        return esri_image_url(lat, lng)
     params = {
         "center": f"{lat:.6f},{lng:.6f}",
         "zoom": ZOOM,
@@ -221,7 +271,7 @@ def _fetch_image(http: httpx.Client, lat: float, lng: float) -> tuple[bytes, str
     response.raise_for_status()
     mime = response.headers.get("content-type", "image/png").split(";")[0]
     if not mime.startswith("image/"):
-        raise ValueError(f"Static Maps no devolvió una imagen ({mime})")
+        raise ValueError(f"El proveedor de mapas no devolvió una imagen ({mime})")
     return response.content, mime
 
 
@@ -236,6 +286,8 @@ def _ask_openai(
         f"Tipo de recinto: {contexto['tipo_recinto']}. Plaga objetivo: {contexto['plaga']}. "
         f"Superficie aproximada: {contexto.get('superficie_m2') or 'no indicada'} m². "
         f"Máximo de dispositivos nuevos: {contexto['maximo']}. "
+        f"Escala de la imagen: {contexto['metros_por_pixel']:.2f} m por píxel. "
+        f"Radio aproximado del predio desde el centro: {contexto['radio_px']} píxeles. "
         f"Notas del operador: {contexto.get('notas') or 'sin notas'}. "
         f"Dispositivos ya instalados (no repetir): {json.dumps(existentes_px, ensure_ascii=False) if existentes_px else 'ninguno'}."
     )
@@ -297,9 +349,7 @@ def sugerir_dispositivos(
             origen="reglas",
         )
 
-    if not settings.google_maps_api_key:
-        return fallback("no hay clave de Google Maps para la foto satelital")
-
+    zoom = image_zoom()
     own_http = http is None
     http = http or httpx.Client()
     try:
@@ -314,12 +364,21 @@ def sugerir_dispositivos(
             return fallback("no hay clave de OpenAI", image_url)
 
         existentes_px = [
-            {"tipo": d["tipo"], **dict(zip(("x", "y"), (round(v) for v in latlng_to_pixel(d["lat"], d["lng"], lat, lng))))}
+            {"tipo": d["tipo"], **dict(zip(("x", "y"), (round(v) for v in latlng_to_pixel(d["lat"], d["lng"], lat, lng, zoom))))}
             for d in existentes
         ]
         try:
             result = _ask_openai(
-                http, image, mime, {**contexto, "maximo": max_devices(superficie) - len(existentes)}, existentes_px
+                http,
+                image,
+                mime,
+                {
+                    **contexto,
+                    "maximo": max_devices(superficie) - len(existentes),
+                    "metros_por_pixel": meters_per_pixel(lat, zoom),
+                    "radio_px": predio_radius_px(superficie, lat, zoom),
+                },
+                existentes_px,
             )
         except Exception:
             logger.exception("Falló la IA del croquis")
@@ -328,7 +387,7 @@ def sugerir_dispositivos(
         if own_http:
             http.close()
 
-    devices, warnings = validate_devices(result, lat, lng, superficie, existentes)
+    devices, warnings = validate_devices(result, lat, lng, superficie, existentes, zoom)
     if not devices:
         return fallback("la IA no propuso ninguna ubicación válida", image_url)
 
