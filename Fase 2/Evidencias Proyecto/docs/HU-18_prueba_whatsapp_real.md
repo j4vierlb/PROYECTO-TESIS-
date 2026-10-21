@@ -27,9 +27,9 @@ Pasos detallados: [backend/README.md](../backend/README.md), sección "Prueba re
 | 1 | `Hola, ¿qué servicios tienen?` | Respuesta de consulta, sin agendar ni inventar precios | ☑ |
 | 2 | (número nuevo) `Quiero agendar hoy a las 17:00` (hoy, dentro del horario 08:00–18:00 y al menos 1 h después de la hora de la prueba) | Pide la dirección antes de agendar | ☑ |
 | 3 | `Av. Macul 1234, Macul` | Confirma la visita; aparece en el panel web y en la pestaña **Hoy** de la app del operador | ☑ (BD verificada; faltan capturas de panel y app) |
-| 4 | Pedir un horario fuera de atención (ej. domingo 20:00) | Ofrece el siguiente horario libre | ◐ parcial |
-| 5 | Pedir un horario a menos de 1 h de otra visita | Ofrece un horario alternativo | ☐ |
-| 6 | Aceptar el horario alternativo (`sí, ese me sirve`) | Agenda en el horario ofrecido | ☐ |
+| 4 | Pedir un horario fuera de atención (ej. domingo 20:00) | Ofrece el siguiente horario libre | ◐ falló el 20/10; corregido el 21/10 (falta repetir desde el teléfono) |
+| 5 | Pedir un horario a menos de 1 h de otra visita | Ofrece un horario alternativo | ◐ OK con mensaje simulado (falta desde el teléfono) |
+| 6 | Aceptar el horario alternativo (`sí, ese me sirve`) | Agenda en el horario ofrecido | ◐ OK con mensaje simulado (falta desde el teléfono) |
 | 7 | `Quiero cancelar mi visita` | Indica que un operador confirmará; no cambia nada en la base | ☐ |
 | 8 | `OPENAI_API_KEY` vacía y reiniciar el backend | Mensaje de contingencia "un operador te contactará" | ☐ |
 | 9 | `curl` al webhook sin firma, con validación activa | 403 Firma de Twilio inválida | ☑ |
@@ -54,7 +54,23 @@ Para no pagar el Upgrade se usó [`backend/scripts/puente_twilio_trial.py`](../b
 | 4 | Quiero agendar el domingo a las 20:00 | El domingo no atendemos y el horario máximo es hasta las 18:00. ¿Quieres agendar otro día y hora dentro de nuestro horario de atención? | Parcial: la IA rechaza el horario sin consultar al backend y no ofrece el siguiente horario libre |
 | 9 | `curl` sin firma al webhook por ngrok | `403 {"detail":"Firma de Twilio inválida"}` | OK |
 
-Casos 5 a 8: pendientes.
+### Corrección del caso 4 (21/10/2026)
+
+**Causa:** el prompt del agente decía *"Solo propone o aceptes horarios dentro del horario de atención"*. La IA rechazaba el domingo por su cuenta y nunca le pasaba la fecha al backend, que es el que busca el siguiente horario libre.
+
+**Cambio** (`backend/app/ai/agent.py`): la IA ya no rechaza horarios. Si el cliente pide una fecha y hora concretas y hay dirección, responde `create_appointment` con esa fecha, y el backend la valida y ofrece la alternativa.
+
+**Verificación** con mensajes simulados al webhook (mismo formato y firma que Twilio, desde un número de prueba que luego se borró):
+
+| Mensaje | Respuesta del sistema |
+|---|---|
+| Hola, mi dirección es Av. Macul 1234, Macul. Quiero agendar el domingo a las 20:00 | Ese horario no está disponible 😕 ¿Te acomoda el 26/10/2026 a las 08:00 (hora de Chile)? Si prefieres, indícame otro día y hora. |
+| (otro cliente, con una visita del operador a las 17:30) Quiero agendar hoy a las 17:00 | Ese horario no está disponible 😕 ¿Te acomoda el 22/10/2026 a las 08:00 (hora de Chile)? … |
+| sí, ese me sirve | Perfecto 😊 Tu visita quedó agendada para el 22/10/2026 a las 08:00 (hora de Chile). |
+
+Consulta y cancelación se revisaron después del cambio y siguen respondiendo igual (sin agendar).
+
+Pendiente: repetir los casos 4 a 8 desde el teléfono con el puente, y las capturas.
 
 ## Evidencia (capturas)
 
@@ -74,4 +90,4 @@ Guardar en [`evidencias/HU-18/`](evidencias/HU-18/) con este nombre: `HU18_<n°c
 
 | Fecha real | Casos OK | Observaciones |
 |---|---|---|
-| 20/10/2026 (en curso) | 4/9 + 1 parcial | Prueba con cuenta Trial vía puente (ver arriba). Pendientes casos 5–8 y capturas de panel y app. |
+| 20–21/10/2026 (en curso) | 4/9 desde el teléfono; 4, 5 y 6 OK con mensajes simulados | Prueba con cuenta Trial vía puente (ver arriba). Caso 4 corregido el 21/10. Pendientes: casos 4–8 desde el teléfono y capturas de panel y app. |
