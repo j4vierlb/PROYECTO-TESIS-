@@ -27,10 +27,10 @@ Pasos detallados: [backend/README.md](../backend/README.md), sección "Prueba re
 | 1 | `Hola, ¿qué servicios tienen?` | Respuesta de consulta, sin agendar ni inventar precios | ☑ |
 | 2 | (número nuevo) `Quiero agendar hoy a las 17:00` (hoy, dentro del horario 08:00–18:00 y al menos 1 h después de la hora de la prueba) | Pide la dirección antes de agendar | ☑ |
 | 3 | `Av. Macul 1234, Macul` | Confirma la visita; aparece en el panel web y en la pestaña **Hoy** de la app del operador | ☑ (BD verificada; faltan capturas de panel y app) |
-| 4 | Pedir un horario fuera de atención (ej. domingo 20:00) | Ofrece el siguiente horario libre | ◐ falló el 20/10; corregido el 21/10 (falta repetir desde el teléfono) |
-| 5 | Pedir un horario a menos de 1 h de otra visita | Ofrece un horario alternativo | ◐ OK con mensaje simulado (falta desde el teléfono) |
-| 6 | Aceptar el horario alternativo (`sí, ese me sirve`) | Agenda en el horario ofrecido | ◐ OK con mensaje simulado (falta desde el teléfono) |
-| 7 | `Quiero cancelar mi visita` | Indica que un operador confirmará; no cambia nada en la base | ☐ |
+| 4 | Pedir un horario fuera de atención (ej. domingo 20:00) | Ofrece el siguiente horario libre | ☑ (falló el 20/10; corregido el 21/10 y repetido desde el teléfono el 22/10) |
+| 5 | Pedir un horario a menos de 1 h de otra visita | Ofrece un horario alternativo | ☑ |
+| 6 | Aceptar el horario alternativo (`sí, ese me sirve`) | Agenda en el horario ofrecido | ☑ |
+| 7 | `Quiero cancelar mi visita` | Indica que un operador confirmará; no cambia nada en la base | ☑ |
 | 8 | `OPENAI_API_KEY` vacía y reiniciar el backend | Mensaje de contingencia "un operador te contactará" | ☐ |
 | 9 | `curl` al webhook sin firma, con validación activa | 403 Firma de Twilio inválida | ☑ |
 
@@ -70,7 +70,19 @@ Para no pagar el Upgrade se usó [`backend/scripts/puente_twilio_trial.py`](../b
 
 Consulta y cancelación se revisaron después del cambio y siguen respondiendo igual (sin agendar).
 
-Pendiente: repetir los casos 4 a 8 desde el teléfono con el puente, y las capturas.
+### Casos 4 a 7 desde el teléfono (22/10/2026)
+
+Después del Upgrade de la cuenta Twilio se usó el **Sandbox de WhatsApp** (+1 415 523 8886): el teléfono se unió con `join <código>`, el webhook del Sandbox apunta a la URL de ngrok y Twilio llama directo al backend, sin el puente. Así la respuesta del bot sí llega al teléfono.
+
+| # | Mensaje real enviado | Respuesta del bot | Verificación en BD |
+|---|---|---|---|
+| — | Hola | Hola, ¿en qué puedo ayudarte hoy? | intención `saludo` |
+| 4 | Quiero agendar para el domingo a las 22:00 | Ese horario no está disponible 😕 ¿Te acomoda el 26/10/2026 a las 08:00 (hora de Chile)? Si prefieres, indícame otro día y hora. | no crea visita |
+| 5 | Quiero agendar hoy a las 10:30 (había una visita a las 10:00) | Ese horario no está disponible 😕 ¿Te acomoda el 22/10/2026 a las 11:00 (hora de Chile)? … | no crea visita |
+| 6 | Si, ese me sirve | Perfecto 😊 Tu visita quedó agendada para el 22/10/2026 a las 11:00 (hora de Chile). | visita 22/10 11:00, `agendada`, `whatsapp_ia` |
+| 7 | Quiero cancelar mi visita | Para cancelar tu visita, un operador debe confirmar la modificación. Te contactaremos pronto. | intención `cancelar`; las visitas de las 10:00 y 11:00 siguen `agendada` |
+
+Cada mensaje del cliente quedó en `mensajes_whatsapp` con su `message_sid` real de Twilio. Capturas: `HU18_00_sandbox_04_whatsapp.jpg` y `HU18_04-07_whatsapp.jpg` (fondo del chat difuminado).
 
 ## Evidencia (capturas)
 
@@ -78,7 +90,7 @@ Guardar en [`evidencias/HU-18/`](evidencias/HU-18/) con este nombre: `HU18_<n°c
 
 1. `HU18_00_ngrok.png` — terminal de ngrok con la URL pública y los `POST /webhooks/whatsapp 200`.
 2. `HU18_00_twilio_sandbox.png` — Sandbox settings con la URL configurada (ocultar el Auth Token).
-3. `HU18_<caso>_whatsapp.png` — conversación en el teléfono, una por cada caso 1–8.
+3. `HU18_<caso>_whatsapp.png` — conversación en el teléfono, una por cada caso 1–8. Los casos 4 a 7 están en `HU18_00_sandbox_04_whatsapp.jpg` (unión al Sandbox, saludo y caso 4) y `HU18_04-07_whatsapp.jpg`.
 4. `HU18_03_panel.png` — la visita creada en el panel web (origen `whatsapp_ia`).
 5. `HU18_03_app.png` — la misma visita en la pestaña **Hoy** de la app móvil. La app solo muestra las visitas del día (`/operadores/me/visitas-hoy`): por eso el caso 2 agenda para hoy. Si se agendó para otro día, esta captura se toma ese día.
 6. `HU18_03_bd.png` — `SELECT` en `mensajes_whatsapp` mostrando el historial y `message_sid`.
@@ -91,3 +103,4 @@ Guardar en [`evidencias/HU-18/`](evidencias/HU-18/) con este nombre: `HU18_<n°c
 | Fecha real | Casos OK | Observaciones |
 |---|---|---|
 | 20–21/10/2026 (en curso) | 4/9 desde el teléfono; 4, 5 y 6 OK con mensajes simulados | Prueba con cuenta Trial vía puente (ver arriba). Caso 4 corregido el 21/10. Pendientes: casos 4–8 desde el teléfono y capturas de panel y app. |
+| 22/10/2026 | 8/9 (casos 1–7 y 9) | Casos 4–7 desde el teléfono con el Sandbox después del Upgrade. Falta el caso 8 y las capturas de panel y app del caso 3. |
