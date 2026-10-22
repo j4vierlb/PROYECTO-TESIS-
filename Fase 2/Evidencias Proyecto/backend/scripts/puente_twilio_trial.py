@@ -41,6 +41,13 @@ def read_env(path: Path) -> dict[str, str]:
     return values
 
 
+def mask_phone(number: str) -> str:
+    """whatsapp:+56912345678 -> whatsapp:+569****5678, para que el log se
+    pueda capturar como evidencia sin mostrar el número real."""
+    prefix, _, digits = number.rpartition("+")
+    return f"{prefix}+{digits[:3]}****{digits[-4:]}" if len(digits) > 7 else number
+
+
 def main() -> None:
     env = read_env(ROOT_ENV)
     sid, token = env.get("TWILIO_ACCOUNT_SID"), env.get("TWILIO_AUTH_TOKEN")
@@ -73,7 +80,7 @@ def main() -> None:
                     "Body": msg["body"] or "",
                     "NumMedia": msg.get("num_media") or "0",
                 }
-                print(f"\n<- {msg['from']}: {form['Body']}")
+                print(f"\n<- {mask_phone(msg['from'])}: {form['Body']}")
                 signature = validator.compute_signature(webhook_url, form)
                 response = backend.post(BACKEND_URL, data=form, headers={"X-Twilio-Signature": signature})
                 print(f"   backend respondió {response.status_code}")
