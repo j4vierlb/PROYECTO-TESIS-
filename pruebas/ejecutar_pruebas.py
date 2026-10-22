@@ -36,6 +36,7 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 ADMIN = ("admin@killbichos.cl", "demo1234")
 TECNICO = ("tecnico1@killbichos.cl", "demo1234")
@@ -48,6 +49,22 @@ BASE = "http://localhost:8000"
 
 
 # ------------------------------------------------------------------ utilidades
+
+# Las visitas de prueba se agendan en horario hábil de Chile: el panel rechaza
+# horarios fuera de atención (422) y dos visitas del mismo técnico a menos de
+# una hora (409). Así el script da el mismo resultado a cualquier hora del día.
+def horarios_habiles(cantidad: int = 8) -> list[str]:
+    """Próximos horarios de lunes a viernes entre 10:00 y 17:00 (hora de Chile),
+    empezando mañana, en formato ISO 8601 con zona horaria."""
+    santiago = ZoneInfo("America/Santiago")
+    dia = (datetime.now(santiago) + timedelta(days=1)).replace(minute=0, second=0, microsecond=0)
+    horarios = []
+    while len(horarios) < cantidad:
+        if dia.weekday() < 5:  # 0 = lunes ... 4 = viernes
+            horarios += [dia.replace(hour=h).isoformat() for h in range(10, 18)]
+        dia += timedelta(days=1)
+    return horarios[:cantidad]
+
 def llamar(metodo, ruta, token=None, cuerpo=None, form=None, timeout=15):
     """Devuelve (codigo_http, json_o_texto, segundos)."""
     headers = {}
@@ -151,11 +168,17 @@ def main():
     registrar("PI-06", "Crear cliente válido", "201 con id", code, code == 201 and bool(cli_id))
 
     # ---- Visitas
-    manana = (datetime.now(timezone.utc) + timedelta(days=1)).replace(microsecond=0).isoformat()
+    horarios = horarios_habiles()
+    manana = horarios[0]
     vis_id = None
     if cli_id and op_id:
-        code, vis, _ = llamar("POST", "/panel/visitas", tok_adm,
-                              {"cliente_id": cli_id, "operador_id": op_id, "fecha_hora": manana, "notas": "PRUEBA-AUTO"})
+        # Si el técnico ya tiene una visita cerca de ese horario (409), se prueba
+        # el siguiente horario hábil.
+        for manana in horarios:
+            code, vis, _ = llamar("POST", "/panel/visitas", tok_adm,
+                                  {"cliente_id": cli_id, "operador_id": op_id, "fecha_hora": manana, "notas": "PRUEBA-AUTO"})
+            if code != 409:
+                break
         vis_id = vis.get("id") if code == 201 and isinstance(vis, dict) else None
         registrar("PI-07", "Crear visita manual asignada a un técnico", "201 con origen manual y estado agendada", code,
                   code == 201 and vis.get("origen_agendamiento") == "manual" and vis.get("estado") == "agendada")
