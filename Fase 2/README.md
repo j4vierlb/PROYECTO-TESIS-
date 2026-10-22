@@ -10,7 +10,9 @@ Kill Bichos IA es una plataforma web y móvil para apoyar el contacto con client
 - `Evidencias Proyecto/frontend`: panel administrativo React/Vite.
 - `Evidencias Proyecto/app-movil`: aplicación Flutter para operadores.
 - `Evidencias Proyecto/database`: PostgreSQL/PostGIS, esquema, datos de prueba y migraciones. Docker Compose está en la raíz del repositorio.
-- `Documentos`: entregables de gestión, diseño, pruebas, manual y cierre.
+- `Evidencias Proyecto/Evidencias de documentacion`: entregables de gestión, diseño, pruebas, manual y cierre.
+- `Evidencias Grupales`: guías del estudiante de la fase (2.4 Desarrollo del Proyecto APT y 2.6 Informe Final).
+- `Evidencias Individuales`: diarios de reflexión de cada integrante (2.1).
 
 ## Inicio rápido
 
@@ -74,7 +76,7 @@ Estas credenciales son únicamente para el ambiente local de demostración.
 
 ## Documentación de Fase 2
 
-La carpeta `Documentos` contiene:
+La carpeta `Evidencias Proyecto/Evidencias de documentacion` contiene:
 
 1. Documento de inicio y alcance del MVP.
 2. Sprint Backlog y tablero de trabajo.
