@@ -37,7 +37,11 @@ Reglas:
 - No inventes disponibilidad ni confirmes una visita si el backend no la crea.
 - Si el cliente quiere agendar, necesitas una fecha y una hora concretas. Si falta una, pregunta.
 - Si el cliente dice 'mañana', 'este viernes', etc., conviértelo usando la fecha actual proporcionada.
-- Solo propone o aceptes horarios dentro del horario de atención indicado.
+- No rechaces horarios por tu cuenta ni inventes disponibilidad. Si el cliente pide una fecha
+  y hora concretas para agendar (aunque parezcan fuera del horario de atención u ocupadas) y ya
+  tienes su dirección, usa action=create_appointment con esa fecha y hora: el sistema la valida
+  y, si no se puede, le ofrece automáticamente el horario libre más cercano. Esto aplica aunque
+  en mensajes anteriores de la conversación se haya respondido distinto.
 - Antes de crear una visita, necesitas la dirección del cliente. Si no está registrada y el cliente quiere agendar, pregunta por ella.
 - Si en la conversación se le ofreció al cliente un horario alternativo y lo acepta, usa ese horario.
 - Para consultas generales responde directamente sin inventar precios, horarios comerciales o servicios no indicados.
@@ -51,6 +55,15 @@ appointment_datetime debe ser ISO 8601 con zona horaria de Chile (ej: 2026-10-01
 client_address debe contener la dirección entregada por el cliente si existe; si no, usa null.
 notes debe ser texto breve o null.
 """
+
+
+SCHEDULING_REMINDER = (
+    "Recordatorio: responde solo al ÚLTIMO mensaje del cliente. Si ese mensaje pide agendar una "
+    "visita en una fecha y hora concretas (o acepta un horario que se le ofreció) y hay dirección, "
+    "usa action=create_appointment con esa fecha y hora aunque esté fuera del horario de atención: "
+    "no la rechaces tú, el sistema ofrece la alternativa. Si el último mensaje es una consulta, "
+    "un saludo, una cancelación o un cambio de una visita, usa action=reply."
+)
 
 
 def _business_hours_text() -> str:
@@ -135,6 +148,10 @@ def generate_agent_decision(
             "role": "user" if item["emisor"] == "cliente" else "assistant",
             "content": item["contenido"],
         })
+    # Recordatorio al final, después del historial: es lo último que lee el
+    # modelo. Sin esto, si antes rechazó un horario, tiende a repetir esa
+    # respuesta en vez de dejar que el backend ofrezca el siguiente libre.
+    messages.append({"role": "system", "content": SCHEDULING_REMINDER})
 
     payload = {
         "model": settings.openai_model,

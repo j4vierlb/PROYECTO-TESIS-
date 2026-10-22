@@ -204,6 +204,18 @@ def remove_device(db: Connection, device_id: UUID) -> None:
     db.commit()
 
 
+def save_client_location(db: Connection, cliente_id: UUID, lat: float, lng: float) -> None:
+    """Guarda las coordenadas del cliente si todavía no tiene."""
+    db.execute(
+        text("""
+            UPDATE clientes SET ubicacion = ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography
+            WHERE id = :id AND ubicacion IS NULL
+        """),
+        {"id": str(cliente_id), "lat": lat, "lng": lng},
+    )
+    db.commit()
+
+
 def fetch_device_context(db: Connection, device_id: UUID) -> dict[str, Any]:
     """Una trampa junto con los datos de la visita a la que pertenece su
     croquis (operador, estado y empresa). Sirve para decidir quién puede ver
@@ -338,6 +350,52 @@ def set_device_photo(db: Connection, device_id: UUID, foto_path: str) -> None:
     db.commit()
 
 
+def add_suggested_devices(
+    db: Connection,
+    croquis_id: UUID,
+    imagen_satelital_url: str | None,
+    devices: list[dict[str, Any]],
+) -> None:
+    """Agrega al croquis las trampas que propuso la IA (o el plan B), sin
+    confirmar: el técnico las revisa en terreno. Marca el croquis como
+    sugerido por IA y guarda la URL de la foto satelital (sin la clave)."""
+    # Mismo bloqueo y numeración que add_device, para no repetir códigos.
+    db.execute(text("SELECT id FROM croquis WHERE id = :id FOR UPDATE"), {"id": str(croquis_id)})
+    last = db.execute(
+        text(
+            """
+            SELECT COALESCE(MAX(substring(codigo FROM '^T-([0-9]+)$')::int), 0)
+            FROM dispositivos_trampa WHERE croquis_id = :croquis_id
+            """
+        ),
+        {"croquis_id": str(croquis_id)},
+    ).scalar_one()
+    for n, device in enumerate(devices, start=last + 1):
+        db.execute(
+            text(
+                """
+                INSERT INTO dispositivos_trampa (croquis_id, codigo, tipo, ubicacion, sugerido_por_ia, confirmado, estado)
+                VALUES (:croquis_id, :codigo, :tipo, ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography,
+                        TRUE, FALSE, 'activo')
+                """
+            ),
+            {"croquis_id": str(croquis_id), "codigo": f"T-{n:02d}", "tipo": device["tipo"],
+             "lat": device["lat"], "lng": device["lng"]},
+        )
+    db.execute(
+        text(
+            """
+            UPDATE croquis
+            SET sugerido_por_ia = TRUE,
+                imagen_satelital_url = COALESCE(:imagen, imagen_satelital_url)
+            WHERE id = :id
+            """
+        ),
+        {"id": str(croquis_id), "imagen": imagen_satelital_url},
+    )
+    db.commit()
+
+
 # ---------------------------------------------------------------------------
 # Consultas relacionadas a autenticación
 # ---------------------------------------------------------------------------
@@ -450,10 +508,11 @@ def fetch_or_create_whatsapp_client(
 
 
 def update_whatsapp_client_address(db: Connection, cliente_id: UUID, address: str) -> None:
-    """Guarda la dirección que el cliente entregó por WhatsApp. La ubicación
-    (lat/lng) queda vacía hasta que alguien la geolocalice."""
+    """Guarda la dirección que el cliente entregó por WhatsApp y borra la
+    ubicación anterior, que ya no corresponde. La nueva la calcula
+    geocoding.geocodificar_cliente en segundo plano."""
     db.execute(
-        text("UPDATE clientes SET direccion = :direccion WHERE id = :cliente_id"),
+        text("UPDATE clientes SET direccion = :direccion, ubicacion = NULL WHERE id = :cliente_id"),
         {"direccion": address, "cliente_id": str(cliente_id)},
     )
     db.commit()

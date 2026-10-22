@@ -24,7 +24,7 @@ from datetime import datetime, timedelta, timezone
 from uuid import UUID
 from zoneinfo import ZoneInfo
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response, status
 from sqlalchemy.engine import Connection
 from twilio.request_validator import RequestValidator
 from twilio.twiml.messaging_response import MessagingResponse
@@ -32,6 +32,7 @@ from twilio.twiml.messaging_response import MessagingResponse
 from app.ai.agent import MAX_WHATSAPP_CHARS, generate_agent_decision
 from app.config import settings
 from app.database import get_db
+from app.geocoding import geocodificar_cliente
 from app.repositories import (
     HorarioNoDisponible,
     create_whatsapp_visit,
@@ -113,7 +114,13 @@ def _format_local(fecha_hora: datetime) -> str:
     return fecha_hora.astimezone(SANTIAGO).strftime("%d/%m/%Y a las %H:%M")
 
 
-def _schedule_visit(db: Connection, client: dict, decision: dict, message_sid: str) -> str:
+def _schedule_visit(
+    db: Connection,
+    client: dict,
+    decision: dict,
+    message_sid: str,
+    background_tasks: BackgroundTasks,
+) -> str:
     """Intenta agendar la visita que pidió la IA y devuelve el texto que se
     le responde al cliente (confirmación, pedido de datos o alternativa)."""
     new_address = decision["client_address"]
@@ -122,6 +129,8 @@ def _schedule_visit(db: Connection, client: dict, decision: dict, message_sid: s
         return "Claro 😊 Antes de agendar, necesito la dirección donde se realizará la visita."
     if new_address and new_address != (client.get("direccion") or "").strip():
         update_whatsapp_client_address(db, client["id"], new_address)
+        # Las coordenadas se buscan después de responder, para no demorar a Twilio.
+        background_tasks.add_task(geocodificar_cliente, client["id"], new_address)
 
     if not decision["appointment_datetime"]:
         return "Claro 😊 Para agendar necesito que me indiques una fecha y una hora concreta."
@@ -166,6 +175,7 @@ def _schedule_visit(db: Connection, client: dict, decision: dict, message_sid: s
 @router.post("/whatsapp")
 def whatsapp_webhook(
     request: Request,
+    background_tasks: BackgroundTasks,
     form: dict[str, str] = Depends(read_twilio_form),
     db: Connection = Depends(get_db),
 ) -> Response:
@@ -213,7 +223,7 @@ def whatsapp_webhook(
         reply = decision["reply"]
         if decision["action"] == "create_appointment":
             try:
-                reply = _schedule_visit(db, client, decision, message_sid)
+                reply = _schedule_visit(db, client, decision, message_sid, background_tasks)
             except Exception:
                 db.rollback()
                 logger.exception("Error creando la visita (MessageSid=%s)", message_sid)
