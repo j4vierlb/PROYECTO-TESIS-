@@ -1,4 +1,4 @@
-# Diseño de la IA del croquis (borrador v0.2)
+# Diseño de la IA del croquis (v0.3)
 
 Objetivo: que la IA **proponga** dónde poner las trampas de un cliente y el operador, en terreno, las **confirme, mueva o retire** desde la app. La IA nunca deja un croquis como definitivo.
 
@@ -42,7 +42,7 @@ Los clientes que llegan por WhatsApp solo tienen `direccion` (texto); `clientes.
 1. `status == "OK"` y un solo resultado (o el primero si todos están a < 100 m).
 2. `geometry.location_type` = `ROOFTOP` o `RANGE_INTERPOLATED`. Si es `GEOMETRIC_CENTER` o `APPROXIMATE` (solo encontró la calle o la comuna), **no se guarda**: una foto centrada en el lugar equivocado produce un croquis inútil.
 3. Si `partial_match = true`, tampoco se guarda (Google adivinó parte de la dirección).
-4. El punto debe caer dentro del rectángulo de la Región Metropolitana (lat −34,3 a −32,9; lng −71,8 a −69,8).
+4. El punto debe caer dentro del rectángulo de la Región Metropolitana (lat −34,3 a −32,9; lng −71,8 a −69,8) **y** Google debe informar la Región Metropolitana como `administrative_area_level_1`. El rectángulo solo no basta: Valparaíso y Viña del Mar también caen dentro.
 
 **Cuándo se geocodifica:**
 
@@ -119,9 +119,46 @@ Respuesta: el mismo `CroquisResponse` de `GET /croquis/{visita_id}`, así la app
 4. ¿La sugerencia se genera al agendar (antes de la visita) o al abrir el croquis en terreno? Generarla antes permite que el operador la vea camino al cliente.
 5. Sin señal en terreno: la app ya tiene base local; ¿se descarga la sugerencia junto con la agenda del día?
 
-## 8. Siguientes pasos
+## 8. Estado de la implementación (21/10/2026)
+
+Implementado, con pruebas automáticas (APIs simuladas) y **probado de punta a punta con OpenAI y una foto satelital real**:
+
+- `app/geocoding.py`: geocodificación (1.1), conectada al webhook de WhatsApp en segundo plano. Si al pedir la sugerencia el cliente sigue sin coordenadas, se reintenta una vez.
+- `app/ai/croquis_agent.py`: descarga la foto satelital, llama a OpenAI con la imagen en base64, convierte píxel → lat/lng (Web Mercator), aplica las validaciones de la sección 3 y, si algo falla, usa el plan B por reglas.
+- `POST /croquis/{visita_id}/sugerencia` en `routers/croquis.py`, solo para operadores. Usa el mismo `create_croquis_for_visit` que el croquis en terreno: si la visita no tiene croquis lo crea (copiando las trampas activas de la visita anterior); si ya tiene, **agrega** las trampas sugeridas sin borrar nada. Las trampas que ya están se le informan a la IA para que no las repita. Responde 200 con el croquis más `origen` (`ia` o `reglas`), `resumen` y `advertencias`; 409 si la visita está cerrada o el cliente no tiene ubicación.
+- **App móvil**: botón ✨ "Sugerir con IA" en la pantalla del croquis. Pide tipo de recinto, plaga, superficie y notas, y muestra el resumen y las advertencias. Las trampas nuevas aparecen como "Sugerida por IA · sin confirmar" y se confirman, mueven o retiran con los botones que ya existían. *Pendiente: compilar y probar en un teléfono (en el PC de desarrollo no hay Flutter instalado).*
+
+### Foto satelital: Google o Esri
+
+| Proveedor | Cuándo | Zoom | Cubre | Clave |
+|---|---|---|---|---|
+| Google Static Maps | Si hay `GOOGLE_MAPS_API_KEY` | 20 (~0,12 m/px) | ~80 × 80 m | Sí (Google exige tarjeta para activar la API) |
+| Esri World Imagery | Si no hay clave de Google | 19 (~0,25 m/px) | ~160 × 160 m | No |
+
+Esri usa la misma proyección que Google, así que la conversión de píxeles es la misma. A zoom 20 Esri responde error 500 en Santiago, por eso se usa 19. Es una solución **para desarrollo y pruebas**: en producción corresponde Google o una cuenta de ArcGIS, y las imágenes de Esri deben citar la fuente (*Esri, Maxar, Earthstar Geographics*).
+
+### Prueba real (21/10/2026)
+
+Visita del seed *Restaurante Don José* (Av. Macul 1234), restaurante, roedores, 300 m², notas "Cocina al fondo, contenedores de basura en el patio trasero", con 3 trampas previas.
+
+- Respuesta en ~8 s, `origen: ia`, 5 cebaderos nuevos (T-04 a T-08), todos sin confirmar.
+- Tokens: 1.123 de entrada y 459 de salida ≈ **0,0012 USD**, dentro de lo estimado en la sección 6.
+- Evidencia: [`evidencias/croquis_ia/`](evidencias/croquis_ia/) (imagen con las trampas dibujadas y JSON de la respuesta). Cian = trampas previas, amarillo = sugeridas, cruz = coordenada del cliente.
+
+**Lo que se aprendió:** en la primera prueba la IA puso 2 cebaderos en medio de una cancha de fútbol. Se ajustó el prompt: se le indica el píxel del predio (el centro) y su radio aproximado según la superficie, y se le pide usar bordes y rincones, sin canchas, calles, estacionamientos abiertos, piscinas ni techos vecinos. Con eso las trampas quedaron agrupadas alrededor del predio. Las coordenadas del seed son de ejemplo y no caen sobre un restaurante real, así que la calidad se debe evaluar con clientes reales (sección 9).
+
+### Decisiones tomadas al implementar
+
+- **Superficie por defecto**: si no se indica, se suponen 200 m² (casa típica) para el máximo de dispositivos, el radio del predio y el plan B.
+- **La URL guardada en `imagen_satelital_url` no lleva la clave** de Google. Con Esri la URL es pública.
+- **La clave de Google no se escribe en los logs**: se silenció el log de httpx y los errores se registran sin la URL.
+- **`zona`, `motivo` y `confianza` no se guardan**: la tabla `dispositivos_trampa` no tiene esas columnas. La confianza solo se usa para quedarse con las mejores si la IA propone de más.
+- Pedir la sugerencia dos veces no duplica: la segunda vez la IA ve las trampas ya agregadas y el máximo por superficie se descuenta.
+
+## 9. Siguientes pasos
 
 1. Responder las preguntas abiertas.
-2. Implementar `app/geocoding.py` (1.1) y conectarlo al agente de WhatsApp y al panel: es requisito para todo lo demás.
-3. Probar el prompt a mano con 3–5 imágenes reales de clientes de Macul y comparar con croquis hechos por un técnico.
-4. Implementar `app/ai/croquis_agent.py` + el endpoint, con el plan B por reglas desde el inicio.
+2. Compilar la app y probar el botón ✨ en un teléfono.
+3. Probar con 3–5 direcciones reales de clientes de Macul (con `GOOGLE_MAPS_API_KEY` y `OPENAI_API_KEY`) y comparar con croquis hechos por un técnico; anotar los tokens que registra el log.
+4. Botón en el panel web.
+5. Endpoint para marcar `validado_por_operador = true`.

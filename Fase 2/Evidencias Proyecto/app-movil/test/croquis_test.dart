@@ -64,4 +64,43 @@ void main() {
     expect(actualizado.version, 2);
     expect(croquis.dispositivos, hasLength(1)); // el original no cambia
   });
+
+  test('Sugerencia de la IA trae el croquis, el resumen y las advertencias', () {
+    final sugerencia = SugerenciaCroquis.fromJson({
+      'id': 'k1',
+      'visita_id': 'v1',
+      'cliente_id': 'c1',
+      'version': 1,
+      'imagen_satelital_url': 'https://server.arcgisonline.com/x',
+      'sugerido_por_ia': true,
+      'validado_por_operador': false,
+      'dispositivos': [
+        {..._trampaJson(), 'sugerido_por_ia': true, 'confirmado': false},
+      ],
+      'origen': 'ia',
+      'resumen': 'Cebaderos en el perímetro.',
+      'advertencias': ['No se ve la bodega.'],
+    });
+    expect(sugerencia.origen, 'ia');
+    expect(sugerencia.resumen, 'Cebaderos en el perímetro.');
+    expect(sugerencia.advertencias, ['No se ve la bodega.']);
+    expect(sugerencia.croquis.dispositivos.single.confirmado, isFalse);
+  });
+
+  test('Sugerencia por reglas sin resumen ni advertencias', () {
+    final sugerencia = SugerenciaCroquis.fromJson({
+      'id': 'k1',
+      'visita_id': 'v1',
+      'cliente_id': 'c1',
+      'version': 1,
+      'imagen_satelital_url': null,
+      'sugerido_por_ia': true,
+      'validado_por_operador': false,
+      'dispositivos': <dynamic>[],
+      'origen': 'reglas',
+      'resumen': null,
+    });
+    expect(sugerencia.resumen, isNull);
+    expect(sugerencia.advertencias, isEmpty);
+  });
 }

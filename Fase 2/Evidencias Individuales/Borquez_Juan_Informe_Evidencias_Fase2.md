@@ -152,30 +152,35 @@ componentes del proyecto ni representa once commits separados.
 
 | Documento | Contenido preparado o actualizado y límite |
 | --- | --- |
-| [01 Inicio](../Documentos/01_Documento_Inicio_Fase2.docx) | Alcance, estado técnico, restricciones y pendientes |
-| [02 Sprint Backlog](../Documentos/02_Sprint_Backlog_y_Tablero.docx) | Trabajo del panel/visor y relación con evidencias, sin reemplazar el Product Backlog del equipo |
-| [03 Definition of Done](../Documentos/03_Definition_of_Done.docx) | Criterios de terminación y comprobación de acceso por empresa |
-| [04 Fichas de Sprint](../Documentos/04_Fichas_de_Sprint.docx) | Planificación y referencias de avance; no acredita ceremonias no realizadas |
-| [05 Retrospectivas](../Documentos/05_Retrospectivas.docx) | Observaciones técnicas y aprendizaje, sin inventar actas de reuniones |
-| [06 Diseño](../Documentos/06_Documento_de_Diseno.docx) | Visor, fotos privadas, configuración de Maps y permisos |
-| [07 Pruebas](../Documentos/07_Plan_de_Pruebas_y_Evidencias.docx) | Casos, resultados reales por corte y límites de su evidencia |
-| [08 Manual técnico](../Documentos/08_Manual_Tecnico.docx) | Ejecución local, configuración, migración y precauciones con la base |
-| [09 Trazabilidad](../Documentos/09_Matriz_de_Trazabilidad.docx) | Relación de requisitos, componentes y verificaciones del visor |
-| [10 Innovación y cierre](../Documentos/10_Informe_de_Innovacion_y_Cierre.docx) | Resultados y condiciones técnicas/formales aún abiertas |
-| [11 Acta para firma](../Documentos/11_Acta_Validacion_Cliente_para_Firma.docx) | Instrumento preparado, sin resultados de aceptación ni firmas inventadas |
+| [01 Inicio](../Evidencias%20Proyecto/Evidencias%20de%20documentacion/01_Documento_Inicio_Fase2.docx) | Alcance, estado técnico, restricciones y pendientes |
+| [02 Sprint Backlog](../Evidencias%20Proyecto/Evidencias%20de%20documentacion/02_Sprint_Backlog_y_Tablero.docx) | Trabajo del panel/visor y relación con evidencias, sin reemplazar el Product Backlog del equipo |
+| [03 Definition of Done](../Evidencias%20Proyecto/Evidencias%20de%20documentacion/03_Definition_of_Done.docx) | Criterios de terminación y comprobación de acceso por empresa |
+| [04 Fichas de Sprint](../Evidencias%20Proyecto/Evidencias%20de%20documentacion/04_Fichas_de_Sprint.docx) | Planificación y referencias de avance; no acredita ceremonias no realizadas |
+| [05 Retrospectivas](../Evidencias%20Proyecto/Evidencias%20de%20documentacion/05_Retrospectivas.docx) | Observaciones técnicas y aprendizaje, sin inventar actas de reuniones |
+| [06 Diseño](../Evidencias%20Proyecto/Evidencias%20de%20documentacion/06_Documento_de_Diseno.docx) | Visor, fotos privadas, configuración de Maps y permisos |
+| [07 Pruebas](../Evidencias%20Proyecto/Evidencias%20de%20documentacion/07_Plan_de_Pruebas_y_Evidencias.docx) | Casos, resultados reales por corte y límites de su evidencia |
+| [08 Manual técnico](../Evidencias%20Proyecto/Evidencias%20de%20documentacion/08_Manual_Tecnico.docx) | Ejecución local, configuración, migración y precauciones con la base |
+| [09 Trazabilidad](../Evidencias%20Proyecto/Evidencias%20de%20documentacion/09_Matriz_de_Trazabilidad.docx) | Relación de requisitos, componentes y verificaciones del visor |
+| [10 Innovación y cierre](../Evidencias%20Proyecto/Evidencias%20de%20documentacion/10_Informe_de_Innovacion_y_Cierre.docx) | Resultados y condiciones técnicas/formales aún abiertas |
+| [11 Acta para firma](../Evidencias%20Proyecto/Evidencias%20de%20documentacion/11_Acta_Validacion_Cliente_para_Firma.docx) | Instrumento preparado, sin resultados de aceptación ni firmas inventadas |
 
-El [registro de actualización del 20/10](../Documentos/Registro_actualizacion_2026-10-20.md)
+El [registro de actualización del 20/10](../Evidencias%20Proyecto/Evidencias%20de%20documentacion/Registro_actualizacion_2026-10-20.md)
 detalla los cambios y la verificación de contenido y estructura. La revisión
 visual de paginación y tablas de esos Word sigue pendiente: no había un
 renderizador disponible. Esta publicación no modifica esos once archivos ni
 los considera visualmente aprobados.
 
-La [solicitud de validación](../Documentos/Solicitud_validacion_Rodrigo_Quiroga.md)
+La [solicitud de validación](../Evidencias%20Proyecto/Evidencias%20de%20documentacion/Solicitud_validacion_Rodrigo_Quiroga.md)
 y el acta son preparación para una sesión con Rodrigo Quiroga, no constancia
 de que ocurrió. La [autoevaluación 2.2](https://github.com/j4vierlb/PROYECTO-TESIS-/blob/4338c22/Fase%202/Evidencias%20Individuales/Borquez_Juan_2.2_APT122_AutoevaluacionAvance_Fase2.docx)
-actualizada está publicada en `main` mediante `4338c22`; no se vuelve a subir
-una copia idéntica en esta entrega. Su ausencia en un checkout anterior de
-`juan` no significa que falte en GitHub.
+actualizada está publicada en `main` mediante `4338c22` y se incorporó a `juan`
+al integrar `origin/main` el 22/10. La copia local anterior era idéntica; no se
+generó una segunda versión ni se atribuyó como una nueva actualización.
+
+La integración del 22/10 también incorpora la reorganización del PR #19:
+los once Word y sus registros pasan de `Fase 2/Documentos` a
+`Fase 2/Evidencias Proyecto/Evidencias de documentacion`. Se ajustaron los
+enlaces de este índice sin modificar los documentos ni sus resultados.
 
 ## 7. Atrasos, seguimiento y condiciones de cierre
 
@@ -211,5 +216,5 @@ no se duplican sus resultados ni se cambian sus fechas. No se incluyen archivos
 
 Antes de publicar se comprueban enlaces locales, hashes de las capturas,
 separación debug/release y archivos seleccionados por commit. El enlace a la
-autoevaluación apunta a su commit publicado en `main`, porque esa copia todavía
-no forma parte del historial base de esta entrega en `juan`.
+autoevaluación apunta a su commit original publicado en `main`, preservando
+la trazabilidad de esa actualización tras integrarla en `juan`.

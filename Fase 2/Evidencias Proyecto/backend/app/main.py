@@ -22,6 +22,9 @@ from app.routers import auth, croquis, dispositivos, panel, visitas, whatsapp
 # .exception). Sin esto, uvicorn solo imprime sus propios logs y los errores
 # del agente de WhatsApp no se verían.
 logging.basicConfig(level=logging.INFO, format="%(levelname)s:     %(name)s - %(message)s")
+# httpx registra cada URL pedida, y las de Google Maps llevan la clave en
+# "?key=...": se silencia para que la clave no quede escrita en los logs.
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 # Crea la aplicación. El título, la versión y la descripción aparecen en la
 # documentación automática que FastAPI genera en /docs (Swagger).

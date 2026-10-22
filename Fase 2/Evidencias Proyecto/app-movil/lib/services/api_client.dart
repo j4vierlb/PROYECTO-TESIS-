@@ -196,6 +196,31 @@ class ApiClient {
     return DispositivoTrampa.fromJson(jsonDecode(body) as Map<String, dynamic>);
   }
 
+  /// POST /croquis/{visita_id}/sugerencia — la IA mira la foto satelital del
+  /// predio y propone trampas nuevas (quedan sin confirmar). Crea el croquis
+  /// si la visita todavía no tiene.
+  Future<SugerenciaCroquis> sugerirTrampas(
+    String visitaId, {
+    required String tipoRecinto,
+    required String plaga,
+    double? superficieM2,
+    String? notas,
+  }) async {
+    final body = await _authenticatedRequest(
+      'POST',
+      '/croquis/$visitaId/sugerencia',
+      body: {
+        'tipo_recinto': tipoRecinto,
+        'plaga': plaga,
+        'superficie_m2': ?superficieM2,
+        'notas': ?notas,
+      },
+      // Descargar la foto y esperar a la IA tarda más que una petición normal.
+      timeout: const Duration(seconds: 90),
+    );
+    return SugerenciaCroquis.fromJson(jsonDecode(body) as Map<String, dynamic>);
+  }
+
   /// POST /dispositivos-trampa/{id}/foto — sube la foto de referencia de la
   /// trampa (archivo JPEG tomado con la cámara). Devuelve la trampa con su
   /// nueva `fotoUrl`.
@@ -241,6 +266,7 @@ class ApiClient {
     String method,
     String path, {
     Map<String, dynamic>? body,
+    Duration timeout = const Duration(seconds: 15),
     bool reintento = false,
   }) async {
     final token = await AuthStorage.instance.getAccessToken();
@@ -257,16 +283,16 @@ class ApiClient {
       request.body = jsonEncode(body);
     }
 
-    // Si el servidor no responde en 15 segundos, se corta con un error en vez
-    // de dejar al operador esperando indefinidamente.
-    final streamed = await request.send().timeout(const Duration(seconds: 15));
+    // Si el servidor no responde a tiempo (15 s por defecto), se corta con un
+    // error en vez de dejar al operador esperando indefinidamente.
+    final streamed = await request.send().timeout(timeout);
     final response = await http.Response.fromStream(streamed);
 
     // 401 = el access_token venció (dura 8 horas): se renueva con el
     // refresh_token y se repite la misma petición una sola vez.
     if (response.statusCode == 401 && !reintento) {
       await _renovarOCerrarSesion();
-      return _authenticatedRequest(method, path, body: body, reintento: true);
+      return _authenticatedRequest(method, path, body: body, timeout: timeout, reintento: true);
     }
 
     // Cualquier 2xx es éxito (200 OK, 201 creado).
