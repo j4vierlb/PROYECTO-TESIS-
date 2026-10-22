@@ -12,6 +12,15 @@ Kill Bichos IA es una plataforma web y móvil para apoyar el contacto con client
 - `Evidencias Proyecto/database`: PostgreSQL/PostGIS, esquema, datos de prueba y migraciones. Docker Compose está en la raíz del repositorio.
 - `Documentos`: entregables de gestión, diseño, pruebas, manual y cierre.
 
+## Aportes individuales y evidencias
+
+- [Informe de Juan Bórquez: panel, pruebas, documentación y Android](Evidencias%20Individuales/Borquez_Juan_Informe_Evidencias_Fase2.md).
+- [Evidencias Android del 21/10/2026](Evidencias%20Proyecto/pruebas/android_2026-10-21/README.md): siete capturas originales, hashes y alcance de la comprobación.
+
+Estos índices complementan los formatos Word. Distinguen las ejecuciones
+históricas de los pendientes y no constituyen aceptación del cliente ni una
+certificación de todos los componentes del sistema.
+
 ## Inicio rápido
 
 ### Entorno completo con Docker
