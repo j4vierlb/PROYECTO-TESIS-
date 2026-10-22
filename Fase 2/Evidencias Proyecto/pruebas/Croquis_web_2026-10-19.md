@@ -152,7 +152,7 @@ completa si el ejecutor informa omisiones.
 El backlog 02, diseño 06, pruebas 07 y trazabilidad 09 reflejan los resultados
 actuales de Maps y PR #14. La actualización de los 11 Word y sus límites se
 registró en
-[Registro_actualizacion_2026-10-20.md](../../Documentos/Registro_actualizacion_2026-10-20.md).
+[Registro_actualizacion_2026-10-20.md](../Evidencias%20de%20documentacion/Registro_actualizacion_2026-10-20.md).
 Su contenido y estructura se comprobaron; la revisión visual de páginas
 sigue pendiente porque el renderizador empaquetado no dispone de LibreOffice.
 
