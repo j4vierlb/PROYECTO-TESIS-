@@ -13,6 +13,10 @@ export function chileTime(value) {
   }).format(new Date(value))
 }
 
+export function chileDateTimeInput(value) {
+  return `${chileDate(new Date(value))}T${chileTime(value)}`
+}
+
 export function clientLocation(client) {
   return Number.isFinite(client.lat) && Number.isFinite(client.lng)
     ? `${client.lat.toFixed(4)}, ${client.lng.toFixed(4)}`
@@ -53,5 +57,8 @@ export function clientPayload(form) {
   const missingLat = form.lat === '' || form.lat == null
   const missingLng = form.lng === '' || form.lng == null
   if (missingLat !== missingLng) throw new Error('Completa ambas coordenadas o deja ambas vacías')
+  if (!missingLat && (!Number.isFinite(Number(form.lat)) || !Number.isFinite(Number(form.lng)))) {
+    throw new Error('Ingresa coordenadas numéricas válidas')
+  }
   return { ...form, direccion: form.direccion.trim() || null, lat: missingLat ? null : Number(form.lat), lng: missingLng ? null : Number(form.lng) }
 }

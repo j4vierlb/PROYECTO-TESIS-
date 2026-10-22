@@ -1,0 +1,813 @@
+{
+  "date": "2026-10-20T00:41:17.017531-03:00",
+  "base": "7f635f9",
+  "suite": "backend completo con PR14",
+  "tests": 107,
+  "passed": 107,
+  "failed": 0,
+  "errors": 0,
+  "skipped": 0,
+  "cases": [
+    {
+      "id": "test_acceso_empresa.AccesoEntreEmpresasTest.test_admin_de_otra_empresa_no_puede_modificar_la_visita",
+      "result": "passed"
+    },
+    {
+      "id": "test_acceso_empresa.AccesoEntreEmpresasTest.test_admin_y_coordinador_no_ven_visitas_ni_croquis_de_otra_empresa",
+      "result": "passed"
+    },
+    {
+      "id": "test_acceso_empresa.AccesoEntreEmpresasTest.test_admin_y_coordinador_si_ven_las_de_su_empresa",
+      "result": "passed"
+    },
+    {
+      "id": "test_acceso_empresa.AccesoEntreEmpresasTest.test_operador_de_otra_empresa_no_crea_croquis_ni_agrega_trampas",
+      "result": "passed"
+    },
+    {
+      "id": "test_acceso_empresa.AccesoEntreEmpresasTest.test_operador_sigue_limitado_a_sus_propias_visitas",
+      "result": "passed"
+    },
+    {
+      "id": "test_acceso_empresa.AccesoEntreEmpresasTest.test_visita_inexistente_sigue_respondiendo_404",
+      "result": "passed"
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_A_to_A_croquis",
+      "result": "passed",
+      "role": "admin",
+      "source_company": "A",
+      "target_company": "A",
+      "resource": "croquis",
+      "method": "GET",
+      "path": "/croquis/50000000-0000-0000-0000-000000000001",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_A_to_A_photo",
+      "result": "passed",
+      "role": "admin",
+      "source_company": "A",
+      "target_company": "A",
+      "resource": "photo",
+      "method": "GET",
+      "path": "/dispositivos-trampa/70000000-0000-0000-0000-000000000001/foto",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_A_to_A_visit",
+      "result": "passed",
+      "role": "admin",
+      "source_company": "A",
+      "target_company": "A",
+      "resource": "visit",
+      "method": "GET",
+      "path": "/visitas/50000000-0000-0000-0000-000000000001",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_A_to_B_croquis",
+      "result": "passed",
+      "role": "admin",
+      "source_company": "A",
+      "target_company": "B",
+      "resource": "croquis",
+      "method": "GET",
+      "path": "/croquis/50000000-0000-0000-0000-000000000005",
+      "expected_status": [
+        403,
+        404
+      ],
+      "actual_status": 403,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_A_to_B_photo",
+      "result": "passed",
+      "role": "admin",
+      "source_company": "A",
+      "target_company": "B",
+      "resource": "photo",
+      "method": "GET",
+      "path": "/dispositivos-trampa/70000000-0000-0000-0000-000000000005/foto",
+      "expected_status": [
+        403,
+        404
+      ],
+      "actual_status": 403,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_A_to_B_visit",
+      "result": "passed",
+      "role": "admin",
+      "source_company": "A",
+      "target_company": "B",
+      "resource": "visit",
+      "method": "GET",
+      "path": "/visitas/50000000-0000-0000-0000-000000000005",
+      "expected_status": [
+        403,
+        404
+      ],
+      "actual_status": 403,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_B_to_A_croquis",
+      "result": "passed",
+      "role": "admin",
+      "source_company": "B",
+      "target_company": "A",
+      "resource": "croquis",
+      "method": "GET",
+      "path": "/croquis/50000000-0000-0000-0000-000000000001",
+      "expected_status": [
+        403,
+        404
+      ],
+      "actual_status": 403,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_B_to_A_photo",
+      "result": "passed",
+      "role": "admin",
+      "source_company": "B",
+      "target_company": "A",
+      "resource": "photo",
+      "method": "GET",
+      "path": "/dispositivos-trampa/70000000-0000-0000-0000-000000000001/foto",
+      "expected_status": [
+        403,
+        404
+      ],
+      "actual_status": 403,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_B_to_A_visit",
+      "result": "passed",
+      "role": "admin",
+      "source_company": "B",
+      "target_company": "A",
+      "resource": "visit",
+      "method": "GET",
+      "path": "/visitas/50000000-0000-0000-0000-000000000001",
+      "expected_status": [
+        403,
+        404
+      ],
+      "actual_status": 403,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_B_to_B_croquis",
+      "result": "passed",
+      "role": "admin",
+      "source_company": "B",
+      "target_company": "B",
+      "resource": "croquis",
+      "method": "GET",
+      "path": "/croquis/50000000-0000-0000-0000-000000000005",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_B_to_B_photo",
+      "result": "passed",
+      "role": "admin",
+      "source_company": "B",
+      "target_company": "B",
+      "resource": "photo",
+      "method": "GET",
+      "path": "/dispositivos-trampa/70000000-0000-0000-0000-000000000005/foto",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_B_to_B_visit",
+      "result": "passed",
+      "role": "admin",
+      "source_company": "B",
+      "target_company": "B",
+      "resource": "visit",
+      "method": "GET",
+      "path": "/visitas/50000000-0000-0000-0000-000000000005",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_anonymous_to_A_croquis",
+      "result": "passed",
+      "role": "anonymous",
+      "source_company": null,
+      "target_company": "A",
+      "resource": "croquis",
+      "method": "GET",
+      "path": "/croquis/50000000-0000-0000-0000-000000000001",
+      "expected_status": [
+        401
+      ],
+      "actual_status": 401,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_anonymous_to_A_photo",
+      "result": "passed",
+      "role": "anonymous",
+      "source_company": null,
+      "target_company": "A",
+      "resource": "photo",
+      "method": "GET",
+      "path": "/dispositivos-trampa/70000000-0000-0000-0000-000000000001/foto",
+      "expected_status": [
+        401
+      ],
+      "actual_status": 401,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_anonymous_to_A_visit",
+      "result": "passed",
+      "role": "anonymous",
+      "source_company": null,
+      "target_company": "A",
+      "resource": "visit",
+      "method": "GET",
+      "path": "/visitas/50000000-0000-0000-0000-000000000001",
+      "expected_status": [
+        401
+      ],
+      "actual_status": 401,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_anonymous_to_B_croquis",
+      "result": "passed",
+      "role": "anonymous",
+      "source_company": null,
+      "target_company": "B",
+      "resource": "croquis",
+      "method": "GET",
+      "path": "/croquis/50000000-0000-0000-0000-000000000005",
+      "expected_status": [
+        401
+      ],
+      "actual_status": 401,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_anonymous_to_B_photo",
+      "result": "passed",
+      "role": "anonymous",
+      "source_company": null,
+      "target_company": "B",
+      "resource": "photo",
+      "method": "GET",
+      "path": "/dispositivos-trampa/70000000-0000-0000-0000-000000000005/foto",
+      "expected_status": [
+        401
+      ],
+      "actual_status": 401,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_anonymous_to_B_visit",
+      "result": "passed",
+      "role": "anonymous",
+      "source_company": null,
+      "target_company": "B",
+      "resource": "visit",
+      "method": "GET",
+      "path": "/visitas/50000000-0000-0000-0000-000000000005",
+      "expected_status": [
+        401
+      ],
+      "actual_status": 401,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_A_to_A_croquis",
+      "result": "passed",
+      "role": "coordinador",
+      "source_company": "A",
+      "target_company": "A",
+      "resource": "croquis",
+      "method": "GET",
+      "path": "/croquis/50000000-0000-0000-0000-000000000001",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_A_to_A_photo",
+      "result": "passed",
+      "role": "coordinador",
+      "source_company": "A",
+      "target_company": "A",
+      "resource": "photo",
+      "method": "GET",
+      "path": "/dispositivos-trampa/70000000-0000-0000-0000-000000000001/foto",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_A_to_A_visit",
+      "result": "passed",
+      "role": "coordinador",
+      "source_company": "A",
+      "target_company": "A",
+      "resource": "visit",
+      "method": "GET",
+      "path": "/visitas/50000000-0000-0000-0000-000000000001",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_A_to_B_croquis",
+      "result": "passed",
+      "role": "coordinador",
+      "source_company": "A",
+      "target_company": "B",
+      "resource": "croquis",
+      "method": "GET",
+      "path": "/croquis/50000000-0000-0000-0000-000000000005",
+      "expected_status": [
+        403,
+        404
+      ],
+      "actual_status": 403,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_A_to_B_photo",
+      "result": "passed",
+      "role": "coordinador",
+      "source_company": "A",
+      "target_company": "B",
+      "resource": "photo",
+      "method": "GET",
+      "path": "/dispositivos-trampa/70000000-0000-0000-0000-000000000005/foto",
+      "expected_status": [
+        403,
+        404
+      ],
+      "actual_status": 403,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_A_to_B_visit",
+      "result": "passed",
+      "role": "coordinador",
+      "source_company": "A",
+      "target_company": "B",
+      "resource": "visit",
+      "method": "GET",
+      "path": "/visitas/50000000-0000-0000-0000-000000000005",
+      "expected_status": [
+        403,
+        404
+      ],
+      "actual_status": 403,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_B_to_A_croquis",
+      "result": "passed",
+      "role": "coordinador",
+      "source_company": "B",
+      "target_company": "A",
+      "resource": "croquis",
+      "method": "GET",
+      "path": "/croquis/50000000-0000-0000-0000-000000000001",
+      "expected_status": [
+        403,
+        404
+      ],
+      "actual_status": 403,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_B_to_A_photo",
+      "result": "passed",
+      "role": "coordinador",
+      "source_company": "B",
+      "target_company": "A",
+      "resource": "photo",
+      "method": "GET",
+      "path": "/dispositivos-trampa/70000000-0000-0000-0000-000000000001/foto",
+      "expected_status": [
+        403,
+        404
+      ],
+      "actual_status": 403,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_B_to_A_visit",
+      "result": "passed",
+      "role": "coordinador",
+      "source_company": "B",
+      "target_company": "A",
+      "resource": "visit",
+      "method": "GET",
+      "path": "/visitas/50000000-0000-0000-0000-000000000001",
+      "expected_status": [
+        403,
+        404
+      ],
+      "actual_status": 403,
+      "returned_target_resource": false,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_B_to_B_croquis",
+      "result": "passed",
+      "role": "coordinador",
+      "source_company": "B",
+      "target_company": "B",
+      "resource": "croquis",
+      "method": "GET",
+      "path": "/croquis/50000000-0000-0000-0000-000000000005",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_B_to_B_photo",
+      "result": "passed",
+      "role": "coordinador",
+      "source_company": "B",
+      "target_company": "B",
+      "resource": "photo",
+      "method": "GET",
+      "path": "/dispositivos-trampa/70000000-0000-0000-0000-000000000005/foto",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_B_to_B_visit",
+      "result": "passed",
+      "role": "coordinador",
+      "source_company": "B",
+      "target_company": "B",
+      "resource": "visit",
+      "method": "GET",
+      "path": "/visitas/50000000-0000-0000-0000-000000000005",
+      "expected_status": [
+        200
+      ],
+      "actual_status": 200,
+      "returned_target_resource": true,
+      "foreign_data_returned": false
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_agregar_trampa_valida_tipo_coordenadas_y_croquis",
+      "result": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_agregar_trampas_asigna_codigos_correlativos_y_queda_confirmada",
+      "result": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_crear_croquis_copia_trampas_activas_de_la_visita_anterior_sin_confirmar",
+      "result": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_crear_croquis_dos_veces_no_lo_duplica",
+      "result": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_foto_en_visita_cerrada_o_por_otro_operador_se_rechaza",
+      "result": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_foto_no_es_publica_ni_visible_para_otros",
+      "result": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_foto_png_tambien_se_acepta",
+      "result": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_foto_rechaza_archivos_que_no_son_imagen_o_muy_grandes",
+      "result": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_no_se_agregan_trampas_en_visita_cerrada_ni_ajena",
+      "result": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_no_se_crea_croquis_en_visita_ajena_cerrada_o_por_un_admin",
+      "result": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_patch_rechaza_trampa_de_otro_operador_y_de_visita_cerrada",
+      "result": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_patch_sigue_funcionando_para_el_dueno_en_visita_abierta",
+      "result": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_primer_croquis_del_cliente_parte_vacio_en_version_1",
+      "result": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_subir_y_ver_foto",
+      "result": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_trampa_sin_foto_responde_404",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_agenda_con_cliente_sin_coordenadas_y_sin_operador_devuelve_200",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_cadena_vacia_reproduce_el_422_que_el_frontend_corrige",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_cliente_nuevo_admite_ubicacion_vacia",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_conflicto_de_operador_devuelve_409_sin_guardar",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_coordenadas_incompletas_y_nombre_vacio_son_rechazados",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_editar_cliente_sin_coordenadas_conserva_null",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_fecha_estado_nulos_y_campos_ajenos_son_rechazados",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_fuera_de_horario_incluso_sin_operador",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_no_amplia_el_contrato_movil",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_no_reprograma_visita_finalizada_pero_permite_notas",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_operador_inactivo_o_externo_es_rechazado",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_panel_clientes_con_ubicacion_null_devuelve_200",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_quitar_operador_no_cambia_fecha_ni_estado",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_reagendada_requiere_una_nueva_fecha",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_rechaza_fechas_sin_zona_en_creacion_y_edicion",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_reprogramar_actualiza_fecha_estado_y_operador",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_sin_asignar_null_devuelve_201_y_conserva_utc",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_usa_horario_configurado_y_no_horario_fijo",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_uuid_de_operador_devuelve_201",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_visita_de_otra_empresa_no_se_modifica",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_croquis_readonly.PanelCroquisReadTest.test_CRB01_admin_y_coordinador_consultan_croquis_completado_con_retiradas",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_croquis_readonly.PanelCroquisReadTest.test_CRB02_admin_y_coordinador_descargan_foto_de_su_empresa",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_croquis_readonly.PanelCroquisReadTest.test_CRB03_get_inexistente_no_crea_croquis",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_croquis_readonly.PanelCroquisReadTest.test_CRB04_foto_y_croquis_exigen_token",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_croquis_readonly.PanelCroquisReadTest.test_CRB05_fotos_rechazan_admin_y_coordinador_de_otra_empresa",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_2330_chile_se_guarda_en_utc_del_dia_siguiente_sin_cambiar_dia_agenda",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_asignar_y_desasignar_visita_existente",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_bloquea_choques_y_permite_separacion_exacta_de_una_hora",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_cancelar_con_croquis_conserva_visita_croquis_y_trampas",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_cancelar_libera_el_horario",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_cliente_con_coordenadas_cero_roundtrip_postgis",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_cliente_con_visitas_no_se_elimina",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_cliente_sin_visitas_se_puede_eliminar",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_cliente_whatsapp_sin_ubicacion_se_lista_y_edita_sin_inventar_coordenadas",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_crear_sin_coordenadas_y_telefono_duplicado_controlado",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_estadisticas_cuentan_hoy_segun_chile",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_hora_de_invierno_10_chile_persiste_14_utc",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_hora_de_verano_10_chile_persiste_13_utc",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_no_asigna_operador_de_otra_empresa",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_no_asigna_operador_inactivo",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_no_permite_domingo_cierre_ni_madrugada_sin_asignar",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_no_puede_modificar_visita_de_otra_empresa",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_no_se_puede_agendar_cliente_de_otra_empresa",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_operador_asignado_y_filtro",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_operador_vacio_es_rechazado_sin_guardar_visita",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_reprogramacion_conflictiva_no_altera_la_visita",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_reprogramacion_real_cambia_agenda_estado_y_operador",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_sin_asignar_se_guarda_null_y_reaparece_en_la_agenda",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_sin_token_no_se_puede_entrar_al_panel",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_tecnico_no_puede_editar_por_el_endpoint_del_panel",
+      "result": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_telefono_duplicado_al_editar_no_cambia_cliente",
+      "result": "passed"
+    },
+    {
+      "id": "test_zona_horaria.HoyEnChileTest.test_despues_de_las_21_sigue_siendo_hoy_en_chile",
+      "result": "passed"
+    },
+    {
+      "id": "test_zona_horaria.HoyEnChileTest.test_despues_de_medianoche_cambia_el_dia",
+      "result": "passed"
+    },
+    {
+      "id": "test_zona_horaria.HoyEnChileTest.test_durante_el_dia_coincide_con_utc",
+      "result": "passed"
+    },
+    {
+      "id": "test_zona_horaria.HoyEnChileTest.test_horario_de_invierno",
+      "result": "passed"
+    },
+    {
+      "id": "test_zona_horaria.HoyEnChileTest.test_ultimo_minuto_del_dia",
+      "result": "passed"
+    }
+  ],
+  "success": true
+}

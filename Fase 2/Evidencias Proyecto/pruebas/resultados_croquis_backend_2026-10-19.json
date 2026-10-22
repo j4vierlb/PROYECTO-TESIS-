@@ -1,0 +1,300 @@
+{
+  "date_utc": "2026-10-20T01:31:44.363606+00:00",
+  "suite": "unittest backend panel y croquis",
+  "database_names": [
+    "panel_regression",
+    "croquis_regression"
+  ],
+  "tests": 71,
+  "passed": 71,
+  "failed": 0,
+  "errors": 0,
+  "skipped": 0,
+  "success": true,
+  "cases": [
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_agregar_trampa_valida_tipo_coordenadas_y_croquis",
+      "status": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_agregar_trampas_asigna_codigos_correlativos_y_queda_confirmada",
+      "status": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_crear_croquis_copia_trampas_activas_de_la_visita_anterior_sin_confirmar",
+      "status": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_crear_croquis_dos_veces_no_lo_duplica",
+      "status": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_foto_en_visita_cerrada_o_por_otro_operador_se_rechaza",
+      "status": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_foto_no_es_publica_ni_visible_para_otros",
+      "status": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_foto_png_tambien_se_acepta",
+      "status": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_foto_rechaza_archivos_que_no_son_imagen_o_muy_grandes",
+      "status": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_no_se_agregan_trampas_en_visita_cerrada_ni_ajena",
+      "status": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_no_se_crea_croquis_en_visita_ajena_cerrada_o_por_un_admin",
+      "status": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_patch_rechaza_trampa_de_otro_operador_y_de_visita_cerrada",
+      "status": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_patch_sigue_funcionando_para_el_dueno_en_visita_abierta",
+      "status": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_primer_croquis_del_cliente_parte_vacio_en_version_1",
+      "status": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_subir_y_ver_foto",
+      "status": "passed"
+    },
+    {
+      "id": "test_croquis_terreno.CroquisTerrenoTest.test_trampa_sin_foto_responde_404",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_agenda_con_cliente_sin_coordenadas_y_sin_operador_devuelve_200",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_cadena_vacia_reproduce_el_422_que_el_frontend_corrige",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_cliente_nuevo_admite_ubicacion_vacia",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_conflicto_de_operador_devuelve_409_sin_guardar",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_coordenadas_incompletas_y_nombre_vacio_son_rechazados",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_editar_cliente_sin_coordenadas_conserva_null",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_fecha_estado_nulos_y_campos_ajenos_son_rechazados",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_fuera_de_horario_incluso_sin_operador",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_no_amplia_el_contrato_movil",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_no_reprograma_visita_finalizada_pero_permite_notas",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_operador_inactivo_o_externo_es_rechazado",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_panel_clientes_con_ubicacion_null_devuelve_200",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_quitar_operador_no_cambia_fecha_ni_estado",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_reagendada_requiere_una_nueva_fecha",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_rechaza_fechas_sin_zona_en_creacion_y_edicion",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_reprogramar_actualiza_fecha_estado_y_operador",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_sin_asignar_null_devuelve_201_y_conserva_utc",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_usa_horario_configurado_y_no_horario_fijo",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_uuid_de_operador_devuelve_201",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_contract.PanelContractTest.test_visita_de_otra_empresa_no_se_modifica",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_croquis_readonly.PanelCroquisReadTest.test_CRB01_admin_y_coordinador_consultan_croquis_completado_con_retiradas",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_croquis_readonly.PanelCroquisReadTest.test_CRB02_admin_y_coordinador_descargan_foto_de_su_empresa",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_croquis_readonly.PanelCroquisReadTest.test_CRB03_get_inexistente_no_crea_croquis",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_croquis_readonly.PanelCroquisReadTest.test_CRB04_foto_y_croquis_exigen_token",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_croquis_readonly.PanelCroquisReadTest.test_CRB05_fotos_rechazan_admin_y_coordinador_de_otra_empresa",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_2330_chile_se_guarda_en_utc_del_dia_siguiente_sin_cambiar_dia_agenda",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_asignar_y_desasignar_visita_existente",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_bloquea_choques_y_permite_separacion_exacta_de_una_hora",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_cancelar_con_croquis_conserva_visita_croquis_y_trampas",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_cancelar_libera_el_horario",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_cliente_con_coordenadas_cero_roundtrip_postgis",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_cliente_con_visitas_no_se_elimina",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_cliente_sin_visitas_se_puede_eliminar",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_cliente_whatsapp_sin_ubicacion_se_lista_y_edita_sin_inventar_coordenadas",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_crear_sin_coordenadas_y_telefono_duplicado_controlado",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_estadisticas_cuentan_hoy_segun_chile",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_hora_de_invierno_10_chile_persiste_14_utc",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_hora_de_verano_10_chile_persiste_13_utc",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_no_asigna_operador_de_otra_empresa",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_no_asigna_operador_inactivo",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_no_permite_domingo_cierre_ni_madrugada_sin_asignar",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_no_puede_modificar_visita_de_otra_empresa",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_no_se_puede_agendar_cliente_de_otra_empresa",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_operador_asignado_y_filtro",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_operador_vacio_es_rechazado_sin_guardar_visita",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_reprogramacion_conflictiva_no_altera_la_visita",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_reprogramacion_real_cambia_agenda_estado_y_operador",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_sin_asignar_se_guarda_null_y_reaparece_en_la_agenda",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_sin_token_no_se_puede_entrar_al_panel",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_tecnico_no_puede_editar_por_el_endpoint_del_panel",
+      "status": "passed"
+    },
+    {
+      "id": "test_panel_postgis.PanelPostgisTest.test_telefono_duplicado_al_editar_no_cambia_cliente",
+      "status": "passed"
+    },
+    {
+      "id": "test_zona_horaria.HoyEnChileTest.test_despues_de_las_21_sigue_siendo_hoy_en_chile",
+      "status": "passed"
+    },
+    {
+      "id": "test_zona_horaria.HoyEnChileTest.test_despues_de_medianoche_cambia_el_dia",
+      "status": "passed"
+    },
+    {
+      "id": "test_zona_horaria.HoyEnChileTest.test_durante_el_dia_coincide_con_utc",
+      "status": "passed"
+    },
+    {
+      "id": "test_zona_horaria.HoyEnChileTest.test_horario_de_invierno",
+      "status": "passed"
+    },
+    {
+      "id": "test_zona_horaria.HoyEnChileTest.test_ultimo_minuto_del_dia",
+      "status": "passed"
+    }
+  ]
+}

@@ -13,7 +13,7 @@ from datetime import datetime
 from enum import Enum
 from uuid import UUID
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.security import ACCESS_TOKEN_MINUTES
 
@@ -116,8 +116,19 @@ class ClientCreate(BaseModel):
     nombre: str = Field(min_length=2, max_length=150)
     telefono_whatsapp: str = Field(min_length=5, max_length=30)
     direccion: str = Field(min_length=2)
-    lat: float = Field(ge=-90, le=90)
-    lng: float = Field(ge=-180, le=180)
+    lat: float | None = Field(default=None, ge=-90, le=90)
+    lng: float | None = Field(default=None, ge=-180, le=180)
+
+    @model_validator(mode="after")
+    def complete_location(self):
+        if (self.lat is None) != (self.lng is None):
+            raise ValueError("Completa ambas coordenadas o deja ambas vacías")
+        return self
+
+    @field_validator("nombre", "telefono_whatsapp", "direccion", mode="before")
+    @classmethod
+    def trim_text(cls, value):
+        return value.strip() if isinstance(value, str) else value
 
 
 class ClientUpdate(BaseModel):
@@ -126,6 +137,13 @@ class ClientUpdate(BaseModel):
     direccion: str | None = Field(default=None, min_length=2)
     lat: float | None = Field(default=None, ge=-90, le=90)
     lng: float | None = Field(default=None, ge=-180, le=180)
+
+    @field_validator("nombre", "telefono_whatsapp", mode="before")
+    @classmethod
+    def nonempty_text(cls, value):
+        if value is None:
+            raise ValueError("El nombre y el teléfono no pueden quedar vacíos")
+        return value.strip() if isinstance(value, str) else value
 
 
 class OperatorSummary(BaseModel):
@@ -137,8 +155,23 @@ class OperatorSummary(BaseModel):
 class VisitCreate(BaseModel):
     cliente_id: UUID
     operador_id: UUID | None = None
-    fecha_hora: datetime
+    fecha_hora: AwareDatetime
     notas: str | None = None
+
+
+class PanelVisitUpdate(VisitUpdate):
+    """Edición administrativa; no amplía el PATCH de la aplicación móvil."""
+
+    model_config = ConfigDict(extra="forbid")
+    operador_id: UUID | None = None
+    fecha_hora: AwareDatetime | None = None
+
+    @field_validator("fecha_hora", "estado")
+    @classmethod
+    def required_when_present(cls, value):
+        if value is None:
+            raise ValueError("La fecha y el estado no pueden quedar vacíos")
+        return value
 
 
 class PanelVisitResponse(VisitResponse):
