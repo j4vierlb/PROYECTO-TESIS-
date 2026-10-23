@@ -300,3 +300,24 @@ Las claves siguen en los archivos privados Android/iOS; no se incorporó `.env`
 al APK. No es una versión release: siguen pendientes teléfono físico,
 comparación exacta con iPhone y sincronización offline completa. Conservar
 una foto en caché para reintentar no equivale a tener modo offline.
+
+## Correcciones posteriores a la revisión de PR #21 (23/10/2026)
+
+Estado vigente: **75 pruebas Flutter aprobadas**, análisis sin observaciones y
+APK debug recompilado. La sesión vencida conserva la foto pendiente, ligada a
+su cuenta original; el logout manual advierte antes de descartarla. Una URL de
+foto inválida produce null y deja la trampa sin foto, sin derribar el croquis.
+Se bloquea completar la visita desde esta app mientras tenga una foto pendiente:
+hay que volver al croquis y reintentar o descartarla explícitamente.
+
+La ubicación nativa mantiene hasta 20 s de espera. Si falla, el técnico puede
+elegir **Por red**: proveedor fusionado Google, precisión media y hasta 10 s,
+sin activar automáticamente ajustes. Sigue disponible marcar en el mapa. No se
+garantiza señal ni precisión interior. La justificación, casos nuevos y límites
+están en el [registro de revisión](../pruebas/android_revision_PR21_2026-10-23/README.md).
+
+Correcciones funcionales: `f55659a`; formato/estilo independiente: `c4a56ff`.
+No se reescribió el historial de la PR. SHA-256 del APK local actual:
+`4615ae8a2c7750ef841153def9b2efe791460aba1b6e6d804b96cd2f0ed31823`.
+La nueva compilación no se instaló ni probó en emulador o teléfono en esta
+revisión: las pruebas de widgets y servicios son automatizadas con mocks.

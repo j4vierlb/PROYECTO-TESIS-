@@ -135,6 +135,12 @@ integrada en el código de `main` tomado para esta versión, aunque no se llamó
 en estas pruebas; la afirmación de ausencia del corte del 20/10 es histórica.
 Continúa pendiente la sincronización offline completa.
 
+La [revisión posterior de PR #21](Evidencias%20Proyecto/pruebas/android_revision_PR21_2026-10-23/README.md)
+eleva la suite a **75 pruebas Flutter** y corrige la conservación de fotos al
+vencer sesión, URLs inválidas y cierre con fotos pendientes. Añade respaldo de
+ubicación optativo y separa formato/estilo en otro commit. Los 16 controles HTTP
+y las capturas anteriores no se repitieron en esa revisión; no se suman a las 75.
+
 ## Seguridad y datos
 
 El sistema utiliza JWT, roles diferenciados, CORS restringido y aislamiento por empresa. No se deben subir secretos, tokens, contraseñas reales ni datos personales del cliente al repositorio.

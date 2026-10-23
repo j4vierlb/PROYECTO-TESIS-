@@ -160,6 +160,13 @@ de teléfono físico, comparación con iPhone ni sincronización offline complet
 El código funcional de este corte se identifica con el commit `2df57a5`;
 la documentación y las evidencias se publican en su entrega asociada.
 
+La [revisión de PR #21](../Evidencias%20Proyecto/pruebas/android_revision_PR21_2026-10-23/README.md)
+incorpora `f55659a` (sesión/foto, aislamiento local por cuenta, URLs nulas,
+bloqueo de cierre y respaldo de ubicación optativo) y `c4a56ff` (estilo separado).
+Se verificaron **75 pruebas Flutter**, 25 nuevas respecto de ese corte, y otra
+compilación debug. No se repitieron las pruebas manuales de emulador ni los
+controles HTTP reales del corte anterior en esta revisión.
+
 ## 6. Documentación de Fase 2
 
 Los documentos 01 al 10 se incorporaron juntos en `8a4e4bd`. En `676a885`
