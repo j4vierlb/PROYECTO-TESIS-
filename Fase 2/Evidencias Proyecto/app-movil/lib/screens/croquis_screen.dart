@@ -38,6 +38,7 @@ class CroquisScreen extends StatefulWidget {
   // En una visita ya completada el croquis es solo de consulta: no se
   // pueden confirmar, mover ni retirar trampas.
   final bool readOnly;
+  final ApiClient? apiClient;
 
   const CroquisScreen({
     super.key,
@@ -45,6 +46,7 @@ class CroquisScreen extends StatefulWidget {
     this.clienteLat,
     this.clienteLng,
     this.readOnly = false,
+    this.apiClient,
   });
 
   @override
@@ -52,7 +54,7 @@ class CroquisScreen extends StatefulWidget {
 }
 
 class _CroquisScreenState extends State<CroquisScreen> {
-  final _apiClient = ApiClient();
+  late final _apiClient = widget.apiClient ?? ApiClient();
   final _photos = PendingPhotoStore.instance;
   PendingPhoto? _pendingPhoto;
 
@@ -130,7 +132,7 @@ class _CroquisScreenState extends State<CroquisScreen> {
       // token nuevo.
       final headers = await _apiClient.authHeaders();
       if (mounted) setState(() => _fotoHeaders = headers);
-      final pending = await _photos.read();
+      final pending = await _photos.readForCurrentAccount();
       if (mounted) {
         setState(
           () => _pendingPhoto = pending?.visitId == widget.visitaId
@@ -326,19 +328,22 @@ class _CroquisScreenState extends State<CroquisScreen> {
 
   /// Pide permiso de ubicación (si hace falta) y agrega la trampa en la
   /// posición actual del teléfono.
-  Future<void> _agregarConGps() async {
+  Future<void> _agregarConGps({bool networkFallback = false}) async {
     if (_agregando || widget.readOnly) return;
     setState(() => _agregando = true);
     Position posicion;
     try {
-      posicion = await FieldLocation().current();
+      posicion = await FieldLocation().current(networkFallback: networkFallback);
       if (mounted) setState(() => _ubicacionPermitida = true);
     } on FieldLocationException catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(error.message),
-            action: error.settings == null
+            duration: const Duration(seconds: 10),
+            action: error.canTryNetwork
+                ? SnackBarAction(label: 'Por red', onPressed: () => _agregarConGps(networkFallback: true))
+                : error.settings == null
                 ? null
                 : SnackBarAction(
                     label: 'Ajustes',
@@ -365,9 +370,11 @@ class _CroquisScreenState extends State<CroquisScreen> {
     if (!mounted) return;
     setState(() => _agregando = false);
     // Con poca precisión (bajo techo) se avisa, pero se deja continuar.
-    final aviso = posicion.accuracy > 25
-        ? 'GPS con precisión de ±${posicion.accuracy.round()} m'
-        : '';
+    final aviso = networkFallback
+        ? 'Ubicación aproximada (respaldo por red), precisión ±${posicion.accuracy.round()} m. Revisa la posición en el mapa.'
+        : posicion.accuracy > 25
+            ? 'GPS con precisión de ±${posicion.accuracy.round()} m'
+            : '';
     await _agregarEn(
       LatLng(posicion.latitude, posicion.longitude),
       aviso: aviso,
@@ -514,6 +521,12 @@ class _CroquisScreenState extends State<CroquisScreen> {
         _updatingId != null) {
       return;
     }
+    final owned = await _photos.readForCurrentAccount();
+    if (!mounted) return;
+    if (owned == null || owned.deviceId != foto.deviceId || owned.visitId != foto.visitId) {
+      _mostrarMensaje('Inicia sesión con la cuenta original para reintentar la foto');
+      return;
+    }
     final dispositivos = _croquis?.dispositivos
         .where((item) => item.id == foto.deviceId)
         .toList();
@@ -574,6 +587,8 @@ class _CroquisScreenState extends State<CroquisScreen> {
 
   /// Muestra la foto en pantalla completa (se puede hacer zoom).
   Future<void> _verFoto(DispositivoTrampa dispositivo) async {
+    final fotoUrl = _apiClient.fotoUrlCompleta(dispositivo.fotoUrl);
+    if (fotoUrl == null) return;
     try {
       final headers = await _apiClient.authHeaders();
       if (!mounted) return;
@@ -604,7 +619,7 @@ class _CroquisScreenState extends State<CroquisScreen> {
             Flexible(
               child: InteractiveViewer(
                 child: Image.network(
-                  _apiClient.fotoUrlCompleta(dispositivo.fotoUrl!),
+                  fotoUrl,
                   headers: _fotoHeaders,
                   errorBuilder: (_, _, _) => const Padding(
                     padding: EdgeInsets.all(32),
@@ -908,9 +923,7 @@ class _CroquisScreenState extends State<CroquisScreen> {
           onRetirar: () => _retirar(dispositivo),
           onFoto: () => _tomarFoto(dispositivo),
           onVerFoto: () => _verFoto(dispositivo),
-          fotoUrl: dispositivo.fotoUrl == null
-              ? null
-              : _apiClient.fotoUrlCompleta(dispositivo.fotoUrl!),
+          fotoUrl: _apiClient.fotoUrlCompleta(dispositivo.fotoUrl),
           fotoHeaders: _fotoHeaders,
         );
       },

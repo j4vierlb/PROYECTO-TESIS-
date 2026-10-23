@@ -27,6 +27,9 @@ class AuthStorage {
     required String accessToken,
     required String refreshToken,
   }) async {
+    await PendingPhotoStore.instance.bindLegacyOwner(
+      await getAccessToken() ?? await getRefreshToken(),
+    );
     await _storage.write(key: _accessTokenKey, value: accessToken);
     await _storage.write(key: _refreshTokenKey, value: refreshToken);
   }
@@ -38,11 +41,16 @@ class AuthStorage {
   /// POST /auth/refresh sin volver a escribir la clave.
   Future<String?> getRefreshToken() => _storage.read(key: _refreshTokenKey);
 
-  /// Borra la sesión (se usa al cerrar sesión).
-  Future<void> clear() async {
+  /// Invalidar tokens no descarta trabajo de campo. Solo el logout manual,
+  /// confirmado por el usuario, puede eliminar el envío pendiente.
+  Future<void> clear({bool manualLogout = false}) async {
+    if (!manualLogout) {
+      await PendingPhotoStore.instance.bindLegacyOwner(
+        await getAccessToken() ?? await getRefreshToken(),
+      );
+    }
     await _storage.delete(key: _accessTokenKey);
     await _storage.delete(key: _refreshTokenKey);
-    // Una foto de otra sesión nunca debe adjuntarse al entrar con otra cuenta.
-    await _storage.delete(key: PendingPhotoStore.storageKey);
+    if (manualLogout) await _storage.delete(key: PendingPhotoStore.storageKey);
   }
 }

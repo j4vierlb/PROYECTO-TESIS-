@@ -18,6 +18,17 @@ void main() {
       debugDefaultTargetPlatformOverride = null;
     }
   });
+  test('Respaldo Android usa proveedor fusionado, precision media y 10 segundos', () {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    try {
+      final settings = fieldLocationSettings(networkFallback: true) as AndroidSettings;
+      expect(settings.forceLocationManager, isFalse);
+      expect(settings.accuracy, LocationAccuracy.medium);
+      expect(settings.timeLimit, const Duration(seconds: 10));
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
+  });
   final position = Position(
     longitude: -70.5989,
     latitude: -33.4869,
@@ -117,5 +128,40 @@ void main() {
         ),
       ),
     );
+  });
+  test('Fallo nativo ofrece respaldo pero no activa Google automaticamente', () async {
+    var fallbackCalls = 0;
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    try {
+      final gps = FieldLocation(
+        serviceEnabled: () async => true,
+        permission: () async => LocationPermission.whileInUse,
+        locate: () => throw TimeoutException('GPS'),
+        locateFallback: () async { fallbackCalls++; return position; },
+      );
+      await expectLater(gps.current(), throwsA(isA<FieldLocationException>().having((e) => e.canTryNetwork, 'opcion explicita', isTrue)));
+      expect(fallbackCalls, 0);
+      expect(await gps.current(networkFallback: true), same(position));
+      expect(fallbackCalls, 1);
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
+  });
+  test('Rechazar permiso impide tambien consultar el respaldo por red', () async {
+    final gps = FieldLocation(
+      serviceEnabled: () async => true,
+      permission: () async => LocationPermission.denied,
+      requestPermission: () async => LocationPermission.denied,
+      locateFallback: () => throw StateError('No se debe consultar'),
+    );
+    await expectLater(gps.current(networkFallback: true), throwsA(isA<FieldLocationException>()));
+  });
+  test('Si falla el respaldo no forma un bucle y ofrece mapa', () async {
+    final gps = FieldLocation(
+      serviceEnabled: () async => true,
+      permission: () async => LocationPermission.whileInUse,
+      locateFallback: () => throw TimeoutException('Red'),
+    );
+    await expectLater(gps.current(networkFallback: true), throwsA(isA<FieldLocationException>().having((e) => e.canTryNetwork, 'sin bucle', isFalse).having((e) => e.message, 'alternativa', contains('mapa'))));
   });
 }

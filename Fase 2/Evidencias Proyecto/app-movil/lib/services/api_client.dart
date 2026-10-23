@@ -284,22 +284,25 @@ class ApiClient {
 
   /// Dirección completa de una foto (fotoUrl viene relativa) y el header con
   /// el token, porque las fotos no son públicas: Image.network los necesita.
-  String fotoUrlCompleta(String fotoUrl) {
-    final uri = Uri.parse(fotoUrl);
+  String? fotoUrlCompleta(String? fotoUrl) {
+    if (fotoUrl == null || fotoUrl.isEmpty) return null;
+    try {
+    final uri = Uri.tryParse(fotoUrl);
+    if (uri == null) return null;
     if (uri.hasScheme ||
         uri.hasAuthority ||
         uri.hasFragment ||
         uri.queryParameters.keys.any((key) => key != 'v') ||
-        !uri.path.startsWith('/dispositivos-trampa/') ||
-        !uri.path.endsWith('/foto') ||
+        !RegExp(r'^/dispositivos-trampa/[A-Za-z0-9-]+/foto$').hasMatch(uri.path) ||
         uri.pathSegments.any(
           (segment) => segment == '..' || segment.contains('\\'),
         )) {
-      throw const FormatException(
-        'La foto debe pertenecer al backend de la aplicación',
-      );
+      return null;
     }
     return Uri.parse(baseUrl).resolveUri(uri).toString();
+    } on FormatException {
+      return null;
+    }
   }
 
   Future<Map<String, String>> authHeaders() async {

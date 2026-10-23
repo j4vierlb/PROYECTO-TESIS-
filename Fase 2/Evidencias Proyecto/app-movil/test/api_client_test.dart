@@ -13,6 +13,7 @@ String accessToken() {
       .encode(
         utf8.encode(
           jsonEncode({
+            'sub': 'owner-a',
             'exp':
                 DateTime.now()
                     .add(const Duration(hours: 8))
@@ -107,6 +108,17 @@ void main() {
       access,
     );
   });
+  test('401 al renovar conserva foto pendiente y solicita reingreso', () async {
+    const storage = FlutterSecureStorage();
+    await storage.write(key: 'pending_field_photo', value: jsonEncode({'visitId': 'v1', 'deviceId': 'd1', 'path': '/cache/a.jpg', 'ownerId': 'owner-a'}));
+    var notices = 0;
+    ApiClient.onSesionVencida = () => notices++;
+    final api = ApiClient(client: MockClient((_) async => http.Response('{}', 401)));
+    await expectLater(api.fetchVisitasHoy(), throwsA(isA<ApiException>()));
+    expect(notices, 1);
+    expect(await storage.read(key: 'access_token'), isNull);
+    expect(jsonDecode((await storage.read(key: 'pending_field_photo'))!)['path'], '/cache/a.jpg');
+  });
   test('Timeout de login tambien esta acotado', () async {
     final api = ApiClient(
       client: MockClient((_) => Completer<http.Response>().future),
@@ -152,17 +164,24 @@ void main() {
     );
   });
   for (final path in [
+    null,
+    '',
+    'http://[',
     'https://other.invalid/foto',
     '//other.invalid/foto',
     '/other/foto',
     '/dispositivos-trampa/d1/foto?token=secret',
     '/dispositivos-trampa/../foto',
+    '/dispositivos-trampa/%FF/foto',
+    '/dispositivos-trampa/d1/foto?v=%FF',
+    '/dispositivos-trampa/d1/otra/foto',
+    '/dispositivos-trampa/%2F../foto',
   ]) {
     test(
       'Rechaza foto fuera del contrato: $path',
       () => expect(
-        () => ApiClient().fotoUrlCompleta(path),
-        throwsFormatException,
+        ApiClient().fotoUrlCompleta(path),
+        isNull,
       ),
     );
   }

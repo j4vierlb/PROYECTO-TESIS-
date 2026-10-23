@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 
-LocationSettings fieldLocationSettings() {
+LocationSettings fieldLocationSettings({bool networkFallback = false}) {
   // GPS nativo: no exige activar el servicio adicional Google Location Accuracy.
   if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
     return AndroidSettings(
-      forceLocationManager: true,
-      accuracy: LocationAccuracy.high,
-      timeLimit: const Duration(seconds: 20),
+      forceLocationManager: !networkFallback,
+      accuracy: networkFallback ? LocationAccuracy.medium : LocationAccuracy.high,
+      timeLimit: Duration(seconds: networkFallback ? 10 : 20),
     );
   }
   return const LocationSettings(
@@ -21,7 +21,8 @@ enum LocationSettingsTarget { device, application }
 class FieldLocationException implements Exception {
   final String message;
   final LocationSettingsTarget? settings;
-  const FieldLocationException(this.message, {this.settings});
+  final bool canTryNetwork;
+  const FieldLocationException(this.message, {this.settings, this.canTryNetwork = false});
 }
 
 /// Misma política para Android e iOS; callbacks reemplazables en pruebas.
@@ -30,12 +31,14 @@ class FieldLocation {
   final Future<LocationPermission> Function() permission;
   final Future<LocationPermission> Function() requestPermission;
   final Future<Position> Function() locate;
+  final Future<Position> Function() locateFallback;
 
   FieldLocation({
     Future<bool> Function()? serviceEnabled,
     Future<LocationPermission> Function()? permission,
     Future<LocationPermission> Function()? requestPermission,
     Future<Position> Function()? locate,
+    Future<Position> Function()? locateFallback,
   }) : serviceEnabled = serviceEnabled ?? Geolocator.isLocationServiceEnabled,
        permission = permission ?? Geolocator.checkPermission,
        requestPermission = requestPermission ?? Geolocator.requestPermission,
@@ -43,9 +46,12 @@ class FieldLocation {
            locate ??
            (() => Geolocator.getCurrentPosition(
              locationSettings: fieldLocationSettings(),
-           ));
+           )),
+       locateFallback = locateFallback ?? (() => Geolocator.getCurrentPosition(
+         locationSettings: fieldLocationSettings(networkFallback: true),
+       ));
 
-  Future<Position> current() async {
+  Future<Position> current({bool networkFallback = false}) async {
     if (!await serviceEnabled()) {
       throw const FieldLocationException(
         'Activa la ubicación (GPS) del teléfono',
@@ -67,10 +73,14 @@ class FieldLocation {
       );
     }
     try {
-      return await locate();
+      return await (networkFallback ? locateFallback() : locate());
     } catch (_) {
-      throw const FieldLocationException(
-        'No se pudo obtener la ubicación. Prueba al aire libre o márcala en el mapa.',
+      final offerNetwork = !networkFallback && !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+      throw FieldLocationException(
+        offerNetwork
+            ? 'No se obtuvo ubicación (límite 20 s). Puedes intentar por red (Google puede solicitar activar su precisión) o marcarla en el mapa.'
+            : 'No se pudo obtener la ubicación. Prueba al aire libre o márcala en el mapa.',
+        canTryNetwork: offerNetwork,
       );
     }
   }
