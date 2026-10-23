@@ -14,6 +14,7 @@ import 'package:http_parser/http_parser.dart';
 import '../models/croquis.dart';
 import '../models/visita.dart';
 import 'auth_storage.dart';
+import 'session.dart' show tokenVencido;
 
 /// Excepción con el mensaje real que devolvió el backend (siempre viene como
 /// {"detail": "..."}), para poder mostrárselo tal cual al operador.
@@ -28,6 +29,19 @@ class ApiException implements Exception {
 }
 
 class ApiClient {
+  // La inyección se usa en pruebas; en la app cada request sigue cerrando
+  // su propio cliente al terminar, como BaseRequest.send().
+  final http.Client? client;
+  final Duration requestTimeout;
+
+  ApiClient({this.client, this.requestTimeout = const Duration(seconds: 15)});
+
+  Future<http.Response> _send(http.BaseRequest request, {Duration? timeout}) =>
+      (() async {
+        final streamed = await (client?.send(request) ?? request.send());
+        return http.Response.fromStream(streamed);
+      })().timeout(timeout ?? requestTimeout);
+
   // Un iPhone físico no comparte la red del Mac como el simulador, así que
   // necesita la IP real del Mac en la WiFi (no "localhost"). Esa IP puede
   // cambiar (otra red, el router la reasigna), por eso se pasa al compilar:
@@ -50,19 +64,18 @@ class ApiClient {
   /// true si se renovó; false si el backend lo rechazó (sesión vencida), y en
   /// ese caso borra los tokens. Sin internet lanza la excepción de red.
   Future<bool> refreshSession() {
-    return _renovando ??= _pedirRenovacion().whenComplete(() => _renovando = null);
+    return _renovando ??= _pedirRenovacion().whenComplete(
+      () => _renovando = null,
+    );
   }
 
   Future<bool> _pedirRenovacion() async {
     final refreshToken = await AuthStorage.instance.getRefreshToken();
     if (refreshToken == null) return false;
-    final response = await http
-        .post(
-          Uri.parse('$baseUrl/auth/refresh'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({'refresh_token': refreshToken}),
-        )
-        .timeout(const Duration(seconds: 15));
+    final request = http.Request('POST', Uri.parse('$baseUrl/auth/refresh'))
+      ..headers['Content-Type'] = 'application/json'
+      ..body = jsonEncode({'refresh_token': refreshToken});
+    final response = await _send(request);
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
       await AuthStorage.instance.saveTokens(
@@ -91,17 +104,17 @@ class ApiClient {
   /// de forma segura; si no, lanza ApiException con el mensaje del backend.
   Future<void> login(String usuario, String clave) async {
     // `await` espera la respuesta sin congelar la pantalla.
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/login'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'usuario': usuario, 'clave': clave}), // Map -> texto JSON
-    );
+    final request = http.Request('POST', Uri.parse('$baseUrl/auth/login'))
+      ..headers['Content-Type'] = 'application/json'
+      ..body = jsonEncode({'usuario': usuario, 'clave': clave});
+    final response = await _send(request);
 
     if (response.statusCode != 200) {
       throw ApiException(response.statusCode, _extractDetail(response.body));
     }
 
-    final data = jsonDecode(response.body) as Map<String, dynamic>; // texto JSON -> Map
+    final data =
+        jsonDecode(response.body) as Map<String, dynamic>; // texto JSON -> Map
     await AuthStorage.instance.saveTokens(
       accessToken: data['access_token'] as String,
       refreshToken: data['refresh_token'] as String,
@@ -113,15 +126,21 @@ class ApiClient {
     final body = await _authenticatedGet('/operadores/me/visitas-hoy');
     final data = jsonDecode(body) as List<dynamic>;
     // Convierte cada elemento del JSON en un objeto Visita.
-    return data.map((item) => Visita.fromJson(item as Map<String, dynamic>)).toList();
+    return data
+        .map((item) => Visita.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 
   /// Visitas completadas del operador, de la más reciente a la más antigua.
   /// `limit`/`offset` permiten pedirlas por páginas.
   Future<List<Visita>> fetchHistorial({int limit = 20, int offset = 0}) async {
-    final body = await _authenticatedGet('/operadores/me/visitas-historial?limit=$limit&offset=$offset');
+    final body = await _authenticatedGet(
+      '/operadores/me/visitas-historial?limit=$limit&offset=$offset',
+    );
     final data = jsonDecode(body) as List<dynamic>;
-    return data.map((item) => Visita.fromJson(item as Map<String, dynamic>)).toList();
+    return data
+        .map((item) => Visita.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 
   /// GET /visitas/{id} — detalle de una visita.
@@ -138,16 +157,17 @@ class ApiClient {
 
   /// Actualiza el estado y/o las notas de una visita (PATCH parcial: solo se
   /// envían los campos que se pasan). Devuelve la visita ya actualizada.
-  Future<Visita> updateVisita(String visitaId, {String? estado, String? notas}) async {
+  Future<Visita> updateVisita(
+    String visitaId, {
+    String? estado,
+    String? notas,
+  }) async {
     final body = await _authenticatedRequest(
       'PATCH',
       '/visitas/$visitaId',
       // `'estado': ?estado` solo agrega la clave si el valor no es null, así
       // no se manda "notas": null por error y se borran las notas.
-      body: {
-        'estado': ?estado,
-        'notas': ?notas,
-      },
+      body: {'estado': ?estado, 'notas': ?notas},
     );
     return Visita.fromJson(jsonDecode(body) as Map<String, dynamic>);
   }
@@ -163,11 +183,7 @@ class ApiClient {
     final body = await _authenticatedRequest(
       'PATCH',
       '/dispositivos-trampa/$dispositivoId',
-      body: {
-        'accion': accion,
-        'lat': ?lat,
-        'lng': ?lng,
-      },
+      body: {'accion': accion, 'lat': ?lat, 'lng': ?lng},
     );
     return DispositivoTrampa.fromJson(jsonDecode(body) as Map<String, dynamic>);
   }
@@ -224,40 +240,86 @@ class ApiClient {
   /// POST /dispositivos-trampa/{id}/foto — sube la foto de referencia de la
   /// trampa (archivo JPEG tomado con la cámara). Devuelve la trampa con su
   /// nueva `fotoUrl`.
-  Future<DispositivoTrampa> uploadFoto(String dispositivoId, String rutaArchivo, {bool reintento = false}) async {
+  Future<DispositivoTrampa> uploadFoto(
+    String dispositivoId,
+    String rutaArchivo, {
+    bool reintento = false,
+  }) async {
     final token = await AuthStorage.instance.getAccessToken();
     if (token == null) {
       throw ApiException(401, 'No hay sesión activa');
     }
     // Formulario "multipart": la forma estándar de enviar un archivo por HTTP.
-    final request = http.MultipartRequest('POST', Uri.parse('$baseUrl/dispositivos-trampa/$dispositivoId/foto'))
-      ..headers['Authorization'] = 'Bearer $token'
-      ..files.add(await http.MultipartFile.fromPath('foto', rutaArchivo, contentType: MediaType('image', 'jpeg')));
+    final request =
+        http.MultipartRequest(
+            'POST',
+            Uri.parse('$baseUrl/dispositivos-trampa/$dispositivoId/foto'),
+          )
+          ..headers['Authorization'] = 'Bearer $token'
+          ..files.add(
+            await http.MultipartFile.fromPath(
+              'foto',
+              rutaArchivo,
+              contentType: MediaType(
+                'image',
+                rutaArchivo.toLowerCase().endsWith('.png') ? 'png' : 'jpeg',
+              ),
+            ),
+          );
     // Subir una foto por datos móviles puede tardar más que una petición normal.
-    final streamed = await request.send().timeout(const Duration(seconds: 60));
-    final response = await http.Response.fromStream(streamed);
+    final response = await _send(request, timeout: const Duration(seconds: 60));
     // Token vencido: se renueva y se sube otra vez (una sola vez).
     if (response.statusCode == 401 && !reintento) {
       await _renovarOCerrarSesion();
       return uploadFoto(dispositivoId, rutaArchivo, reintento: true);
     }
+    if (response.statusCode == 401) await _cerrarSesionRechazada();
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw ApiException(response.statusCode, _extractDetail(response.body));
     }
-    return DispositivoTrampa.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    return DispositivoTrampa.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
   }
 
   /// Dirección completa de una foto (fotoUrl viene relativa) y el header con
   /// el token, porque las fotos no son públicas: Image.network los necesita.
-  String fotoUrlCompleta(String fotoUrl) => '$baseUrl$fotoUrl';
+  String fotoUrlCompleta(String fotoUrl) {
+    final uri = Uri.parse(fotoUrl);
+    if (uri.hasScheme ||
+        uri.hasAuthority ||
+        uri.hasFragment ||
+        uri.queryParameters.keys.any((key) => key != 'v') ||
+        !uri.path.startsWith('/dispositivos-trampa/') ||
+        !uri.path.endsWith('/foto') ||
+        uri.pathSegments.any(
+          (segment) => segment == '..' || segment.contains('\\'),
+        )) {
+      throw const FormatException(
+        'La foto debe pertenecer al backend de la aplicación',
+      );
+    }
+    return Uri.parse(baseUrl).resolveUri(uri).toString();
+  }
 
   Future<Map<String, String>> authHeaders() async {
-    final token = await AuthStorage.instance.getAccessToken();
+    var token = await AuthStorage.instance.getAccessToken();
+    if (token != null && tokenVencido(token)) {
+      await _renovarOCerrarSesion();
+      token = await AuthStorage.instance.getAccessToken();
+    }
     return {if (token != null) 'Authorization': 'Bearer $token'};
   }
 
+  Future<Never> _cerrarSesionRechazada() async {
+    await AuthStorage.instance.clear();
+    onSesionVencida?.call();
+    throw ApiException(401, 'Tu sesión venció. Vuelve a iniciar sesión.');
+  }
+
   /// Atajo para los GET autenticados.
-  Future<String> _authenticatedGet(String path) => _authenticatedRequest('GET', path);
+  Future<String> _authenticatedGet(String path) =>
+      _authenticatedRequest('GET', path);
 
   /// Request autenticado con el access_token guardado. Centraliza el manejo
   /// de "sin sesión", del tiempo de espera y de los errores {"detail": "..."}
@@ -266,7 +328,7 @@ class ApiClient {
     String method,
     String path, {
     Map<String, dynamic>? body,
-    Duration timeout = const Duration(seconds: 15),
+    Duration? timeout,
     bool reintento = false,
   }) async {
     final token = await AuthStorage.instance.getAccessToken();
@@ -285,15 +347,21 @@ class ApiClient {
 
     // Si el servidor no responde a tiempo (15 s por defecto), se corta con un
     // error en vez de dejar al operador esperando indefinidamente.
-    final streamed = await request.send().timeout(timeout);
-    final response = await http.Response.fromStream(streamed);
+    final response = await _send(request, timeout: timeout);
 
     // 401 = el access_token venció (dura 8 horas): se renueva con el
     // refresh_token y se repite la misma petición una sola vez.
     if (response.statusCode == 401 && !reintento) {
       await _renovarOCerrarSesion();
-      return _authenticatedRequest(method, path, body: body, timeout: timeout, reintento: true);
+      return _authenticatedRequest(
+        method,
+        path,
+        body: body,
+        timeout: timeout,
+        reintento: true,
+      );
     }
+    if (response.statusCode == 401) await _cerrarSesionRechazada();
 
     // Cualquier 2xx es éxito (200 OK, 201 creado).
     if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -307,7 +375,16 @@ class ApiClient {
   String _extractDetail(String body) {
     try {
       final decoded = jsonDecode(body) as Map<String, dynamic>;
-      return decoded['detail'] as String? ?? 'Error inesperado (${body.length} bytes)';
+      final detail = decoded['detail'];
+      if (detail is String) return detail;
+      if (detail is List) {
+        return detail
+            .whereType<Map>()
+            .map((item) => item['msg'])
+            .whereType<String>()
+            .join('; ');
+      }
+      return 'Error inesperado del servidor';
     } catch (_) {
       return 'Error inesperado del servidor';
     }

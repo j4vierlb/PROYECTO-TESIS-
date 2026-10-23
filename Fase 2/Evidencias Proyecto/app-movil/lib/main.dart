@@ -18,11 +18,13 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'services/api_client.dart';
 import 'services/session.dart';
+import 'services/pending_photo.dart';
 import 'theme/app_theme.dart';
 
 /// Permite navegar desde fuera de una pantalla: lo usa el aviso de "sesión
@@ -30,10 +32,19 @@ import 'theme/app_theme.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 /// Función que Flutter ejecuta al iniciar: dibuja el widget raíz de la app.
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    try {
+      await PendingPhotoStore.instance.recoverInterruptedCapture();
+    } catch (_) {
+      // Un plugin/captura fallido no debe impedir abrir la app ni iniciar sesión.
+    }
+  }
   // Si la sesión ya no se puede renovar, se vuelve al login borrando las
   // pantallas anteriores (con "atrás" no se puede volver a la agenda).
-  ApiClient.onSesionVencida = () => navigatorKey.currentState?.pushAndRemoveUntil(
+  ApiClient.onSesionVencida = () =>
+      navigatorKey.currentState?.pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const LoginScreen()),
         (route) => false,
       );
@@ -46,7 +57,10 @@ class KillBichosApp extends StatelessWidget {
   /// Decide si hay sesión al abrir. Se puede reemplazar en las pruebas.
   final Future<bool> Function() restaurarSesion;
 
-  const KillBichosApp({super.key, this.restaurarSesion = SessionService.restaurar});
+  const KillBichosApp({
+    super.key,
+    this.restaurarSesion = SessionService.restaurar,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +92,9 @@ class _InicioSesion extends StatefulWidget {
 
 class _InicioSesionState extends State<_InicioSesion> {
   // Se guarda el Future para no repetir la revisión cada vez que se redibuja.
-  late final Future<bool> _haySesion = widget.restaurarSesion().catchError((_) => false);
+  late final Future<bool> _haySesion = widget.restaurarSesion().catchError(
+    (_) => false,
+  );
 
   @override
   Widget build(BuildContext context) {
