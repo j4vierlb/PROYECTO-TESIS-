@@ -110,14 +110,27 @@ void main() {
   });
   test('401 al renovar conserva foto pendiente y solicita reingreso', () async {
     const storage = FlutterSecureStorage();
-    await storage.write(key: 'pending_field_photo', value: jsonEncode({'visitId': 'v1', 'deviceId': 'd1', 'path': '/cache/a.jpg', 'ownerId': 'owner-a'}));
+    await storage.write(
+      key: 'pending_field_photo',
+      value: jsonEncode({
+        'visitId': 'v1',
+        'deviceId': 'd1',
+        'path': '/cache/a.jpg',
+        'ownerId': 'owner-a',
+      }),
+    );
     var notices = 0;
     ApiClient.onSesionVencida = () => notices++;
-    final api = ApiClient(client: MockClient((_) async => http.Response('{}', 401)));
+    final api = ApiClient(
+      client: MockClient((_) async => http.Response('{}', 401)),
+    );
     await expectLater(api.fetchVisitasHoy(), throwsA(isA<ApiException>()));
     expect(notices, 1);
     expect(await storage.read(key: 'access_token'), isNull);
-    expect(jsonDecode((await storage.read(key: 'pending_field_photo'))!)['path'], '/cache/a.jpg');
+    expect(
+      jsonDecode((await storage.read(key: 'pending_field_photo'))!)['path'],
+      '/cache/a.jpg',
+    );
   });
   test('Timeout de login tambien esta acotado', () async {
     final api = ApiClient(
@@ -179,10 +192,7 @@ void main() {
   ]) {
     test(
       'Rechaza foto fuera del contrato: $path',
-      () => expect(
-        ApiClient().fotoUrlCompleta(path),
-        isNull,
-      ),
+      () => expect(ApiClient().fotoUrlCompleta(path), isNull),
     );
   }
   test(

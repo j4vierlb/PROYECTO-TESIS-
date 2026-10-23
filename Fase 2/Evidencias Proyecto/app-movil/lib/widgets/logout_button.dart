@@ -22,10 +22,18 @@ class LogoutButton extends StatelessWidget {
           context: context,
           builder: (dialogContext) => AlertDialog(
             title: const Text('Foto sin enviar'),
-            content: const Text('Cerrar sesión descartará el envío pendiente, no la imagen original. Puedes volver al croquis para reintentarlo.'),
+            content: const Text(
+              'Cerrar sesión descartará el envío pendiente, no la imagen original. Puedes volver al croquis para reintentarlo.',
+            ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Volver')),
-              TextButton(onPressed: () => Navigator.pop(dialogContext, true), child: const Text('Salir y descartar')),
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('Volver'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: const Text('Salir y descartar'),
+              ),
             ],
           ),
         );
@@ -34,7 +42,9 @@ class LogoutButton extends StatelessWidget {
       await AuthStorage.instance.clear(manualLogout: true);
     } catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No se pudo cerrar sesión. Reintenta.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se pudo cerrar sesión. Reintenta.')),
+        );
       }
       return;
     }

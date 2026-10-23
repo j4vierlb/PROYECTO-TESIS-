@@ -6,7 +6,9 @@ LocationSettings fieldLocationSettings({bool networkFallback = false}) {
   if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
     return AndroidSettings(
       forceLocationManager: !networkFallback,
-      accuracy: networkFallback ? LocationAccuracy.medium : LocationAccuracy.high,
+      accuracy: networkFallback
+          ? LocationAccuracy.medium
+          : LocationAccuracy.high,
       timeLimit: Duration(seconds: networkFallback ? 10 : 20),
     );
   }
@@ -22,7 +24,11 @@ class FieldLocationException implements Exception {
   final String message;
   final LocationSettingsTarget? settings;
   final bool canTryNetwork;
-  const FieldLocationException(this.message, {this.settings, this.canTryNetwork = false});
+  const FieldLocationException(
+    this.message, {
+    this.settings,
+    this.canTryNetwork = false,
+  });
 }
 
 /// Misma política para Android e iOS; callbacks reemplazables en pruebas.
@@ -47,9 +53,11 @@ class FieldLocation {
            (() => Geolocator.getCurrentPosition(
              locationSettings: fieldLocationSettings(),
            )),
-       locateFallback = locateFallback ?? (() => Geolocator.getCurrentPosition(
-         locationSettings: fieldLocationSettings(networkFallback: true),
-       ));
+       locateFallback =
+           locateFallback ??
+           (() => Geolocator.getCurrentPosition(
+             locationSettings: fieldLocationSettings(networkFallback: true),
+           ));
 
   Future<Position> current({bool networkFallback = false}) async {
     if (!await serviceEnabled()) {
@@ -75,7 +83,10 @@ class FieldLocation {
     try {
       return await (networkFallback ? locateFallback() : locate());
     } catch (_) {
-      final offerNetwork = !networkFallback && !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+      final offerNetwork =
+          !networkFallback &&
+          !kIsWeb &&
+          defaultTargetPlatform == TargetPlatform.android;
       throw FieldLocationException(
         offerNetwork
             ? 'No se obtuvo ubicación (límite 20 s). Puedes intentar por red (Google puede solicitar activar su precisión) o marcarla en el mapa.'

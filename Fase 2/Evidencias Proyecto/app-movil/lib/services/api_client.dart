@@ -287,19 +287,20 @@ class ApiClient {
   String? fotoUrlCompleta(String? fotoUrl) {
     if (fotoUrl == null || fotoUrl.isEmpty) return null;
     try {
-    final uri = Uri.tryParse(fotoUrl);
-    if (uri == null) return null;
-    if (uri.hasScheme ||
-        uri.hasAuthority ||
-        uri.hasFragment ||
-        uri.queryParameters.keys.any((key) => key != 'v') ||
-        !RegExp(r'^/dispositivos-trampa/[A-Za-z0-9-]+/foto$').hasMatch(uri.path) ||
-        uri.pathSegments.any(
-          (segment) => segment == '..' || segment.contains('\\'),
-        )) {
-      return null;
-    }
-    return Uri.parse(baseUrl).resolveUri(uri).toString();
+      final uri = Uri.tryParse(fotoUrl);
+      if (uri == null) return null;
+      if (uri.hasScheme ||
+          uri.hasAuthority ||
+          uri.hasFragment ||
+          uri.queryParameters.keys.any((key) => key != 'v') ||
+          !RegExp(r'^/dispositivos-trampa/[A-Za-z0-9-]+/foto$')
+              .hasMatch(uri.path) ||
+          uri.pathSegments.any(
+            (segment) => segment == '..' || segment.contains('\\'),
+          )) {
+        return null;
+      }
+      return Uri.parse(baseUrl).resolveUri(uri).toString();
     } on FormatException {
       return null;
     }

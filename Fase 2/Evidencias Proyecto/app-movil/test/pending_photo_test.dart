@@ -7,11 +7,16 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 
-String ownerToken(String owner) => 'header.${base64Url.encode(utf8.encode(jsonEncode({'sub': owner}))).replaceAll('=', '')}.signature';
+String ownerToken(String owner) =>
+    'header.${base64Url.encode(utf8.encode(jsonEncode({'sub': owner}))).replaceAll('=', '')}.signature';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  setUp(() => FlutterSecureStorage.setMockInitialValues({'access_token': ownerToken('owner-a')}));
+  setUp(
+    () => FlutterSecureStorage.setMockInitialValues({
+      'access_token': ownerToken('owner-a'),
+    }),
+  );
   test(
     'Antes de abrir camara se registra visita y trampa, no otro destino',
     () async {
@@ -115,47 +120,82 @@ void main() {
     expect((await store.read())?.path, '/cache/a.jpg');
     expect((await store.read())?.ownerId, 'owner-a');
     expect(await store.readForCurrentAccount(), isNull);
-    await AuthStorage.instance.saveTokens(accessToken: ownerToken('owner-a'), refreshToken: 'refresh');
+    await AuthStorage.instance.saveTokens(
+      accessToken: ownerToken('owner-a'),
+      refreshToken: 'refresh',
+    );
     expect((await store.readForCurrentAccount())?.deviceId, 'd1');
   });
   test('Otra cuenta no puede ver ni reasignar el envio pendiente', () async {
     final store = PendingPhotoStore(pick: (_) async => XFile('/cache/a.jpg'));
     await store.capture('v1', 'd1', ImageSource.camera);
     await AuthStorage.instance.clear();
-    await AuthStorage.instance.saveTokens(accessToken: ownerToken('owner-b'), refreshToken: 'refresh');
+    await AuthStorage.instance.saveTokens(
+      accessToken: ownerToken('owner-b'),
+      refreshToken: 'refresh',
+    );
     expect(await store.readForCurrentAccount(), isNull);
     expect((await store.read())?.ownerId, 'owner-a');
-    await expectLater(store.capture('v2', 'd2', ImageSource.camera), throwsStateError);
+    await expectLater(
+      store.capture('v2', 'd2', ImageSource.camera),
+      throwsStateError,
+    );
   });
-  test('Pendiente de version anterior conserva el propietario al vencer', () async {
-    FlutterSecureStorage.setMockInitialValues({
-      'access_token': ownerToken('owner-a'),
-      PendingPhotoStore.storageKey: jsonEncode({'visitId': 'v1', 'deviceId': 'd1', 'path': '/cache/legacy.jpg'}),
-    });
-    await AuthStorage.instance.clear();
-    expect((await PendingPhotoStore().read())?.ownerId, 'owner-a');
-    await AuthStorage.instance.saveTokens(accessToken: ownerToken('owner-b'), refreshToken: 'refresh');
-    expect(await PendingPhotoStore().readForCurrentAccount(), isNull);
-  });
-  test('Sin token anterior no adjudica una foto antigua a la cuenta nueva', () async {
-    FlutterSecureStorage.setMockInitialValues({
-      PendingPhotoStore.storageKey: jsonEncode({'visitId': 'v1', 'deviceId': 'd1', 'path': '/cache/legacy.jpg'}),
-    });
-    await AuthStorage.instance.saveTokens(accessToken: ownerToken('owner-b'), refreshToken: 'refresh');
-    expect(await PendingPhotoStore().readForCurrentAccount(), isNull);
-    expect((await PendingPhotoStore().read())?.path, '/cache/legacy.jpg');
-  });
+  test(
+    'Pendiente de version anterior conserva el propietario al vencer',
+    () async {
+      FlutterSecureStorage.setMockInitialValues({
+        'access_token': ownerToken('owner-a'),
+        PendingPhotoStore.storageKey: jsonEncode({
+          'visitId': 'v1',
+          'deviceId': 'd1',
+          'path': '/cache/legacy.jpg',
+        }),
+      });
+      await AuthStorage.instance.clear();
+      expect((await PendingPhotoStore().read())?.ownerId, 'owner-a');
+      await AuthStorage.instance.saveTokens(
+        accessToken: ownerToken('owner-b'),
+        refreshToken: 'refresh',
+      );
+      expect(await PendingPhotoStore().readForCurrentAccount(), isNull);
+    },
+  );
+  test(
+    'Sin token anterior no adjudica una foto antigua a la cuenta nueva',
+    () async {
+      FlutterSecureStorage.setMockInitialValues({
+        PendingPhotoStore.storageKey: jsonEncode({
+          'visitId': 'v1',
+          'deviceId': 'd1',
+          'path': '/cache/legacy.jpg',
+        }),
+      });
+      await AuthStorage.instance.saveTokens(
+        accessToken: ownerToken('owner-b'),
+        refreshToken: 'refresh',
+      );
+      expect(await PendingPhotoStore().readForCurrentAccount(), isNull);
+      expect((await PendingPhotoStore().read())?.path, '/cache/legacy.jpg');
+    },
+  );
   test('No inicia una captura sin identidad de sesion', () async {
     FlutterSecureStorage.setMockInitialValues({});
-    await expectLater(PendingPhotoStore().capture('v1', 'd1', ImageSource.camera), throwsStateError);
+    await expectLater(
+      PendingPhotoStore().capture('v1', 'd1', ImageSource.camera),
+      throwsStateError,
+    );
     expect(await PendingPhotoStore().read(), isNull);
   });
-  test('Arranque con refresh vencido vuelve a login sin perder la foto', () async {
-    final store = PendingPhotoStore(pick: (_) async => XFile('/cache/a.jpg'));
-    await store.capture('v1', 'd1', ImageSource.camera);
-    expect(await SessionService.restaurar(), isFalse);
-    expect(await AuthStorage.instance.getAccessToken(), isNull);
-    expect((await store.read())?.path, '/cache/a.jpg');
-    expect((await store.read())?.ownerId, 'owner-a');
-  });
+  test(
+    'Arranque con refresh vencido vuelve a login sin perder la foto',
+    () async {
+      final store = PendingPhotoStore(pick: (_) async => XFile('/cache/a.jpg'));
+      await store.capture('v1', 'd1', ImageSource.camera);
+      expect(await SessionService.restaurar(), isFalse);
+      expect(await AuthStorage.instance.getAccessToken(), isNull);
+      expect((await store.read())?.path, '/cache/a.jpg');
+      expect((await store.read())?.ownerId, 'owner-a');
+    },
+  );
 }

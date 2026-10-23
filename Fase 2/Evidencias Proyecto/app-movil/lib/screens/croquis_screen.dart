@@ -333,7 +333,9 @@ class _CroquisScreenState extends State<CroquisScreen> {
     setState(() => _agregando = true);
     Position posicion;
     try {
-      posicion = await FieldLocation().current(networkFallback: networkFallback);
+      posicion = await FieldLocation().current(
+        networkFallback: networkFallback,
+      );
       if (mounted) setState(() => _ubicacionPermitida = true);
     } on FieldLocationException catch (error) {
       if (mounted) {
@@ -342,7 +344,10 @@ class _CroquisScreenState extends State<CroquisScreen> {
             content: Text(error.message),
             duration: const Duration(seconds: 10),
             action: error.canTryNetwork
-                ? SnackBarAction(label: 'Por red', onPressed: () => _agregarConGps(networkFallback: true))
+                ? SnackBarAction(
+                    label: 'Por red',
+                    onPressed: () => _agregarConGps(networkFallback: true),
+                  )
                 : error.settings == null
                 ? null
                 : SnackBarAction(
@@ -373,8 +378,8 @@ class _CroquisScreenState extends State<CroquisScreen> {
     final aviso = networkFallback
         ? 'Ubicación aproximada (respaldo por red), precisión ±${posicion.accuracy.round()} m. Revisa la posición en el mapa.'
         : posicion.accuracy > 25
-            ? 'GPS con precisión de ±${posicion.accuracy.round()} m'
-            : '';
+        ? 'GPS con precisión de ±${posicion.accuracy.round()} m'
+        : '';
     await _agregarEn(
       LatLng(posicion.latitude, posicion.longitude),
       aviso: aviso,
@@ -523,8 +528,12 @@ class _CroquisScreenState extends State<CroquisScreen> {
     }
     final owned = await _photos.readForCurrentAccount();
     if (!mounted) return;
-    if (owned == null || owned.deviceId != foto.deviceId || owned.visitId != foto.visitId) {
-      _mostrarMensaje('Inicia sesión con la cuenta original para reintentar la foto');
+    if (owned == null ||
+        owned.deviceId != foto.deviceId ||
+        owned.visitId != foto.visitId) {
+      _mostrarMensaje(
+        'Inicia sesión con la cuenta original para reintentar la foto',
+      );
       return;
     }
     final dispositivos = _croquis?.dispositivos

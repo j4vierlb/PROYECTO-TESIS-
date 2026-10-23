@@ -68,7 +68,9 @@ class PendingPhotoStore {
     try {
       final parts = token.split('.');
       if (parts.length != 3) return null;
-      final claims = jsonDecode(utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))));
+      final claims = jsonDecode(
+        utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))),
+      );
       final subject = claims['sub'];
       return subject is String && subject.isNotEmpty ? subject : null;
     } catch (_) {
@@ -80,7 +82,9 @@ class PendingPhotoStore {
     final photo = await read();
     final owner = _subject(previousToken);
     if (photo != null && photo.ownerId == null && owner != null) {
-      await _save(PendingPhoto(photo.visitId, photo.deviceId, photo.path, owner));
+      await _save(
+        PendingPhoto(photo.visitId, photo.deviceId, photo.path, owner),
+      );
     }
   }
 
@@ -99,7 +103,9 @@ class PendingPhotoStore {
       throw StateError('Reintenta o descarta primero la foto pendiente');
     }
     final owner = _subject(await storage.read(key: 'access_token'));
-    if (owner == null) throw StateError('Vuelve a iniciar sesión antes de capturar');
+    if (owner == null) {
+      throw StateError('Vuelve a iniciar sesión antes de capturar');
+    }
     // Se registra el destino ANTES de salir hacia cámara/galería.
     await _save(PendingPhoto(visitId, deviceId, null, owner));
     XFile? photo;
@@ -121,14 +127,22 @@ class PendingPhotoStore {
   /// Android puede destruir MainActivity al usar la cámara con poca RAM.
   /// La foto recuperada se conserva para revisión/reintento, no se reasigna.
   Future<void> recoverInterruptedCapture() async {
-    await bindLegacyOwner(await storage.read(key: 'access_token') ?? await storage.read(key: 'refresh_token'));
+    await bindLegacyOwner(
+      await storage.read(key: 'access_token') ??
+          await storage.read(key: 'refresh_token'),
+    );
     final lost = await recover();
     final pending = await read();
     if (pending == null) return; // nunca adjuntar a una trampa desconocida
     final files = lost.files;
     if (files != null && files.isNotEmpty) {
       await _save(
-        PendingPhoto(pending.visitId, pending.deviceId, files.first.path, pending.ownerId),
+        PendingPhoto(
+          pending.visitId,
+          pending.deviceId,
+          files.first.path,
+          pending.ownerId,
+        ),
       );
     } else if (pending.path == null) {
       await clear(); // selección cancelada o sin archivo recuperable
