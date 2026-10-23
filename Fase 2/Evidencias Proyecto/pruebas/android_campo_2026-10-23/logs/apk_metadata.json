@@ -1,0 +1,7 @@
+{
+  "android_key_present": true,
+  "debug_apk_sha256": "9b5e52529e9a990e06cd42c4f8f811e7bcf9ccb89d9b9baf44f9f2515ba73142",
+  "api_base": "http://127.0.0.1:8000",
+  "maps_enabled": true,
+  "work_tunnel_restored": true
+}

@@ -1,0 +1,54 @@
+INFO:     172.19.0.1:45160 - "GET /health HTTP/1.1" 200 OK
+INFO:     Started server process [1]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     172.19.0.1:55432 - "POST /auth/login HTTP/1.1" 200 OK
+INFO:     172.19.0.1:60376 - "GET /operadores/me/visitas-hoy HTTP/1.1" 401 Unauthorized
+INFO:     172.19.0.1:60384 - "POST /auth/refresh HTTP/1.1" 401 Unauthorized
+INFO:     172.19.0.1:58972 - "POST /auth/login HTTP/1.1" 200 OK
+INFO:     172.19.0.1:58988 - "PATCH /visitas/99999999-9999-4999-8999-999999999999 HTTP/1.1" 200 OK
+INFO:     172.19.0.1:58992 - "POST /croquis/99999999-9999-4999-8999-999999999999 HTTP/1.1" 201 Created
+INFO:     172.19.0.1:39652 - "POST /auth/login HTTP/1.1" 200 OK
+INFO:     172.19.0.1:39664 - "PATCH /visitas/99999999-9999-4999-8999-999999999999 HTTP/1.1" 200 OK
+INFO:     172.19.0.1:39678 - "POST /croquis/99999999-9999-4999-8999-999999999999 HTTP/1.1" 201 Created
+INFO:     172.19.0.1:39684 - "POST /croquis/99999999-9999-4999-8999-999999999999 HTTP/1.1" 200 OK
+INFO:     172.19.0.1:39700 - "POST /croquis/99999999-9999-4999-8999-999999999999/dispositivos HTTP/1.1" 201 Created
+INFO:     172.19.0.1:39710 - "PATCH /dispositivos-trampa/34cca6db-3689-432c-b94e-b44c9639accf HTTP/1.1" 200 OK
+INFO:     172.19.0.1:39724 - "PATCH /dispositivos-trampa/34cca6db-3689-432c-b94e-b44c9639accf HTTP/1.1" 200 OK
+INFO:     172.19.0.1:39736 - "POST /dispositivos-trampa/34cca6db-3689-432c-b94e-b44c9639accf/foto HTTP/1.1" 200 OK
+INFO:     172.19.0.1:39746 - "GET /dispositivos-trampa/34cca6db-3689-432c-b94e-b44c9639accf/foto HTTP/1.1" 200 OK
+INFO:     172.19.0.1:39756 - "GET /dispositivos-trampa/34cca6db-3689-432c-b94e-b44c9639accf/foto HTTP/1.1" 401 Unauthorized
+INFO:     172.19.0.1:39764 - "POST /auth/login HTTP/1.1" 200 OK
+INFO:     172.19.0.1:39778 - "GET /dispositivos-trampa/34cca6db-3689-432c-b94e-b44c9639accf/foto HTTP/1.1" 403 Forbidden
+INFO:     172.19.0.1:39786 - "GET /visitas/99999999-9999-4999-8999-999999999999 HTTP/1.1" 403 Forbidden
+INFO:     172.19.0.1:39798 - "PATCH /dispositivos-trampa/34cca6db-3689-432c-b94e-b44c9639accf HTTP/1.1" 200 OK
+INFO:     172.19.0.1:39814 - "PATCH /visitas/99999999-9999-4999-8999-999999999999 HTTP/1.1" 200 OK
+INFO:     172.19.0.1:39820 - "PATCH /dispositivos-trampa/34cca6db-3689-432c-b94e-b44c9639accf HTTP/1.1" 409 Conflict
+INFO:     172.19.0.1:39836 - "POST /auth/login HTTP/1.1" 200 OK
+INFO:     172.19.0.1:39838 - "GET /operadores/me/visitas-hoy HTTP/1.1" 200 OK
+INFO:     172.19.0.1:45046 - "GET /operadores/me/visitas-hoy HTTP/1.1" 200 OK
+INFO:     172.19.0.1:46230 - "GET /visitas/77777777-7777-7777-7777-777777777777 HTTP/1.1" 200 OK
+INFO:     172.19.0.1:58010 - "PATCH /visitas/77777777-7777-7777-7777-777777777777 HTTP/1.1" 200 OK
+INFO:     172.19.0.1:35458 - "PATCH /visitas/77777777-7777-7777-7777-777777777777 HTTP/1.1" 200 OK
+INFO:     172.19.0.1:55916 - "GET /croquis/77777777-7777-7777-7777-777777777777 HTTP/1.1" 200 OK
+INFO:     172.19.0.1:59340 - "GET /operadores/me/visitas-hoy HTTP/1.1" 200 OK
+INFO:     172.19.0.1:59352 - "GET /operadores/me/visitas-hoy HTTP/1.1" 200 OK
+INFO:     172.19.0.1:44676 - "GET /visitas/77777777-7777-7777-7777-777777777777 HTTP/1.1" 200 OK
+INFO:     172.19.0.1:35114 - "GET /croquis/77777777-7777-7777-7777-777777777777 HTTP/1.1" 200 OK
+INFO:     172.19.0.1:33442 - "POST /croquis/77777777-7777-7777-7777-777777777777/dispositivos HTTP/1.1" 201 Created
+INFO:     172.19.0.1:48756 - "GET /operadores/me/visitas-hoy HTTP/1.1" 200 OK
+INFO:     172.19.0.1:33448 - "GET /visitas/77777777-7777-7777-7777-777777777777 HTTP/1.1" 200 OK
+INFO:     172.19.0.1:33464 - "GET /croquis/77777777-7777-7777-7777-777777777777 HTTP/1.1" 200 OK
+INFO:     172.19.0.1:33470 - "POST /dispositivos-trampa/97dab0bd-cda2-409f-85c6-9c8a1a698805/foto HTTP/1.1" 200 OK
+INFO:     172.19.0.1:33472 - "GET /dispositivos-trampa/97dab0bd-cda2-409f-85c6-9c8a1a698805/foto?v=ba2644fa HTTP/1.1" 200 OK
+INFO:     172.19.0.1:60698 - "POST /dispositivos-trampa/f8a15f03-f738-4a4c-bb87-f27fdf912388/foto HTTP/1.1" 200 OK
+INFO:     172.19.0.1:60712 - "GET /dispositivos-trampa/f8a15f03-f738-4a4c-bb87-f27fdf912388/foto?v=b1469fc1 HTTP/1.1" 200 OK
+INFO:     172.19.0.1:58630 - "PATCH /dispositivos-trampa/97dab0bd-cda2-409f-85c6-9c8a1a698805 HTTP/1.1" 200 OK
+INFO:     172.19.0.1:59136 - "PATCH /dispositivos-trampa/97dab0bd-cda2-409f-85c6-9c8a1a698805 HTTP/1.1" 200 OK
+INFO:     172.19.0.1:42864 - "POST /croquis/77777777-7777-7777-7777-777777777777/dispositivos HTTP/1.1" 201 Created
+INFO:     172.19.0.1:47580 - "PATCH /dispositivos-trampa/d7b2dcae-fab3-4871-895b-74f4f7ea6560 HTTP/1.1" 200 OK
+INFO:     172.19.0.1:42110 - "PATCH /visitas/77777777-7777-7777-7777-777777777777 HTTP/1.1" 200 OK
+INFO:     172.19.0.1:54478 - "GET /croquis/77777777-7777-7777-7777-777777777777 HTTP/1.1" 200 OK
+INFO:     172.19.0.1:54482 - "GET /dispositivos-trampa/97dab0bd-cda2-409f-85c6-9c8a1a698805/foto?v=ba2644fa HTTP/1.1" 200 OK
+INFO:     172.19.0.1:56276 - "GET /operadores/me/visitas-hoy HTTP/1.1" 200 OK

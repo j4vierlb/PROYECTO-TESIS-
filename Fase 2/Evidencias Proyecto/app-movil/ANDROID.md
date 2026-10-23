@@ -160,12 +160,12 @@ sea compartido. Usar cuentas y visitas de prueba; estos pasos modifican datos.
 
 | ID | Verificación en ambos dispositivos | Resultado / evidencia |
 |---|---|---|
-| AND-01 | Login válido, inválido y cierre de sesión | Android: login válido y cierre aprobados; inválido sin ejecutar. Comparación iOS pendiente |
-| AND-02 | Cerrar y abrir la app conserva la sesión; renovar token y cerrar sesión eliminan/actualizan los tokens correctamente | Android: conserva al relanzar; tras cerrar sesión y relanzar vuelve al login. Renovación y comparación iOS pendientes |
+| AND-01 | Login válido, inválido y cierre de sesión | Android 22/10: login válido y cierre aprobados; inválido verificado por HTTP, no desde la UI. Comparación iOS pendiente |
+| AND-02 | Cerrar y abrir la app conserva la sesión; renovar token y cerrar sesión eliminan/actualizan los tokens correctamente | Android 22/10: conserva sesión vigente al relanzar; logout vuelve al login. Refresh HTTP aprobado; renovación automática de token vencido desde UI y comparación iOS pendientes |
 | AND-03 | Agenda, detalle, notas e iniciar/completar una visita | Android: agenda vacía y detalle completado aprobados. Edición/cambios de estado y comparación iOS pendientes |
 | AND-04 | Historial y visita completada en modo de solo consulta | Android aprobado con visita de prueba existente; comparación iOS pendiente |
 | AND-05 | Abrir croquis existente y crear el de una visita sin croquis | Android: croquis existente de 3 trampas en consulta aprobado. Creación y comparación iOS pendientes |
-| AND-06 | Mapa satelital, posición inicial y marcadores por estado | Sin ejecutar |
+| AND-06 | Mapa satelital, posición inicial y marcadores por estado | Android 22/10: mapa híbrido/satelital real, centrado en trampas, tres marcadores sin confirmar y selección T-01 aprobados. GPS, otros estados y comparación iOS pendientes |
 | AND-07 | Agregar trampa por GPS; denegar ubicación y volver a intentar | Sin ejecutar |
 | AND-08 | Agregar tocando el mapa, mover, confirmar y retirar | Sin ejecutar |
 | AND-09 | Sacar foto, elegir de galería, cancelar y consultar la foto privada | Sin ejecutar |
@@ -232,8 +232,71 @@ La compilación también muestra advertencias de APIs obsoletas y de futura
 compatibilidad de Kotlin en dependencias. No son fallas de esta compilación y no
 se actualizaron paquetes para eliminarlas, para conservar el lockfile de iOS.
 
-Siguen pendientes la clave Android de Maps, pruebas de GPS/cámara/fotos y los
-flujos de escritura con datos de prueba, y la confirmación del commit/SDK de la
-versión instalada en el iPhone. No se ha comprobado todavía equivalencia
-funcional completa entre dispositivos. El APK generado es debug, no una entrega
-firmada para producción.
+En el corte original del 21/10 seguían pendientes la clave Android de Maps,
+GPS/cámara/fotos, escritura y comparación con el iPhone. La verificación
+posterior siguiente resuelve solamente la configuración y consulta del mapa
+Android y repite los controles indicados; no declara equivalencia completa ni
+una entrega firmada para producción.
+
+## Verificación posterior del 22/10/2026: Maps real
+
+Se integró `origin/main` hasta `fa86264` en la rama `juan`, se respaldó la base,
+se aplicó la migración de `message_sid` y se reconstruyó solo el backend,
+conservando la base antigua y sus volúmenes. Sus 18 archivos Python coinciden
+con el código local; health, refresh y la ruta de sugerencia están disponibles.
+
+Las claves móviles están en los archivos privados indicados en esta guía,
+no en el `.env` raíz. Se comprobó su formato sin imprimir los valores y se
+compiló el APK con `MAPS_ENABLED=true` y backend `http://10.0.2.2:8000`.
+
+- `flutter pub get --enforce-lockfile`: correcto, sin actualizar dependencias.
+- `flutter analyze --no-pub`: sin observaciones.
+- `flutter test --no-pub --reporter expanded`: **18 aprobadas**, con log.
+- Comprobación HTTP separada: **12/12 aprobadas**, sin modificar clientes,
+  visitas o trampas y sin invocar OpenAI ni Twilio.
+- Mapa real aprobado en el emulador: imágenes satelitales, tres marcadores y
+  ventana informativa de T-01, en una visita completada de demostración.
+- Login, logout y sesión vigente al relanzar comprobados desde la app.
+
+El APK sigue siendo debug `1.0.0+1`, firmado con el mismo certificado de la
+preparación original. Su nuevo SHA-256 es
+`718aee538d50f2ed36a60ce3d236d901e339eba79cd873d621bf744a4a18b26d`.
+Los resultados, logs originales, capturas y las incidencias de arranque del
+emulador se conservan en el
+[registro del 22/10](../pruebas/android_2026-10-22/README.md).
+
+No se aprobaron aún GPS, cámara/galería/fotos, escritura, funcionamiento sin
+red, renovación automática de token vencido desde UI ni equivalencia con el
+iPhone. El aviso inicial de System UI por recursos y el primer mapa gris
+durante la carga se mantienen documentados; no se confunden con una prueba
+exitosa. El emulador se dejó abierto en el mapa para la revisión local.
+
+## Actualización del 23/10/2026: trabajo en terreno
+
+El corte del 22/10 anterior es histórico. La nueva versión fortalece el código
+Flutter compartido sin actualizar dependencias: permisos y espera GPS, proveedor
+nativo Android, recuperación de fotos interrumpidas, envío pendiente con reintento
+manual, renovación de sesión y validación de rutas de fotos privadas.
+
+Se aprobaron **50 pruebas Flutter** (18 existentes y 32 nuevas), análisis sin
+observaciones y **16 comprobaciones HTTP** en PostGIS aislado. Desde el emulador
+se verificaron GPS simulado, alta en mapa, mover/confirmar/retirar, cámara emulada,
+galería, foto pendiente tras caída de conexión y reinicio, reintento, fotos
+privadas, notas y cierre con croquis de solo lectura. No se modificó la base
+de trabajo. Detalles y límites en el
+[registro de terreno del 23/10](../pruebas/android_campo_2026-10-23/README.md).
+
+El APK debug actual reemplaza el archivo de compilación anterior y usa
+`API_BASE_URL=http://127.0.0.1:8000`, con Maps activo. Para ejecutarlo en el
+emulador contra el backend local es necesario, después de cada reinicio:
+
+```powershell
+adb -s emulator-5554 reverse tcp:8000 tcp:8000
+```
+
+SHA-256 actual:
+`9b5e52529e9a990e06cd42c4f8f811e7bcf9ccb89d9b9baf44f9f2515ba73142`.
+Las claves siguen en los archivos privados Android/iOS; no se incorporó `.env`
+al APK. No es una versión release: siguen pendientes teléfono físico,
+comparación exacta con iPhone y sincronización offline completa. Conservar
+una foto en caché para reintentar no equivale a tener modo offline.

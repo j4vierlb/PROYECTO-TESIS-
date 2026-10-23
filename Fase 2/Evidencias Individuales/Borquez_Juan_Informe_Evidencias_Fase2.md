@@ -142,6 +142,24 @@ de token vencido, teléfono físico y equivalencia con el iPhone usando el mismo
 commit, configuración y datos. No se declara una versión release ni equivalencia
 funcional completa por el solo hecho de compartir código Flutter.
 
+Actualización posterior al corte inicial: el
+[registro Android del 22/10](../Evidencias%20Proyecto/pruebas/android_2026-10-22/README.md)
+documenta una nueva compilación con clave Android y Maps activo, mapa satelital
+real con tres marcadores y selección T-01, 18 pruebas Flutter y 12 comprobaciones
+HTTP separadas. Resuelve el pendiente de configuración y consulta del mapa
+Android, no los flujos de GPS, cámara/fotos, escritura ni comparación con iPhone.
+
+El [corte de terreno del 23/10](../Evidencias%20Proyecto/pruebas/android_campo_2026-10-23/README.md)
+añade robustez de permisos GPS, recuperación/reintento de fotos y sesión al
+código Flutter compartido; no atribuye como nuevas las funciones originales
+de cámara/mapa/edición. Registra **50 pruebas Flutter** (18 existentes y 32 nuevas),
+16 comprobaciones HTTP aisladas y verificaciones manuales de GPS simulado,
+cámara emulada, galería, caída de conexión/reinicio, notas, edición y cierre.
+Estos resultados sustituyen los pendientes de esos flujos en emulador, no los
+de teléfono físico, comparación con iPhone ni sincronización offline completa.
+El código funcional de este corte se identifica con el commit `2df57a5`;
+la documentación y las evidencias se publican en su entrega asociada.
+
 ## 6. Documentación de Fase 2
 
 Los documentos 01 al 10 se incorporaron juntos en `8a4e4bd`. En `676a885`
