@@ -13,6 +13,19 @@ export function chileTime(value) {
   }).format(new Date(value))
 }
 
+export function chileDateTime(value) {
+  return new Intl.DateTimeFormat('es-CL', {
+    timeZone: CHILE_ZONE, day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).format(new Date(value))
+}
+
+// Valor para un <input type="datetime-local"> con la hora de Chile de una fecha UTC.
+export function utcToChileInput(value) {
+  return new Date(value).toLocaleString('sv-SE', {
+    timeZone: CHILE_ZONE, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).replace(' ', 'T')
+}
+
 export function clientLocation(client) {
   return Number.isFinite(client.lat) && Number.isFinite(client.lng)
     ? `${client.lat.toFixed(4)}, ${client.lng.toFixed(4)}`

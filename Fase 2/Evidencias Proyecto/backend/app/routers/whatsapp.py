@@ -1,13 +1,17 @@
 # =============================================================================
 # routers/whatsapp.py — Webhook de WhatsApp (Twilio) + agente IA
 # -----------------------------------------------------------------------------
-#   POST /webhooks/whatsapp   Twilio llama aquí cada vez que un cliente
-#                             escribe al número de WhatsApp de la empresa
+#   POST /webhooks/whatsapp          Twilio llama aquí cada vez que un cliente
+#                                    escribe al número de WhatsApp de la empresa
+#   POST /webhooks/whatsapp/estado   Twilio informa si un mensaje enviado al
+#                                    cliente llegó (sent, delivered, read, failed)
 #
 # Flujo de un mensaje:
 #   1. Se valida la firma de Twilio (para que nadie más pueda llamar aquí).
 #   2. Se ignora si su MessageSid ya se procesó (Twilio reintenta si tardamos).
 #   3. Se busca o crea el cliente y su conversación, y se guarda el mensaje.
+#      Si un operador tomó la conversación desde el panel, aquí termina: la
+#      IA no responde y el operador contesta desde la bandeja.
 #   4. La IA (ai/agent.py) decide si solo responde o si hay que agendar.
 #   5. Si hay que agendar: se valida la fecha, se guarda la dirección y se
 #      crea la visita con operador asignado; si el horario no está libre,
@@ -33,8 +37,10 @@ from app.ai.agent import MAX_WHATSAPP_CHARS, generate_agent_decision
 from app.config import settings
 from app.database import get_db
 from app.geocoding import geocodificar_cliente
+from app.whatsapp_saliente import status_callback_base, status_callback_url
 from app.repositories import (
     HorarioNoDisponible,
+    update_whatsapp_delivery,
     create_whatsapp_visit,
     fetch_active_whatsapp_conversation,
     fetch_or_create_whatsapp_client,
@@ -66,26 +72,29 @@ async def read_twilio_form(request: Request) -> dict[str, str]:
     return {str(key): str(value) for key, value in form.items()}
 
 
-def _twiml(message: str | None = None) -> Response:
-    """Respuesta en el XML que entiende Twilio. Sin mensaje = no responder."""
+def _twiml(message: str | None = None, status_callback: str | None = None) -> Response:
+    """Respuesta en el XML que entiende Twilio. Sin mensaje = no responder.
+    status_callback = URL donde Twilio informará si la respuesta llegó."""
     response = MessagingResponse()
     if message:
-        response.message(message[:MAX_WHATSAPP_CHARS])
+        extra = {"action": status_callback, "method": "POST"} if status_callback else {}
+        response.message(message[:MAX_WHATSAPP_CHARS], **extra)
     return Response(content=str(response), media_type="application/xml")
 
 
-def _validate_twilio(request: Request, form: dict[str, str]) -> None:
+def _validate_twilio(request: Request, form: dict[str, str], public_url: str | None = None) -> None:
     """Comprueba la firma X-Twilio-Signature. Se calcula sobre la URL pública
-    exacta configurada en Twilio (TWILIO_WEBHOOK_URL), no sobre la URL local
-    que ve el servidor detrás de ngrok o de un proxy."""
+    exacta que llamó Twilio (por defecto TWILIO_WEBHOOK_URL), no sobre la URL
+    local que ve el servidor detrás de ngrok o de un proxy."""
     if not settings.twilio_validate_signature:
         return
-    if not settings.twilio_auth_token or not settings.twilio_webhook_url:
+    public_url = public_url if public_url is not None else settings.twilio_webhook_url
+    if not settings.twilio_auth_token or not public_url:
         logger.error("TWILIO_AUTH_TOKEN o TWILIO_WEBHOOK_URL no están configurados")
         raise HTTPException(status_code=500, detail="Webhook de Twilio no configurado")
     signature = request.headers.get("X-Twilio-Signature", "")
     validator = RequestValidator(settings.twilio_auth_token)
-    if not validator.validate(settings.twilio_webhook_url, form, signature):
+    if not validator.validate(public_url, form, signature):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Firma de Twilio inválida")
 
 
@@ -206,6 +215,10 @@ def whatsapp_webhook(
             logger.info("Mensaje duplicado de Twilio ignorado: %s", message_sid)
             return _twiml()
 
+        if conversation["atendida_por_humano"]:
+            # Un operador atiende esta conversación desde el panel: la IA no responde.
+            return _twiml()
+
         history = fetch_whatsapp_history(db, conversation["id"], limit=20)
     except Exception:
         db.rollback()
@@ -232,10 +245,49 @@ def whatsapp_webhook(
                     "Un operador te contactará pronto."
                 )
 
+    saved = None
     try:
-        insert_whatsapp_message(db, conversation["id"], "agente_ia", reply[:MAX_WHATSAPP_CHARS], intent)
+        # Sin URL pública Twilio no informará el estado: se deja vacío en vez de "queued" para siempre.
+        saved = insert_whatsapp_message(
+            db, conversation["id"], "agente_ia", reply[:MAX_WHATSAPP_CHARS], intent,
+            delivery_status="queued" if status_callback_base() else None,
+        )
     except Exception:
         # La respuesta se envía igual aunque no quede guardada en el historial.
         db.rollback()
         logger.exception("No se pudo guardar la respuesta del agente (MessageSid=%s)", message_sid)
-    return _twiml(reply)
+    return _twiml(reply, status_callback_url(saved["id"]) if saved else None)
+
+
+@router.post("/whatsapp/estado", status_code=status.HTTP_204_NO_CONTENT)
+def whatsapp_status_callback(
+    request: Request,
+    form: dict[str, str] = Depends(read_twilio_form),
+    db: Connection = Depends(get_db),
+) -> Response:
+    """Twilio avisa aquí cada cambio de estado de un mensaje enviado al
+    cliente. ?mensaje_id= lo pone el backend al enviar, para encontrar el
+    mensaje aunque aún no tenga MessageSid (respuestas TwiML del agente)."""
+    query = request.url.query
+    base = status_callback_base()
+    _validate_twilio(request, form, f"{base}?{query}" if base and query else base)
+
+    mensaje_id = None
+    if request.query_params.get("mensaje_id"):
+        try:
+            mensaje_id = UUID(request.query_params["mensaje_id"])
+        except ValueError:
+            raise HTTPException(status_code=400, detail="mensaje_id inválido")
+    estado = form.get("MessageStatus", "").strip()
+    error_code = form.get("ErrorCode", "").strip()
+    error = f"{error_code}: {form.get('ErrorMessage', '').strip()}".rstrip(": ") if error_code else None
+    try:
+        update_whatsapp_delivery(
+            db, estado, message_id=mensaje_id, message_sid=form.get("MessageSid", "").strip(), error=error
+        )
+    except Exception:
+        db.rollback()
+        logger.exception("No se pudo guardar el estado de entrega (MessageSid=%s)", form.get("MessageSid"))
+    if estado in {"failed", "undelivered"}:
+        logger.warning("WhatsApp no entregado (MessageSid=%s): %s", form.get("MessageSid"), error)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

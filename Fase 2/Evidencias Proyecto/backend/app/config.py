@@ -33,12 +33,28 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-4.1-mini"
     # Credenciales de Twilio. TWILIO_WEBHOOK_URL debe ser exactamente la URL
     # pública configurada en Twilio, porque con ella se valida la firma.
+    # TWILIO_WHATSAPP_NUMBER es el número que envía (ej: +14155238886 en el Sandbox).
     twilio_account_sid: str = ""
     twilio_auth_token: str = ""
     twilio_whatsapp_number: str = ""
     twilio_webhook_url: str = ""
     # true en producción. false solo para probar en local con curl.
     twilio_validate_signature: bool = True
+    # URL pública donde Twilio informa si cada mensaje enviado llegó. Vacía =
+    # TWILIO_WEBHOOK_URL + "/estado" (ej: https://xxxx.ngrok-free.app/webhooks/whatsapp/estado).
+    twilio_status_callback_url: str = ""
+    # Plantillas aprobadas (ContentSid "HX...") para escribirle a un cliente
+    # que no ha escrito en las últimas 24 h: fuera de esa ventana WhatsApp no
+    # acepta texto libre. Vacías = esos mensajes quedan como "no_enviado".
+    #   Recordatorio: variables {"1": fecha "dd/mm/aaaa", "2": hora "HH:MM"}.
+    #   Aviso:        variables {"1": texto del aviso}.
+    twilio_content_sid_recordatorio: str = ""
+    twilio_content_sid_aviso: str = ""
+    # Avisos al cliente cuando el panel agenda, reagenda o cancela su visita.
+    whatsapp_avisos_activos: bool = True
+    # Recordatorio el día anterior a la visita, desde esta hora (Chile).
+    whatsapp_recordatorios_activos: bool = True
+    whatsapp_recordatorio_hora: str = "18:00"
     # Empresa que recibe las visitas agendadas por WhatsApp.
     killbichos_empresa_id: str = "11111111-1111-1111-1111-111111111111"
     # Operador fijo para esas visitas. Vacío = el operador libre con menos

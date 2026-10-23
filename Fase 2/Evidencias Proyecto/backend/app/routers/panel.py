@@ -1,7 +1,7 @@
 from datetime import date, datetime, time, timezone
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
@@ -9,7 +9,10 @@ from app.database import get_db
 from app.dependencies import require_web_user
 from app.schemas import (
     ClientCreate, ClientSummary, ClientUpdate, CurrentUser, OperatorSummary,
-    PanelStats, PanelVisitResponse, VisitCreate, VisitStatus, VisitUpdate,
+    PanelStats, PanelVisitResponse, PanelVisitUpdate, VisitCreate, VisitStatus,
+)
+from app.whatsapp_saliente import (
+    AVISO_AGENDADA, AVISO_CANCELADA, AVISO_REAGENDADA, avisar_visita_en_segundo_plano,
 )
 from app.zona_horaria import hoy_chile
 
@@ -155,21 +158,47 @@ def list_panel_visits(fecha: date | None = None, operador_id: UUID | None = None
     return [_visit(dict(row)) for row in rows]
 
 
+def _ensure_operator(db: Connection, operator_id, empresa_id: UUID) -> None:
+    exists = db.execute(text("SELECT 1 FROM operadores WHERE id = :id AND empresa_id = :empresa_id AND activo = TRUE"),
+                        {"id": str(operator_id), "empresa_id": str(empresa_id)}).first()
+    if not exists:
+        raise HTTPException(status_code=400, detail="Operador no válido")
+
+
+_ACTIVE = {VisitStatus.agendada.value, VisitStatus.reagendada.value}
+
+
+def _notice_for_change(before: dict, after: dict) -> str | None:
+    """Qué aviso de WhatsApp corresponde a un cambio hecho en el panel.
+    Cambiar solo las notas, el operador o el avance (en curso, completada)
+    no se le avisa al cliente."""
+    if after["estado"] == VisitStatus.cancelada.value and before["estado"] != VisitStatus.cancelada.value:
+        return AVISO_CANCELADA
+    if after["estado"] not in _ACTIVE:
+        return None
+    if before["estado"] == VisitStatus.cancelada.value:
+        return AVISO_AGENDADA  # se reactivó una visita cancelada
+    if after["fecha_hora"] != before["fecha_hora"]:
+        return AVISO_REAGENDADA
+    return None
+
+
 @router.post("/panel/visitas", response_model=PanelVisitResponse, status_code=status.HTTP_201_CREATED)
-def create_visit(payload: VisitCreate, user: CurrentUser = Depends(require_web_user), db: Connection = Depends(get_db)):
+def create_visit(payload: VisitCreate, background_tasks: BackgroundTasks,
+                 user: CurrentUser = Depends(require_web_user), db: Connection = Depends(get_db)):
     _client_row(db, payload.cliente_id, user.empresa_id)
     if payload.operador_id:
-        exists = db.execute(text("SELECT 1 FROM operadores WHERE id = :id AND empresa_id = :empresa_id AND activo = TRUE"),
-                            {"id": str(payload.operador_id), "empresa_id": str(user.empresa_id)}).first()
-        if not exists:
-            raise HTTPException(status_code=400, detail="Operador no válido")
+        _ensure_operator(db, payload.operador_id, user.empresa_id)
     row_id = db.execute(text("""
         INSERT INTO visitas (empresa_id, cliente_id, operador_id, fecha_hora, estado, origen_agendamiento, notas)
         VALUES (:empresa_id, :cliente_id, :operador_id, :fecha_hora, 'agendada', 'manual', :notas) RETURNING id
     """), {"empresa_id": str(user.empresa_id), "cliente_id": str(payload.cliente_id), "operador_id": str(payload.operador_id) if payload.operador_id else None,
           "fecha_hora": payload.fecha_hora, "notas": payload.notas}).scalar_one()
     db.commit()
-    return _visit(_visit_row(db, row_id, user.empresa_id))
+    row = _visit_row(db, row_id, user.empresa_id)
+    # El aviso por WhatsApp se envía después de responder: el panel no espera a Twilio.
+    background_tasks.add_task(avisar_visita_en_segundo_plano, row, AVISO_AGENDADA)
+    return _visit(row)
 
 
 def _visit_row(db: Connection, visit_id: UUID, empresa_id: UUID) -> dict:
@@ -180,19 +209,32 @@ def _visit_row(db: Connection, visit_id: UUID, empresa_id: UUID) -> dict:
 
 
 @router.patch("/panel/visitas/{visit_id}", response_model=PanelVisitResponse)
-def update_panel_visit(visit_id: UUID, payload: VisitUpdate, user: CurrentUser = Depends(require_web_user), db: Connection = Depends(get_db)):
-    _visit_row(db, visit_id, user.empresa_id)
+def update_panel_visit(visit_id: UUID, payload: PanelVisitUpdate, background_tasks: BackgroundTasks,
+                       user: CurrentUser = Depends(require_web_user), db: Connection = Depends(get_db)):
+    before = _visit_row(db, visit_id, user.empresa_id)
     values = payload.model_dump(exclude_unset=True, mode="json")
+    if values.get("operador_id"):
+        _ensure_operator(db, values["operador_id"], user.empresa_id)
     if values:
-        sets = ", ".join(f"{key} = :{key}" for key in values)
-        db.execute(text(f"UPDATE visitas SET {sets} WHERE id = :id AND empresa_id = :empresa_id"), {**values, "id": str(visit_id), "empresa_id": str(user.empresa_id)})
+        sets = [f"{key} = :{key}" for key in values]
+        if "fecha_hora" in values:
+            # Si cambió la fecha, la visita debe recibir un recordatorio nuevo.
+            sets.append("recordatorio_enviado_at = CASE WHEN fecha_hora = CAST(:fecha_hora AS timestamptz) "
+                        "THEN recordatorio_enviado_at END")
+        db.execute(text(f"UPDATE visitas SET {', '.join(sets)} WHERE id = :id AND empresa_id = :empresa_id"),
+                   {**values, "id": str(visit_id), "empresa_id": str(user.empresa_id)})
         db.commit()
-    return _visit(_visit_row(db, visit_id, user.empresa_id))
+    after = _visit_row(db, visit_id, user.empresa_id)
+    notice = _notice_for_change(before, after)
+    if notice:
+        background_tasks.add_task(avisar_visita_en_segundo_plano, after, notice)
+    return _visit(after)
 
 
 @router.delete("/panel/visitas/{visit_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_visit(visit_id: UUID, user: CurrentUser = Depends(require_web_user), db: Connection = Depends(get_db)):
-    _visit_row(db, visit_id, user.empresa_id)
+def delete_visit(visit_id: UUID, background_tasks: BackgroundTasks,
+                 user: CurrentUser = Depends(require_web_user), db: Connection = Depends(get_db)):
+    before = _visit_row(db, visit_id, user.empresa_id)
     # Las visitas forman parte del historial y pueden tener un croquis asociado.
     # Se cancelan en lugar de borrarse para conservar la trazabilidad.
     db.execute(
@@ -200,3 +242,5 @@ def delete_visit(visit_id: UUID, user: CurrentUser = Depends(require_web_user), 
         {"id": str(visit_id), "empresa_id": str(user.empresa_id)},
     )
     db.commit()
+    if before["estado"] != VisitStatus.cancelada.value:
+        background_tasks.add_task(avisar_visita_en_segundo_plano, before, AVISO_CANCELADA)

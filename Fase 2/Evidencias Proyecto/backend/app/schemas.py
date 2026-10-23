@@ -145,6 +145,19 @@ class PanelVisitResponse(VisitResponse):
     operador: OperatorSummary | None = None
 
 
+class PanelVisitUpdate(VisitUpdate):
+    """Body de PATCH /panel/visitas/{id}: además del estado y las notas, el
+    panel puede reagendar (fecha_hora) y cambiar el operador (null = sin asignar)."""
+    fecha_hora: datetime | None = None
+    operador_id: UUID | None = None
+
+    @model_validator(mode="after")
+    def validate_fecha_hora(self) -> "PanelVisitUpdate":
+        if "fecha_hora" in self.model_fields_set and self.fecha_hora is None:
+            raise ValueError("fecha_hora no puede ser null")
+        return self
+
+
 class PanelStats(BaseModel):
     clientes: int
     visitas_hoy: int
@@ -254,6 +267,49 @@ class DeviceUpdate(BaseModel):
         if self.accion == DeviceAction.mover and (self.lat is None or self.lng is None):
             raise ValueError("lat y lng son obligatorios para mover el dispositivo")
         return self
+
+
+# ---------------------------------------------------------------------------
+# Bandeja de WhatsApp del panel
+# ---------------------------------------------------------------------------
+class ConversationSummary(BaseModel):
+    """Una conversación en la lista de la bandeja."""
+    id: UUID
+    cliente: ClientSummary
+    atendida_por_humano: bool       # True = la IA está pausada y responde un operador
+    ventana_abierta: bool           # el cliente escribió en las últimas 24 h
+    ultimo_mensaje: str | None = None
+    ultimo_emisor: str | None = None
+    ultimo_at: datetime | None = None
+
+
+class WhatsAppMessage(BaseModel):
+    id: UUID
+    emisor: str                     # cliente, agente_ia, sistema u operador
+    contenido: str
+    intencion_detectada: str | None = None
+    # Solo mensajes enviados al cliente: queued, sent, delivered, read,
+    # failed, undelivered o no_enviado.
+    estado_entrega: str | None = None
+    error_entrega: str | None = None
+    created_at: datetime
+
+
+class ConversationDetail(ConversationSummary):
+    mensajes: list[WhatsAppMessage]
+
+
+class OperatorMessageCreate(BaseModel):
+    contenido: str = Field(min_length=1, max_length=1600)
+
+
+class ConversationUpdate(BaseModel):
+    atendida_por_humano: bool
+
+
+class RemindersResult(BaseModel):
+    enviados: int
+    no_enviados: int
 
 
 # ---------------------------------------------------------------------------
