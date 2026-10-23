@@ -1,0 +1,14 @@
+{
+  "source_commit": "c4a56ff",
+  "functional_commit": "f55659a",
+  "tested_at_utc": "2026-10-23T18:15:40.9599093Z",
+  "tests": 75,
+  "tests_added": 25,
+  "previous_tests": 50,
+  "api_calls_to_work_backend": 0,
+  "physical_device_tested": false,
+  "new_emulator_tested": false,
+  "apk_sha256": "4615ae8a2c7750ef841153def9b2efe791460aba1b6e6d804b96cd2f0ed31823",
+  "api_base": "http://127.0.0.1:8000",
+  "maps_enabled": true
+}

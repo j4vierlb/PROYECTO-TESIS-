@@ -1,0 +1,22 @@
+D/StrictMode( 1376): 	at com.google.android.gms.dynamite.DynamiteModule.d(PG:58)
+D/StrictMode( 1376): 	at com.google.android.gms.dynamite.DynamiteModule.d(PG:282)
+D/StrictMode( 1376): 	at com.google.android.gms.dynamite.DynamiteModule.d(PG:282)
+D/MapsInitializer( 3186): preferredRenderer: null
+D/zzcc    ( 3186): preferredRenderer: null
+I/DynamiteModule( 3186): Considering local module com.google.android.gms.maps_core_dynamite:0 and remote module com.google.android.gms.maps_core_dynamite:203115000
+I/DynamiteModule( 3186): Selected remote version of com.google.android.gms.maps_core_dynamite, version >= 203115000
+V/DynamiteModule( 3186): Dynamite loader version >= 2, using loadModule2NoCrashUtils
+I/Google Maps Android API( 3186): Google Play services client version: 20000000
+W/Google Maps Android API( 3186): Adding internal usage attribution is an unsupported operation in the legacy renderer.
+W/Google Maps Android API( 3186): Adding internal usage attribution is an unsupported operation in the legacy renderer.
+I/Google Maps Android API( 3186): Google Play services package version: 252635038
+I/Google Maps Android API( 3186): Google Play services maps renderer version(legacy): 203115000
+D/MapsInitializer( 3186): loadedRenderer: LEGACY
+D/zzcc    ( 3186): preferredRenderer: null
+I/Google Maps Android API( 3186): Google Play services package version: 252635038
+I/Google Maps Android API( 3186): Google Play services maps renderer version(legacy): 203115000
+W/Google Maps Android API( 3186): Deprecation notice: In a future release, indoor will no longer be supported on satellite, hybrid or terrain type maps. Even where indoor is not supported, isIndoorEnabled() will continue to return the value that has been set via setIndoorEnabled(), as it does now. By default, setIndoorEnabled is 'true'. The API release notes (https://developers.google.com/maps/documentation/android-api/releases) will let you know when indoor support becomes unavailable on those map types.
+I/GoogleMapController( 3186): No TextureView found. Likely using the LEGACY renderer.
+W/DynamiteModule( 3186): Local module descriptor class for com.google.android.gms.googlecertificates not found.
+I/DynamiteModule( 3186): Considering local module com.google.android.gms.googlecertificates:0 and remote module com.google.android.gms.googlecertificates:7
+I/DynamiteModule( 3186): Selected remote version of com.google.android.gms.googlecertificates, version >= 7

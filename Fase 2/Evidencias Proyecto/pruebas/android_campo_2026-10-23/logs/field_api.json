@@ -1,0 +1,105 @@
+{
+  "qa_base": "http://127.0.0.1:18787",
+  "work_database_modified": false,
+  "calls_to_openai_twilio": false,
+  "passed": 16,
+  "total": 16,
+  "checks": [
+    {
+      "id": "FIELD-API-01-login",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "FIELD-API-02-start-notes",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "FIELD-API-03-create-croquis",
+      "expected": 201,
+      "actual": 201,
+      "passed": true
+    },
+    {
+      "id": "FIELD-API-04-idempotent-croquis",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "FIELD-API-05-add-coordinates",
+      "expected": 201,
+      "actual": 201,
+      "passed": true
+    },
+    {
+      "id": "FIELD-API-06-move",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "FIELD-API-07-confirm",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "FIELD-API-08-upload-png",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "FIELD-API-09-private-photo",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "FIELD-API-10-no-token",
+      "expected": 401,
+      "actual": 401,
+      "passed": true
+    },
+    {
+      "id": "FIELD-API-11-other-company-login",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "FIELD-API-12-other-company-photo",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "id": "FIELD-API-13-other-company-visit",
+      "expected": 403,
+      "actual": 403,
+      "passed": true
+    },
+    {
+      "id": "FIELD-API-14-retire",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "FIELD-API-15-complete",
+      "expected": 200,
+      "actual": 200,
+      "passed": true
+    },
+    {
+      "id": "FIELD-API-16-closed-visit-write",
+      "expected": 409,
+      "actual": 409,
+      "passed": true
+    }
+  ]
+}

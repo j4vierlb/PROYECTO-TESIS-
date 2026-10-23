@@ -1,0 +1,82 @@
+{
+  "executed_at_utc": "2026-10-23T01:54:00.358820+00:00",
+  "base": "http://127.0.0.1:8000",
+  "passed": 12,
+  "total": 12,
+  "changes_to_clients_visits_traps": false,
+  "calls_to_openai_or_twilio": false,
+  "checks": [
+    {
+      "id": "AND-API-01-health",
+      "expected_http": 200,
+      "actual_http": 200,
+      "passed": true
+    },
+    {
+      "id": "AND-API-02-updated-contract",
+      "expected_http": 200,
+      "actual_http": 200,
+      "passed": true
+    },
+    {
+      "id": "AND-API-03-invalid-login",
+      "expected_http": 401,
+      "actual_http": 401,
+      "passed": true
+    },
+    {
+      "id": "AND-API-04-valid-demo-login",
+      "expected_http": 200,
+      "actual_http": 200,
+      "passed": true
+    },
+    {
+      "id": "AND-API-05-refresh",
+      "expected_http": 200,
+      "actual_http": 200,
+      "passed": true
+    },
+    {
+      "id": "AND-API-06-access-is-not-refresh",
+      "expected_http": 401,
+      "actual_http": 401,
+      "passed": true
+    },
+    {
+      "id": "AND-API-07-today",
+      "expected_http": 200,
+      "actual_http": 200,
+      "passed": true
+    },
+    {
+      "id": "AND-API-08-history",
+      "expected_http": 200,
+      "actual_http": 200,
+      "passed": true
+    },
+    {
+      "id": "AND-API-09-visit-read",
+      "expected_http": 200,
+      "actual_http": 200,
+      "passed": true
+    },
+    {
+      "id": "AND-API-10-croquis-read",
+      "expected_http": 200,
+      "actual_http": 200,
+      "passed": true
+    },
+    {
+      "id": "AND-API-11-invalid-refresh",
+      "expected_http": 401,
+      "actual_http": 401,
+      "passed": true
+    },
+    {
+      "id": "AND-API-12-anonymous-agenda",
+      "expected_http": 401,
+      "actual_http": 401,
+      "passed": true
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+# Conservar los bytes originales de las evidencias y sus hashes en todos los SO.
+* -text whitespace=cr-at-eol
+# Los logs incluyen espacios de progreso originales; no se reformatean.
+logs/* -whitespace
