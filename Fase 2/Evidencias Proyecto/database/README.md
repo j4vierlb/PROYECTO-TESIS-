@@ -22,6 +22,7 @@ La primera vez que se crea la base (volumen vacío), PostgreSQL ejecuta estos sc
 | 3 | `demo_historial.sql` | 2 visitas pasadas completadas, para el historial de la app |
 | 4 | `migracion_message_sid.sql` | Columna `message_sid` para el agente de WhatsApp (en una base nueva ya viene en `schema.sql`; aquí no hace nada y es seguro) |
 | 5 | `migracion_croquis_terreno.sql` | Columna `foto_path` para la foto de cada trampa, y evita croquis duplicados por visita y códigos de trampa repetidos |
+| 6 | `migracion_whatsapp_saliente.sql` | Bandeja del panel, estado de entrega de cada mensaje y recordatorio del día anterior (en una base nueva ya viene en `schema.sql`) |
 
 Los scripts **solo corren al crear la base**. Si la base ya existe, no se vuelven a ejecutar.
 
@@ -38,6 +39,9 @@ docker compose exec -T db psql -U killbichos -d killbichos < "Fase 2/Evidencias 
 
 # Aplicar la migración del croquis en terreno (trampas y fotos desde la app) a una base ya creada
 docker compose exec -T db psql -U killbichos -d killbichos < "Fase 2/Evidencias Proyecto/database/migracion_croquis_terreno.sql"
+
+# Aplicar la migración de WhatsApp saliente (avisos, recordatorios y bandeja) a una base ya creada
+docker compose exec -T db psql -U killbichos -d killbichos < "Fase 2/Evidencias Proyecto/database/migracion_whatsapp_saliente.sql"
 
 # Abrir una consola SQL
 docker compose exec db psql -U killbichos -d killbichos

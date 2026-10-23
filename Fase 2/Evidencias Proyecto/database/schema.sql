@@ -66,16 +66,24 @@ CREATE TABLE conversaciones_whatsapp (
     id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     cliente_id  UUID NOT NULL REFERENCES clientes(id) ON DELETE CASCADE,
     estado      VARCHAR(20) NOT NULL DEFAULT 'activa' CHECK (estado IN ('activa', 'cerrada')),
+    -- TRUE = un operador del panel tomó la conversación y la IA no responde
+    atendida_por_humano BOOLEAN NOT NULL DEFAULT FALSE,
+    atendida_por_humano_desde TIMESTAMPTZ, -- cuándo la tomó el operador
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE mensajes_whatsapp (
     id                    UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     conversacion_id       UUID NOT NULL REFERENCES conversaciones_whatsapp(id) ON DELETE CASCADE,
-    emisor                VARCHAR(10) NOT NULL CHECK (emisor IN ('cliente', 'agente_ia', 'sistema')),
+    -- 'sistema' = aviso o recordatorio automático; 'operador' = escrito desde el panel
+    emisor                VARCHAR(10) NOT NULL CHECK (emisor IN ('cliente', 'agente_ia', 'sistema', 'operador')),
     contenido             TEXT NOT NULL,
     intencion_detectada   VARCHAR(50), -- ej: 'agendar_visita', 'consulta', 'reagendar'
     message_sid           VARCHAR(100) UNIQUE, -- MessageSid de Twilio, para ignorar reintentos duplicados
+    -- Solo mensajes enviados al cliente: queued, sent, delivered, read,
+    -- failed, undelivered (los informa Twilio) o no_enviado (no se llamó a Twilio)
+    estado_entrega        VARCHAR(20),
+    error_entrega         TEXT,
     created_at            TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -93,6 +101,7 @@ CREATE TABLE visitas (
     origen_agendamiento   VARCHAR(20) NOT NULL DEFAULT 'whatsapp_ia'
                            CHECK (origen_agendamiento IN ('whatsapp_ia', 'manual')),
     notas                 TEXT,
+    recordatorio_enviado_at TIMESTAMPTZ, -- recordatorio de WhatsApp del día anterior
     created_at            TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
