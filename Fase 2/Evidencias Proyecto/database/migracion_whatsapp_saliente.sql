@@ -3,7 +3,9 @@
 -- ---------------------------------------------------------------------
 -- 1. Bandeja del panel: un operador puede tomar una conversación
 --    (atendida_por_humano) y escribirle al cliente (emisor 'operador').
---    Mientras la conversación está tomada, la IA no responde.
+--    Mientras la conversación está tomada, la IA no responde, salvo que el
+--    operador lleve WHATSAPP_OPERADOR_MAX_HORAS sin actividad
+--    (atendida_por_humano_desde y sus mensajes).
 -- 2. Estado de entrega: cada mensaje enviado al cliente guarda lo que
 --    informa Twilio (queued, sent, delivered, read, failed, undelivered).
 -- 3. Recordatorio del día anterior: recordatorio_enviado_at evita que una
@@ -16,6 +18,8 @@
 
 ALTER TABLE conversaciones_whatsapp
     ADD COLUMN IF NOT EXISTS atendida_por_humano BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE conversaciones_whatsapp
+    ADD COLUMN IF NOT EXISTS atendida_por_humano_desde TIMESTAMPTZ;
 
 ALTER TABLE mensajes_whatsapp DROP CONSTRAINT IF EXISTS mensajes_whatsapp_emisor_check;
 ALTER TABLE mensajes_whatsapp ADD CONSTRAINT mensajes_whatsapp_emisor_check

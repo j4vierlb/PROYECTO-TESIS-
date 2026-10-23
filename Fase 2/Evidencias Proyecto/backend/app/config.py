@@ -55,6 +55,9 @@ class Settings(BaseSettings):
     # Recordatorio el día anterior a la visita, desde esta hora (Chile).
     whatsapp_recordatorios_activos: bool = True
     whatsapp_recordatorio_hora: str = "18:00"
+    # Horas sin actividad del operador tras las que una conversación tomada
+    # vuelve sola a la IA cuando el cliente escribe. 0 = nunca vuelve sola.
+    whatsapp_operador_max_horas: float = 2
     # Empresa que recibe las visitas agendadas por WhatsApp.
     killbichos_empresa_id: str = "11111111-1111-1111-1111-111111111111"
     # Operador fijo para esas visitas. Vacío = el operador libre con menos

@@ -138,6 +138,7 @@ Copia `.env.example` a `.env` y completa. **Nunca subas el `.env` ni claves real
 | `TWILIO_CONTENT_SID_RECORDATORIO`, `TWILIO_CONTENT_SID_AVISO` | Opcionales: plantillas aprobadas (`HX...`) para clientes que no escriben hace más de 24 h |
 | `WHATSAPP_AVISOS_ACTIVOS` | `true`: avisar al cliente cuando el panel agenda, reagenda o cancela su visita |
 | `WHATSAPP_RECORDATORIOS_ACTIVOS`, `WHATSAPP_RECORDATORIO_HORA` | Recordatorio del día anterior, desde esa hora de Chile (por defecto `18:00`) |
+| `WHATSAPP_OPERADOR_MAX_HORAS` | Horas sin actividad del operador tras las que la conversación vuelve sola a la IA (por defecto `2`; `0` = nunca) |
 | `KILLBICHOS_EMPRESA_ID` | Empresa que recibe las visitas (por defecto la del `seed.sql`) |
 | `KILLBICHOS_OPERADOR_ID` | Opcional: operador fijo para las visitas de WhatsApp |
 | `KILLBICHOS_OPEN_TIME`, `KILLBICHOS_CLOSE_TIME` | Horario de atención, por defecto `08:00` a `18:00` |
@@ -189,8 +190,8 @@ Además de contestar lo que escribe el cliente (TwiML en el webhook), el backend
 | Qué | Cuándo |
 |---|---|
 | **Aviso de visita** | El panel crea una visita, cambia su fecha (Reagendar), la cancela o reactiva una cancelada. Cambiar solo notas, operador o avance (en curso, completada) no se avisa. Tampoco se avisan visitas que ya pasaron. |
-| **Recordatorio** | El día anterior a cada visita agendada, desde `WHATSAPP_RECORDATORIO_HORA`. Un ciclo dentro del backend revisa cada 10 minutos; `visitas.recordatorio_enviado_at` evita duplicados. Si se reagenda, la visita vuelve a recibir recordatorio. En el panel, el botón **Enviar recordatorios de mañana** los envía en el momento (`POST /panel/whatsapp/recordatorios`). |
-| **Respuesta de un operador** | Desde la pestaña **WhatsApp** del panel. Al escribir, la conversación queda **atendida por un operador** y la IA deja de responder en ella hasta que se pulse **Devolver a la IA**. |
+| **Recordatorio** | El día anterior a cada visita agendada, desde `WHATSAPP_RECORDATORIO_HORA`. Un ciclo dentro del backend revisa cada 10 minutos; `visitas.recordatorio_enviado_at` evita duplicados; si Twilio falla por algo pasajero (caída, red, límite de envíos), la marca se quita y se reintenta en la siguiente pasada. Un error permanente (número inválido) no se reintenta. Si se reagenda, la visita vuelve a recibir recordatorio. En el panel, el botón **Enviar recordatorios de mañana** los envía en el momento (`POST /panel/whatsapp/recordatorios`). |
+| **Respuesta de un operador** | Desde la pestaña **WhatsApp** del panel. Al escribir, la conversación queda **atendida por un operador** y la IA deja de responder en ella hasta que se pulse **Devolver a la IA**. Si el operador no escribe en `WHATSAPP_OPERADOR_MAX_HORAS` horas, el siguiente mensaje del cliente lo vuelve a contestar la IA. |
 
 **Ventana de 24 h.** WhatsApp solo deja enviar texto libre hasta 24 h después del último mensaje del cliente. Fuera de esa ventana:
 

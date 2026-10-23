@@ -154,6 +154,47 @@ class EnviarWhatsAppTest(unittest.TestCase):
         self.assertEqual(claim.call_args.args[1].isoformat(), '2026-10-23')
         self.assertIn('mañana 23/10/2026 a las 10:00', self.twilio.messages.create.call_args.kwargs['body'])
 
+    def run_reminders(self):
+        claim = MagicMock(return_value=[dict(id='v1', cliente_id=CLIENT_ID,
+                                             fecha_hora=datetime(2026, 10, 23, 13, tzinfo=UTC))])
+        with patch.object(saliente, 'claim_visits_for_reminder', claim), \
+                patch.object(saliente, 'release_reminder_claim') as release:
+            sent = saliente.enviar_recordatorios(self.db, datetime(2026, 10, 22, 19, tzinfo=SANTIAGO))
+        return sent, release
+
+    def test_recordatorio_se_reintenta_si_twilio_esta_caido(self):
+        error = Exception('Service Unavailable')
+        error.code, error.status = 20503, 503
+        self.twilio.messages.create.side_effect = error
+        sent, release = self.run_reminders()
+        self.assertEqual(sent[0]['estado_entrega'], 'failed')
+        release.assert_called_once_with(self.db, 'v1')
+
+    def test_recordatorio_se_reintenta_si_falla_la_red(self):
+        self.twilio.messages.create.side_effect = ConnectionError('timeout')
+        _, release = self.run_reminders()
+        release.assert_called_once_with(self.db, 'v1')
+
+    def test_recordatorio_con_error_permanente_no_se_reintenta(self):
+        error = Exception('número inválido')
+        error.code, error.status = 21211, 400
+        self.twilio.messages.create.side_effect = error
+        sent, release = self.run_reminders()
+        self.assertEqual(sent[0]['estado_entrega'], 'failed')
+        release.assert_not_called()
+
+    def test_recordatorio_sin_plantilla_no_se_reintenta(self):
+        self.mocks['client_wrote_since'].return_value = False
+        sent, release = self.run_reminders()
+        self.assertEqual(sent[0]['estado_entrega'], 'no_enviado')
+        release.assert_not_called()
+
+    def test_recordatorio_que_falla_en_la_base_se_libera(self):
+        self.mocks['fetch_whatsapp_client'].side_effect = RuntimeError('se cayó la conexión')
+        sent, release = self.run_reminders()
+        self.assertEqual(sent, [])
+        release.assert_called_once_with(self.db, 'v1')
+
 
 class AvisoPorCambioTest(unittest.TestCase):
     def visit(self, estado='agendada', hora=10):
@@ -185,18 +226,21 @@ class WebhookTest(unittest.TestCase):
         path = url.removeprefix('https://ejemplo.ngrok-free.app')
         return self.client.post(path, data=form, headers={'X-Twilio-Signature': signature})
 
-    def inbound(self, human):
+    def inbound(self, human, operator_minutes_ago=5):
         base = 'app.routers.whatsapp.'
+        active_at = datetime.now(UTC) - timedelta(minutes=operator_minutes_ago)
         with patch(base + 'whatsapp_message_exists', return_value=False), \
                 patch(base + 'fetch_or_create_whatsapp_client', return_value=dict(
                     id=CLIENT_ID, nombre='Ana', direccion='Av. Macul 1234')), \
                 patch(base + 'fetch_active_whatsapp_conversation', return_value=dict(
-                    id=CONVERSATION_ID, atendida_por_humano=human)), \
+                    id=CONVERSATION_ID, atendida_por_humano=human, operador_activo_at=active_at)), \
+                patch(base + 'set_conversation_human') as set_human, \
                 patch(base + 'insert_whatsapp_message', return_value=saved_message()) as insert, \
                 patch(base + 'fetch_whatsapp_history', return_value=[]), \
                 patch(base + 'generate_agent_decision', return_value=dict(
                     intent='consulta', reply='Hola 😊', action='reply')) as agent:
             response = self.signed_post(WEBHOOK_URL, dict(From='whatsapp:+56912345678', Body='Hola', MessageSid='SM-1'))
+        self.set_human = set_human
         return response, agent, insert
 
     def test_con_operador_a_cargo_la_ia_no_responde(self):
@@ -205,6 +249,21 @@ class WebhookTest(unittest.TestCase):
         self.assertNotIn('<Message', response.text)
         agent.assert_not_called()
         insert.assert_called_once()  # el mensaje del cliente sí queda guardado
+        self.set_human.assert_not_called()
+
+    def test_operador_inactivo_la_conversacion_vuelve_a_la_ia(self):
+        with patch.object(settings, 'whatsapp_operador_max_horas', 2):
+            response, agent, _ = self.inbound(human=True, operator_minutes_ago=121)
+        agent.assert_called_once()
+        self.assertIn('Hola 😊', response.text)
+        self.set_human.assert_called_once()
+        self.assertIs(self.set_human.call_args.args[2], False)
+
+    def test_sin_tiempo_maximo_el_operador_no_pierde_la_conversacion(self):
+        with patch.object(settings, 'whatsapp_operador_max_horas', 0):
+            _, agent, _ = self.inbound(human=True, operator_minutes_ago=60 * 24)
+        agent.assert_not_called()
+        self.set_human.assert_not_called()
 
     def test_respuesta_de_la_ia_pide_estado_de_entrega(self):
         response, agent, _ = self.inbound(human=False)

@@ -519,13 +519,17 @@ def update_whatsapp_client_address(db: Connection, cliente_id: UUID, address: st
 
 
 def fetch_active_whatsapp_conversation(db: Connection, cliente_id: UUID) -> dict[str, Any]:
-    """Devuelve la conversación activa del cliente, o crea una nueva."""
+    """Devuelve la conversación activa del cliente, o crea una nueva.
+    operador_activo_at = última vez que el operador la tomó o escribió."""
     row = db.execute(
         text("""
-            SELECT id, cliente_id, estado, atendida_por_humano
-            FROM conversaciones_whatsapp
-            WHERE cliente_id = :cliente_id AND estado = 'activa'
-            ORDER BY created_at DESC
+            SELECT cw.id, cw.cliente_id, cw.estado, cw.atendida_por_humano,
+                   GREATEST(cw.atendida_por_humano_desde,
+                            (SELECT max(m.created_at) FROM mensajes_whatsapp m
+                              WHERE m.conversacion_id = cw.id AND m.emisor = 'operador')) AS operador_activo_at
+            FROM conversaciones_whatsapp cw
+            WHERE cw.cliente_id = :cliente_id AND cw.estado = 'activa'
+            ORDER BY cw.created_at DESC
             LIMIT 1
         """),
         {"cliente_id": str(cliente_id)},
@@ -536,7 +540,7 @@ def fetch_active_whatsapp_conversation(db: Connection, cliente_id: UUID) -> dict
         text("""
             INSERT INTO conversaciones_whatsapp (cliente_id, estado)
             VALUES (:cliente_id, 'activa')
-            RETURNING id, cliente_id, estado, atendida_por_humano
+            RETURNING id, cliente_id, estado, atendida_por_humano, NULL::timestamptz AS operador_activo_at
         """),
         {"cliente_id": str(cliente_id)},
     ).mappings().one()
@@ -749,7 +753,12 @@ def fetch_conversation_messages(db: Connection, conversation_id: UUID, limit: in
 def set_conversation_human(db: Connection, conversation_id: UUID, value: bool) -> None:
     """TRUE = la atiende un operador y la IA deja de responder; FALSE = vuelve a la IA."""
     db.execute(
-        text("UPDATE conversaciones_whatsapp SET atendida_por_humano = :value WHERE id = :id"),
+        text("""
+            UPDATE conversaciones_whatsapp
+            SET atendida_por_humano = :value,
+                atendida_por_humano_desde = CASE WHEN :value THEN now() END
+            WHERE id = :id
+        """),
         {"id": str(conversation_id), "value": value},
     )
     db.commit()
@@ -759,7 +768,8 @@ def claim_visits_for_reminder(db: Connection, dia: date, empresa_id: UUID | None
     """Marca como recordadas las visitas activas de `dia` (día de Chile) que
     aún no tienen recordatorio, y las devuelve. Se marcan ANTES de enviar y
     en un solo UPDATE: si dos procesos corren a la vez, cada visita la toma
-    uno solo y nadie recibe dos recordatorios."""
+    uno solo y nadie recibe dos recordatorios. Si el envío falla por algo
+    pasajero, release_reminder_claim la deja libre para la próxima pasada."""
     rows = db.execute(
         text(f"""
             UPDATE visitas
@@ -775,6 +785,12 @@ def claim_visits_for_reminder(db: Connection, dia: date, empresa_id: UUID | None
     ).mappings().all()
     db.commit()
     return [dict(row) for row in rows]
+
+
+def release_reminder_claim(db: Connection, visit_id: UUID) -> None:
+    """Quita la marca de recordatorio para que el ciclo lo vuelva a intentar."""
+    db.execute(text("UPDATE visitas SET recordatorio_enviado_at = NULL WHERE id = :id"), {"id": str(visit_id)})
+    db.commit()
 
 
 def _is_within_business_hours(fecha_hora: datetime) -> bool:

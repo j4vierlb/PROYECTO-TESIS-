@@ -46,6 +46,7 @@ from app.repositories import (
     fetch_or_create_whatsapp_client,
     fetch_whatsapp_history,
     insert_whatsapp_message,
+    set_conversation_human,
     update_whatsapp_client_address,
     whatsapp_message_exists,
 )
@@ -61,6 +62,16 @@ FALLBACK_REPLY = (
 )
 
 router = APIRouter(prefix="/webhooks", tags=["whatsapp"])
+
+
+def _operator_still_active(conversation: dict) -> bool:
+    """False si el operador lleva más de WHATSAPP_OPERADOR_MAX_HORAS sin
+    tomar ni escribir en la conversación."""
+    max_hours = settings.whatsapp_operador_max_horas
+    last = conversation.get("operador_activo_at")
+    if max_hours <= 0 or last is None:
+        return max_hours <= 0
+    return datetime.now(UTC) - last < timedelta(hours=max_hours)
 
 
 async def read_twilio_form(request: Request) -> dict[str, str]:
@@ -216,8 +227,13 @@ def whatsapp_webhook(
             return _twiml()
 
         if conversation["atendida_por_humano"]:
-            # Un operador atiende esta conversación desde el panel: la IA no responde.
-            return _twiml()
+            if _operator_still_active(conversation):
+                # Un operador atiende esta conversación desde el panel: la IA no responde.
+                return _twiml()
+            # El operador la tomó y no volvió a escribir: la IA retoma para
+            # que el cliente no quede sin respuesta.
+            logger.info("Conversación %s vuelve a la IA por inactividad del operador", conversation["id"])
+            set_conversation_human(db, conversation["id"], False)
 
         history = fetch_whatsapp_history(db, conversation["id"], limit=20)
     except Exception:

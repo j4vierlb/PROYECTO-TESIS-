@@ -68,6 +68,7 @@ CREATE TABLE conversaciones_whatsapp (
     estado      VARCHAR(20) NOT NULL DEFAULT 'activa' CHECK (estado IN ('activa', 'cerrada')),
     -- TRUE = un operador del panel tomó la conversación y la IA no responde
     atendida_por_humano BOOLEAN NOT NULL DEFAULT FALSE,
+    atendida_por_humano_desde TIMESTAMPTZ, -- cuándo la tomó el operador
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

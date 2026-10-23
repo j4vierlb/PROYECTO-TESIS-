@@ -35,6 +35,7 @@ from app.repositories import (
     fetch_active_whatsapp_conversation,
     fetch_whatsapp_client,
     insert_whatsapp_message,
+    release_reminder_claim,
     update_whatsapp_delivery,
 )
 from app.zona_horaria import ZONA_CHILE, ahora_chile
@@ -89,6 +90,16 @@ def _describe_twilio_error(exc: Exception) -> str:
     code = getattr(exc, "code", None)
     message = getattr(exc, "msg", None) or str(exc)
     return f"{code}: {message}" if code else message
+
+
+def _error_pasajero(exc: Exception) -> bool:
+    """True si vale la pena reintentar: Twilio caído (5xx), demasiadas
+    solicitudes (429) o un error de red sin respuesta de Twilio. Un número
+    inválido o una plantilla rechazada (4xx) fallaría igual al reintentar."""
+    status = getattr(exc, "status", None)
+    if status is None:
+        return getattr(exc, "code", None) is None
+    return status == 429 or status >= 500
 
 
 def _twilio_client():
@@ -157,7 +168,7 @@ def enviar_whatsapp(
         error = _describe_twilio_error(exc)
         logger.warning("Twilio rechazó el WhatsApp a %s (%s): %s", cliente_id, intencion, error)
         update_whatsapp_delivery(db, "failed", message_id=mensaje["id"], error=error)
-        return {**mensaje, "estado_entrega": "failed", "error_entrega": error}
+        return {**mensaje, "estado_entrega": "failed", "error_entrega": error, "reintentable": _error_pasajero(exc)}
 
     estado = sent.status or "queued"
     update_whatsapp_delivery(db, estado, message_id=mensaje["id"], message_sid=sent.sid)
@@ -262,22 +273,33 @@ def enviar_recordatorios(
 ) -> list[dict[str, Any]]:
     """Envía el recordatorio a las visitas de mañana (día de Chile) que aún
     no lo tienen. Con respetar_hora=True no hace nada antes de
-    WHATSAPP_RECORDATORIO_HORA. Devuelve los mensajes guardados."""
+    WHATSAPP_RECORDATORIO_HORA. Devuelve los mensajes guardados.
+    Si Twilio falla por algo pasajero, la visita se libera y el ciclo de
+    main.py lo reintenta en 10 minutos (hasta que la visita deja de ser
+    "de mañana" a medianoche)."""
     ahora = (ahora or ahora_chile()).astimezone(ZONA_CHILE)
     if respetar_hora and ahora.time() < _hora_recordatorio():
         return []
     manana = ahora.date() + timedelta(days=1)
     enviados = []
     for visita in claim_visits_for_reminder(db, manana, empresa_id):
-        client = fetch_whatsapp_client(db, visita["cliente_id"])
-        fecha, hora = _fecha_hora_chile(visita["fecha_hora"])
-        mensaje = enviar_whatsapp(
-            db, visita["cliente_id"],
-            texto_recordatorio(client["nombre"] if client else None, visita["fecha_hora"]),
-            intencion="recordatorio",
-            content_sid=settings.twilio_content_sid_recordatorio,
-            content_variables={"1": fecha, "2": hora},
-        )
+        try:
+            client = fetch_whatsapp_client(db, visita["cliente_id"])
+            fecha, hora = _fecha_hora_chile(visita["fecha_hora"])
+            mensaje = enviar_whatsapp(
+                db, visita["cliente_id"],
+                texto_recordatorio(client["nombre"] if client else None, visita["fecha_hora"]),
+                intencion="recordatorio",
+                content_sid=settings.twilio_content_sid_recordatorio,
+                content_variables={"1": fecha, "2": hora},
+            )
+        except Exception:
+            logger.exception("Falló el recordatorio de la visita %s; se reintentará", visita["id"])
+            db.rollback()
+            release_reminder_claim(db, visita["id"])
+            continue
+        if mensaje and mensaje.get("reintentable"):
+            release_reminder_claim(db, visita["id"])
         if mensaje:
             enviados.append(mensaje)
     if enviados:
