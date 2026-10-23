@@ -126,7 +126,11 @@ class WhatsAppPostgisTest(unittest.TestCase):
         self.assertEqual(self.client.get(f"/panel/conversaciones/{other['id']}").status_code, 404)
 
     def test_reagendar_desde_el_panel_reinicia_el_recordatorio(self):
-        when = datetime.now(UTC) + timedelta(days=1)
+        # El panel valida el horario de atención: lunes a viernes, 10:00 de Chile.
+        day = datetime.now(SANTIAGO).date() + timedelta(days=1)
+        while day.weekday() > 4:
+            day += timedelta(days=1)
+        when = datetime.combine(day, time(10, 0), tzinfo=SANTIAGO)
         visit_id = self.visit(when)
         self.db.execute(text('UPDATE visitas SET recordatorio_enviado_at = now() WHERE id = :id'), dict(id=visit_id))
         same = self.client.patch(f'/panel/visitas/{visit_id}', json=dict(fecha_hora=when.isoformat(), notas='x'))

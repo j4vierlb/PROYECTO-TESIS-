@@ -19,9 +19,15 @@ El panel utiliza el usuario de prueba `admin@killbichos.cl` con clave `demo1234`
 
 - Login para usuarios administrativos (`admin` y `coordinador`).
 - Agenda filtrable por día y operador.
-- Creación y actualización del estado de visitas.
-- CRUD de clientes con coordenadas del predio.
+- Creación de visitas, edición de notas, asignación o cambio de operador y reprogramación real.
+- Cambiar fecha/hora marca la visita como `reagendada` y lleva la agenda al día guardado.
+- Filtro para visitas sin asignar y acceso rápido a Hoy.
+- CRUD de clientes con coordenadas opcionales y confirmación antes de eliminar.
 - Resumen de clientes, visitas del día y visitas pendientes.
+- Cargas cancelables al navegar, reintento ante errores y prevención de doble envío.
+- Retorno al login cuando vence la sesión; sin credenciales precargadas.
+- Navegación por teclado y adaptación a pantallas de escritorio y móvil.
+- Consulta de croquis por visita, trampas retiradas y fotos privadas, sin editar el registro del técnico.
 
 ## Fechas y datos opcionales
 
@@ -32,8 +38,77 @@ cambio de horario se rechaza con un mensaje antes de enviar la solicitud.
 
 `Sin asignar` envía `operador_id: null`. Los clientes que llegan desde WhatsApp
 sin ubicación se muestran como `Sin coordenadas` y se pueden editar sin inventar
-una ubicación. En la creación manual siguen siendo obligatorias las coordenadas,
-según el contrato actual del backend; al editar se pueden dejar ambas vacías.
+una ubicación. En creación y edición se pueden dejar ambas coordenadas vacías;
+el backend valida que sean un par completo y no las calcula automáticamente.
+
+## Reglas del agendamiento
+
+Se usan los mismos días y horas configurados para WhatsApp en
+`KILLBICHOS_OPERATING_DAYS`, `KILLBICHOS_OPEN_TIME` y `KILLBICHOS_CLOSE_TIME`.
+La hora de cierre no se incluye. La API comprueba los horarios incluso cuando
+la visita no tiene operador, y rechaza choques de un operador a menos de una hora.
+Las visitas canceladas no bloquean el horario. Una visita finalizada o cancelada
+debe reactivarse antes de cambiar su fecha u operador; sus notas sí se pueden editar.
+
+Estas funciones requieren actualizar también `routers/panel.py` y los esquemas
+del panel en `schemas.py`. El contrato móvil `VisitUpdate` no se amplió y no hay
+migraciones para estas reglas de agendamiento. El visor de croquis requiere la
+migración de terreno de main, descrita a continuación. Los módulos de WhatsApp
+y los endpoints de croquis no se modificaron para implementar el visor.
+
+## Croquis de solo lectura
+
+Desde cada visita de Agenda, **Ver croquis** consulta `GET /croquis/{visita_id}`.
+No crea croquis ni agrega, mueve, confirma o retira trampas. También funciona
+para visitas completadas o canceladas. Las trampas retiradas se conservan en gris;
+las propuestas IA sin confirmar aparecen en amarillo. El listado permite elegir
+una trampa y consultar su foto incluso si Google Maps no está configurado.
+
+Las fotos se descargan por `GET /dispositivos-trampa/{id}/foto`, con el token
+en `Authorization`. Solo se aceptan las rutas relativas de fotos del backend;
+no se siguen redirecciones ni se envían tokens en URLs. Las imágenes JPEG/PNG
+se muestran mediante URLs blob que se liberan al cambiar de selección o cerrar.
+
+En el `.env` de la **raíz del repositorio**, junto al compose:
+
+```dotenv
+VITE_API_URL=http://localhost:8000
+VITE_GOOGLE_MAPS_API_KEY=
+```
+
+Completar la segunda variable localmente con la clave **web** proporcionada por
+Javier. No usar la clave del iPhone. Reiniciar `npm run dev`, o reconstruir web
+con `docker compose up -d --no-deps --build web`, después de cambiarla.
+Vite lee el `.env` raíz y solo publica variables con prefijo `VITE_`.
+Nunca agregar ese prefijo a secretos de OpenAI, Twilio, PostgreSQL o JWT.
+
+La clave web es visible en el navegador por diseño. Restringirla a **Maps
+JavaScript API** y referentes HTTP `http://localhost:8080/*` y
+`http://localhost:5173/*`. Abrir el panel con `localhost`, no `127.0.0.1`, para
+probar esos referentes. No requiere Map ID: usa una capa Data de puntos no editables.
+Referencia: [carga del SDK](https://developers.google.com/maps/documentation/javascript/load-maps-js-api)
+y [capa Data](https://developers.google.com/maps/documentation/javascript/datalayer).
+
+Si la base ya existía, aplicar la migración desde la raíz (PowerShell):
+
+```powershell
+Get-Content -Raw 'Fase 2/Evidencias Proyecto/database/migracion_croquis_terreno.sql' |
+  docker compose exec -T db psql -v ON_ERROR_STOP=1 -U killbichos -d killbichos
+docker compose up -d --no-deps --build backend
+```
+
+Estos comandos asumen que `db` pertenece al compose raíz y ya está levantado.
+Si se mantiene una base del compose antiguo, identificar su contenedor y red
+antes de ejecutar comandos; no levantar otra base ni borrar volúmenes para resolverlo.
+
+**Verificación local del 20/10/2026:** el mapa real se comprobó en
+`localhost:5173` después de corregir los referentes de la clave. El PR #14
+de Javier ya está integrado y sus permisos de empresa se verificaron para
+visitas, croquis y fotos: 30 casos aprobados dentro de una regresión de 205
+pruebas (107 backend y 98 frontend). Ver el reporte PR14 de la carpeta pruebas.
+La validación se limita al entorno local registrado; no acredita un despliegue
+remoto. Un `RefererNotAllowedMapError` en otro origen requiere revisar los
+referentes permitidos de la clave en Google Cloud.
 
 ## Pruebas
 
@@ -47,4 +122,6 @@ npm run build
 
 Las pruebas de React simulan las respuestas HTTP; no conectan una base real.
 Los casos, resultados, capturas y pasos para probar con PostGIS real están en
-[`../pruebas/Panel_regresion_2026-10-09.md`](../pruebas/Panel_regresion_2026-10-09.md).
+[`../pruebas/Panel_regresion_2026-10-09.md`](../pruebas/Panel_regresion_2026-10-09.md),
+[`../pruebas/Panel_cierre_2026-10-19.md`](../pruebas/Panel_cierre_2026-10-19.md) y
+[`../pruebas/Croquis_web_2026-10-19.md`](../pruebas/Croquis_web_2026-10-19.md).

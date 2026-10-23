@@ -22,6 +22,8 @@ COPY . .
 # JavaScript al compilar, por eso llega como argumento de compilación.
 ARG VITE_API_URL=http://localhost:8000
 ENV VITE_API_URL=$VITE_API_URL
+ARG VITE_GOOGLE_MAPS_API_KEY
+ENV VITE_GOOGLE_MAPS_API_KEY=$VITE_GOOGLE_MAPS_API_KEY
 RUN npm run build
 
 # ---------- Etapa 2: servir ----------

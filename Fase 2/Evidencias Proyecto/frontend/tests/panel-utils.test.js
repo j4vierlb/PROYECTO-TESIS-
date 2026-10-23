@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { addDays, chileDate, chileTime, chileDateTimeToUtc, clientLocation, clientPayload, visitPayload } from '../src/panel-utils.js'
+import { addDays, chileDate, chileTime, chileDateTimeInput, chileDateTimeToUtc, clientLocation, clientPayload, visitPayload } from '../src/panel-utils.js'
 
 describe('PANEL-HORA: fecha y hora de Chile, independiente del navegador', () => {
+  it.each([
+    ['2026-09-30T02:30:00Z', '2026-09-29T23:30'],
+    ['2026-07-15T14:00:00Z', '2026-07-15T10:00'],
+  ])('precarga una visita existente en hora chilena: %s', (instant, expected) => {
+    expect(chileDateTimeInput(instant)).toBe(expected)
+  })
   it.each([
     ['2026-09-30T01:30:00Z', '2026-09-29', '22:30'],
     ['2026-07-16T01:30:00Z', '2026-07-15', '21:30'],
@@ -52,6 +58,9 @@ describe('PANEL-CLIENTES: ubicación opcional', () => {
   })
   it('rechaza una coordenada incompleta', () => {
     expect(() => clientPayload({ direccion: 'Macul', lat: '0', lng: '' })).toThrow('ambas coordenadas')
+  })
+  it('rechaza valores no numéricos', () => {
+    expect(() => clientPayload({ direccion: '', lat: 'abc', lng: '0' })).toThrow('numéricas')
   })
 })
 

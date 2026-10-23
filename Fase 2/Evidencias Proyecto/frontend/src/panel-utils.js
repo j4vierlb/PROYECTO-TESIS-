@@ -19,11 +19,8 @@ export function chileDateTime(value) {
   }).format(new Date(value))
 }
 
-// Valor para un <input type="datetime-local"> con la hora de Chile de una fecha UTC.
-export function utcToChileInput(value) {
-  return new Date(value).toLocaleString('sv-SE', {
-    timeZone: CHILE_ZONE, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
-  }).replace(' ', 'T')
+export function chileDateTimeInput(value) {
+  return `${chileDate(new Date(value))}T${chileTime(value)}`
 }
 
 export function clientLocation(client) {
@@ -66,5 +63,8 @@ export function clientPayload(form) {
   const missingLat = form.lat === '' || form.lat == null
   const missingLng = form.lng === '' || form.lng == null
   if (missingLat !== missingLng) throw new Error('Completa ambas coordenadas o deja ambas vacías')
+  if (!missingLat && (!Number.isFinite(Number(form.lat)) || !Number.isFinite(Number(form.lng)))) {
+    throw new Error('Ingresa coordenadas numéricas válidas')
+  }
   return { ...form, direccion: form.direccion.trim() || null, lat: missingLat ? null : Number(form.lat), lng: missingLng ? null : Number(form.lng) }
 }
