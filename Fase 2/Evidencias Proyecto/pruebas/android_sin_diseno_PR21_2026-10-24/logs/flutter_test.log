@@ -1,0 +1,84 @@
+00:00 +0: loading C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart
+00:00 +0: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/cliente_test.dart: Cliente de WhatsApp sin dirección ni coordenadas no rompe la app
+00:00 +1: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/cliente_test.dart: Cliente con dirección pero todavía sin coordenadas
+00:00 +2: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/cliente_test.dart: Cliente completo sigue funcionando igual
+00:00 +3: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Agenda transmite token en header, nunca en URL
+00:00 +4: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Agenda transmite token en header, nunca en URL
+00:00 +5: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Agenda transmite token en header, nunca en URL
+00:00 +6: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Agenda transmite token en header, nunca en URL
+00:00 +7: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Agenda transmite token en header, nunca en URL
+00:00 +8: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/croquis_test.dart: Sugerencia de la IA trae el croquis, el resumen y las advertencias
+00:00 +9: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: 401 renueva y repite una sola vez con el token nuevo
+00:00 +10: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: 401 renueva y repite una sola vez con el token nuevo
+00:00 +11: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Segundo 401 no forma bucle: cierra sesion y avisa una vez
+00:00 +12: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Sin red conserva tokens para reintentar
+00:00 +13: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: 401 al renovar conserva foto pendiente y solicita reingreso
+00:00 +14: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Timeout de login tambien esta acotado
+00:00 +15: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Timeout contempla el cuerpo, no solo los headers
+00:00 +16: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: 422 mantiene el mensaje de validacion del backend
+00:00 +17: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Foto relativa conserva la version de cache del backend
+00:00 +18: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: null
+00:00 +19: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato:
+00:00 +20: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: http://[
+00:00 +21: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: https://other.invalid/foto
+00:00 +22: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_location_test.dart: Android usa GPS nativo e iOS conserva el proveedor de plataforma
+00:00 +23: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_location_test.dart: Android usa GPS nativo e iOS conserva el proveedor de plataforma
+00:00 +24: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_location_test.dart: Android usa GPS nativo e iOS conserva el proveedor de plataforma
+00:00 +25: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: /dispositivos-trampa/d1/foto?token=secret
+00:00 +26: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_location_test.dart: Respaldo Android usa proveedor fusionado, precision media y 10 segundos
+00:00 +27: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: /dispositivos-trampa/../foto
+00:00 +28: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_location_test.dart: GPS desactivado ofrece ajustes y no consulta posicion
+00:00 +29: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_location_test.dart: GPS desactivado ofrece ajustes y no consulta posicion
+00:00 +30: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_location_test.dart: GPS desactivado ofrece ajustes y no consulta posicion
+00:00 +31: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: /dispositivos-trampa/d1/otra/foto
+00:00 +32: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_location_test.dart: GPS autorizado LocationPermission.whileInUse conserva las coordenadas
+00:00 +33: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: /dispositivos-trampa/%2F../foto
+00:00 +34: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_location_test.dart: GPS autorizado LocationPermission.always conserva las coordenadas
+00:00 +35: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Cabeceras de fotos renuevan access vencido antes de abrir imagen
+00:00 +36: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_location_test.dart: Primera denegacion pide permiso y permite continuar al aceptar
+00:00 +37: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Upload PNG conserva MIME y Authorization
+00:00 +38: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Upload PNG conserva MIME y Authorization
+00:00 +39: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Upload PNG conserva MIME y Authorization
+00:00 +40: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Upload PNG conserva MIME y Authorization
+00:00 +41: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Upload PNG conserva MIME y Authorization
+00:00 +42: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Upload PNG conserva MIME y Authorization
+00:00 +43: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Upload PNG conserva MIME y Authorization
+00:01 +44: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:01 +45: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:01 +46: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:01 +47: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:01 +48: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:01 +49: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:01 +50: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:01 +51: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:01 +52: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:01 +53: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:01 +54: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:01 +55: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:01 +56: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:01 +57: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:01 +58: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:01 +59: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:01 +60: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:02 +61: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:02 +62: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:02 +63: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:02 +64: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:02 +65: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:03 +66: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/historial_test.dart: La barra inferior cambia de Hoy a Historial
+00:03 +67: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/historial_test.dart: La barra inferior cambia de Hoy a Historial
+00:03 +68: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/widget_test.dart: Sin sesión guardada muestra la pantalla de login al arrancar
+00:03 +69: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/widget_test.dart: Sin sesión guardada muestra la pantalla de login al arrancar
+00:04 +70: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Bloquea PATCH de cierre con foto pendiente; descartar permite cerrar
+00:04 +71: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Bloquea PATCH de cierre con foto pendiente; descartar permite cerrar
+00:04 +72: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Foto de otra visita no impide completar esta
+00:05 +73: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis no muestra la foto pendiente de otra cuenta
+00:05 +74: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Pendiente propia bloquea cámara sin ofrecer descartar la de otra cuenta
+00:05 +75: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Volver conserva la foto ajena y no abre cámara
+00:05 +76: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Descartar envío ajeno permite abrir ImageSource.camera con cuenta actual
+00:06 +77: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Descartar envío ajeno permite abrir ImageSource.gallery con cuenta actual
+00:06 +78: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Pendiente antigua sin dueño ofrece descarte explícito
+00:06 +79: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Tras descartar foto ajena captura y sube solo la foto nueva
+00:07 +80: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Conflicto al capturar informa pendiente, no permisos de cámara
+00:07 +81: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Logout advierte: Volver conserva tokens y foto; confirmar descarta
+00:08 +82: All tests passed!

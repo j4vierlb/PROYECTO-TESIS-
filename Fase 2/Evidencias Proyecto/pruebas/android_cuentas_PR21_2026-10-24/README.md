@@ -2,6 +2,10 @@
 
 Fecha: 24/10/2026. Rama: `juan`.
 
+> Corte histórico de 89 pruebas, antes de retirar la identidad visual. El
+> [estado vigente sin diseño](../android_sin_diseno_PR21_2026-10-24/README.md)
+> conserva la corrección entre cuentas y registra 82 pruebas Flutter.
+
 ## Problema y solución
 
 El almacenamiento conserva un único envío pendiente. Tras vencer la sesión del operador A, el operador B no veía ese envío por el aislamiento de cuentas, pero tampoco podía abrir cámara o galería: la comprobación global lo bloqueaba sin ofrecer una salida.
@@ -60,6 +64,6 @@ flutter build apk --debug --no-pub --dart-define=API_BASE_URL=http://127.0.0.1:8
 
 No se incluyen claves, archivos privados de configuración ni el APK.
 
-## Separación visual pendiente
+## Separación visual: decisión posterior
 
-El usuario indicó expresamente conservar solo `juan` y dejar pendiente la separación en otra PR. Por eso no se crean ramas, no se revierten los tres commits visuales y no se reescribe ni fuerza el historial publicado. Esta actualización corrige el bloqueo entre cuentas; **no acredita que la PR #21 esté separada del trabajo visual ni resuelve posibles conflictos del panel con otra PR**.
+Al publicar este corte se había dejado pendiente la separación. Posteriormente el usuario autorizó retirar temporalmente los tres commits visuales mediante reversiones, manteniendo solo `juan` y sin reescribir el historial. El [registro de separación](../android_sin_diseno_PR21_2026-10-24/README.md) documenta el diff final sin cambios de panel y la recuperación futura del diseño.
