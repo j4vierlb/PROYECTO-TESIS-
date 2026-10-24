@@ -17,7 +17,6 @@ import '../services/pending_photo.dart';
 import '../theme/app_theme.dart';
 import '../utils/formato.dart';
 import '../widgets/estado_badge.dart';
-import '../widgets/company_brand.dart';
 import 'croquis_screen.dart';
 
 class VisitaDetalleScreen extends StatefulWidget {
@@ -171,7 +170,7 @@ class _VisitaDetalleScreenState extends State<VisitaDetalleScreen> {
         Navigator.of(context).pop(_changed);
       },
       child: Scaffold(
-        appBar: AppBar(title: const CompanyTitle('Detalle de visita')),
+        appBar: AppBar(title: const Text('Detalle de visita')),
         body: _buildBody(context),
       ),
     );

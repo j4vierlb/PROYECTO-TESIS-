@@ -142,12 +142,7 @@ void main() {
       );
       expect(tester.takeException(), isNull);
       expect(find.text('T-01 · Cebadero'), findsOneWidget);
-      expect(
-        find.byWidgetPredicate(
-          (widget) => widget is Image && widget.image is NetworkImage,
-        ),
-        findsNothing,
-      );
+      expect(find.byType(Image), findsNothing);
       expect(find.byTooltip('Sacar foto'), findsOneWidget);
     });
   }

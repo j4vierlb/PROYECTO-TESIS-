@@ -14,7 +14,6 @@ import '../theme/app_theme.dart';
 import '../utils/formato.dart';
 import '../widgets/estado_badge.dart';
 import '../widgets/logout_button.dart';
-import '../widgets/company_brand.dart';
 import 'visita_detalle_screen.dart';
 
 class AgendaScreen extends StatefulWidget {
@@ -48,7 +47,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const CompanyTitle('Agenda del día'),
+        title: const Text('Agenda del día'),
         actions: const [LogoutButton()],
       ),
       // RefreshIndicator = el gesto de "tirar hacia abajo para recargar".

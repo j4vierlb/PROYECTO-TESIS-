@@ -26,7 +26,6 @@ import 'services/api_client.dart';
 import 'services/session.dart';
 import 'services/pending_photo.dart';
 import 'theme/app_theme.dart';
-import 'widgets/company_brand.dart';
 
 /// Permite navegar desde fuera de una pantalla: lo usa el aviso de "sesión
 /// vencida" del ApiClient para volver al login desde donde esté el técnico.
@@ -108,7 +107,7 @@ class _InicioSesionState extends State<_InicioSesion> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const CompanyLogo(size: 96),
+                  Image.asset('assets/images/logo.png', height: 96),
                   const SizedBox(height: 24),
                   const CircularProgressIndicator(),
                 ],

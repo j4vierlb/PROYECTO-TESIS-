@@ -28,7 +28,6 @@ import '../services/api_client.dart';
 import '../services/field_location.dart';
 import '../services/pending_photo.dart';
 import '../theme/app_theme.dart';
-import '../widgets/company_brand.dart';
 
 class CroquisScreen extends StatefulWidget {
   final String visitaId;
@@ -774,7 +773,7 @@ class _CroquisScreenState extends State<CroquisScreen> {
     final puedeAgregar = _croquis != null && !widget.readOnly && !_modoAgregar;
     return Scaffold(
       appBar: AppBar(
-        title: const CompanyTitle('Croquis'),
+        title: const Text('Croquis'),
         actions: [
           if (puedeAgregar)
             _sugiriendo
