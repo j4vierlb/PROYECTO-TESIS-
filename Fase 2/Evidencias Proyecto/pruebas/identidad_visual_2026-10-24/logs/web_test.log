@@ -1,0 +1,119 @@
+
+> kill-bichos-panel@0.1.0 test
+> vitest run --reporter=verbose
+
+
+ RUN  v5.0.3 C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/frontend
+
+ ✓ tests/brand-assets.test.js > el logo web es una copia exacta del original compartido con iOS 6ms
+ ✓ tests/brand-assets.test.js > la paleta web coincide con los colores del tema móvil 2ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM01 descarta coordenadas inválidas {"lat":null,"lng":null} 3ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM01 descarta coordenadas inválidas {"lat":91,"lng":0} 0ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM01 descarta coordenadas inválidas {"lat":0,"lng":-181} 0ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM01 descarta coordenadas inválidas {"lat":null,"lng":0} 0ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM01 descarta coordenadas inválidas {"lat":"0","lng":0} 0ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM02 acepta coordenadas cero 1ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM03 apariencia { estado: 'retirado', …(1) } 0ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM03 apariencia { sugerido_por_ia: true, …(1) } 0ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM03 apariencia { estado: 'revisar', confirmado: true } 0ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM03 apariencia { confirmado: true } 0ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM03 apariencia {} 0ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM04 falta de clave no solicita el SDK 2ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM05 dibuja puntos inmutables, selecciona y elimina listeners al cerrar 2ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM06 no crea mapas sin posición válida 0ms
+ ✓ tests/api.test.js > HTTP del panel > envía el token y acepta respuestas sin contenido 5ms
+ ✓ tests/api.test.js > HTTP del panel > traduce los errores de validación sin mostrar objetos 7ms
+ ✓ tests/api.test.js > HTTP del panel > conserva el mensaje de un conflicto y la sesión 1ms
+ ✓ tests/api.test.js > HTTP del panel > cierra una sesión vencida y avisa a la aplicación 3ms
+ ✓ tests/api.test.js > HTTP del panel > un login rechazado no expira otra sesión ni envía su token 1ms
+ ✓ tests/api.test.js > HTTP del panel > un 401 antiguo no cierra una sesión nueva 1ms
+ ✓ tests/api.test.js > HTTP del panel > da un mensaje útil si no hay conexión 1ms
+ ✓ tests/api.test.js > HTTP del panel > no muestra detalles internos del servidor 1ms
+ ✓ tests/api.test.js > HTTP del panel > cancela una petición que tarda más de quince segundos 5ms
+ ✓ tests/api.test.js > CRP descarga privada de fotos > CRP01 rechaza dirección no permitida https://evil.test/foto 1ms
+ ✓ tests/api.test.js > CRP descarga privada de fotos > CRP01 rechaza dirección no permitida //evil.test/foto 1ms
+ ✓ tests/api.test.js > CRP descarga privada de fotos > CRP01 rechaza dirección no permitida /clientes 1ms
+ ✓ tests/api.test.js > CRP descarga privada de fotos > CRP01 rechaza dirección no permitida /dispositivos-trampa/11111111-1111-1111-1111-111111111111/foto?v=abc123&token=abc 1ms
+ ✓ tests/api.test.js > CRP descarga privada de fotos > CRP01 rechaza dirección no permitida /dispositivos-trampa/../foto 0ms
+ ✓ tests/api.test.js > CRP descarga privada de fotos > CRP02 no permite SVG u otro contenido ejecutable 2ms
+ ✓ tests/api.test.js > CRP descarga privada de fotos > CRP03 rechaza foto con tamaño 0 2ms
+ ✓ tests/api.test.js > CRP descarga privada de fotos > CRP03 rechaza foto con tamaño 5242881 8ms
+ ✓ tests/api.test.js > CRP descarga privada de fotos > CRP04 devuelve PNG sin persistencia ni redirecciones 1ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > precarga una visita existente en hora chilena: 2026-09-30T02:30:00Z 59ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > precarga una visita existente en hora chilena: 2026-07-15T14:00:00Z 1ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > muestra 2026-09-30T01:30:00Z en hora de Chile 1ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > muestra 2026-07-16T01:30:00Z en hora de Chile 1ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > muestra 2026-09-30T03:00:00Z en hora de Chile 1ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > muestra 2026-09-29T10:00:00-03:00 en hora de Chile 1ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > guarda 2026-09-29T10:00 como UTC y conserva su hora local 1ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > guarda 2026-07-15T10:00 como UTC y conserva su hora local 1ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > guarda 2026-09-29T23:30 como UTC y conserva su hora local 1ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > guarda 2026-09-06T01:00 como UTC y conserva su hora local 1ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > rechaza una hora inexistente al adelantar el reloj 1ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > rechaza un formato inválido 0ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > navega días sin saltos: 2026-12-31 %+i 1ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > navega días sin saltos: 2026-03-01 %+i 0ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > navega días sin saltos: 2026-09-06 %+i 0ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > navega días sin saltos: 2026-04-04 %+i 0ms
+ ✓ tests/panel-utils.test.js > PANEL-CLIENTES: ubicación opcional > muestra marcador sin coordenadas: {"lat":null,"lng":null} 0ms
+ ✓ tests/panel-utils.test.js > PANEL-CLIENTES: ubicación opcional > muestra marcador sin coordenadas: {} 0ms
+ ✓ tests/panel-utils.test.js > PANEL-CLIENTES: ubicación opcional > muestra marcador sin coordenadas: {"lat":-33.4,"lng":null} 0ms
+ ✓ tests/panel-utils.test.js > PANEL-CLIENTES: ubicación opcional > cero es una coordenada válida 0ms
+ ✓ tests/panel-utils.test.js > PANEL-CLIENTES: ubicación opcional > conserva null al editar un cliente sin ubicación ni dirección 1ms
+ ✓ tests/panel-utils.test.js > PANEL-CLIENTES: ubicación opcional > convierte coordenadas del formulario sin perder cero 0ms
+ ✓ tests/panel-utils.test.js > PANEL-CLIENTES: ubicación opcional > rechaza una coordenada incompleta 0ms
+ ✓ tests/panel-utils.test.js > PANEL-CLIENTES: ubicación opcional > rechaza valores no numéricos 0ms
+ ✓ tests/panel-utils.test.js > PANEL-ASIGNACION: contrato UUID o null > Sin asignar envía null, no cadena vacía 0ms
+ ✓ tests/panel-utils.test.js > PANEL-ASIGNACION: contrato UUID o null > conserva un operador elegido 0ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > el login muestra el logo original con un nombre accesible 143ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > la navegación conserva el logo y las acciones del panel 80ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW01 carga únicamente con GET y no ofrece acciones de modificación 164ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW02 conserva retiradas y distingue propuestas IA 31ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW03 croquis inexistente no se crea automáticamente 10ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW04 informa permisos insuficientes sin mostrar trampas 17ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW05 maneja un croquis vacío 16ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > mantiene texto y color de estado alineados con la app: Agendada 19ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > mantiene texto y color de estado alineados con la app: En curso 40ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > mantiene texto y color de estado alineados con la app: Completada 15ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > mantiene texto y color de estado alineados con la app: Cancelada 16ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW06 mantiene el listado y fotos si Google Maps falla 33ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW07 no inventa ubicaciones ni carga Maps sin coordenadas 15ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW08 muestra una foto autenticada como blob y la libera al cerrar 26ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW09 foto responde 403 7ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW09 foto responde 404 24ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > mantiene texto y color de estado alineados con la app: Reagendada 31ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW10 sincroniza selección en listado y mapa 57ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW11 actualizar vuelve a leer sin escribir 98ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW12 aborta cargas antiguas al cambiar de visita 3ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW13 rechaza respuestas de otra visita 12ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW14 sesión vencida en una foto expira la sesión del panel 15ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW15 abre croquis desde una visita completada y cierra con Escape 138ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > crea clientes manuales sin exigir coordenadas 989ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > el filtro Sin asignar oculta visitas con operador 116ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > el login no trae credenciales de demostración precargadas 5ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > comprueba permisos del panel antes de aceptar un login 499ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > una cuenta sin permiso administrativo permanece en el login 544ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > el cierre de sesión sigue disponible en la navegación 67ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > reprograma una visita y asigna operador con UTC correcto 441ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > permite quitar el operador sin cambiar la fecha 187ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > Reagendada abre la edición en lugar de cambiar solo el estado 134ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > un conflicto al guardar conserva los datos del formulario 446ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > muestra el rechazo de un cambio de estado sin fallar la pantalla 74ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > una sesión vencida vuelve al login con una explicación 23ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > Clientes informa errores de carga y permite reintentar 128ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > no cambia fecha ni operador de una visita finalizada al editar notas 394ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > confirma el borrado y muestra el 409 si el cliente tiene visitas 163ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > un doble envío mientras guarda crea una sola visita 115ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > una respuesta antigua no reemplaza el nuevo día seleccionado 56ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > no permite agendar sin clientes registrados 98ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > Clientes se abre y permite guardar clientes sin ubicación ni dirección 421ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > una ubicación completa sigue mostrando sus coordenadas 69ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > agenda una visita Sin asignar con hora chilena, y la vuelve a mostrar 210ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > también agenda cuando la API no entrega ningún operador 172ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > agrupa UTC en hora chilena y ordena los horarios 19ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > la nueva visita usa la fecha seleccionada en la agenda 109ms
+
+ Test Files  6 passed (6)
+      Tests  107 passed (107)
+   Start at  16:50:26
+   Duration  8.45s (environment 50%, tests 33%, setup 11%, transform 4%, import 2%)
