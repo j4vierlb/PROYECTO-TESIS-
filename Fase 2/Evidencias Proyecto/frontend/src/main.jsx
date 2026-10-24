@@ -3,12 +3,11 @@ import { createRoot } from 'react-dom/client'
 import './styles.css'
 import { request, SESSION_EXPIRED } from './api.js'
 import { CroquisViewer } from './CroquisViewer.jsx'
-import { BrandLogo } from './BrandLogo.jsx'
 import { addDays, chileDate, chileTime, chileDateTimeInput, clientLocation, clientPayload, visitPayload } from './panel-utils.js'
 
 const statuses = {
-  agendada: ['Agendada', 'gray'], en_curso: ['En curso', 'yellow'], completada: ['Completada', 'green'],
-  cancelada: ['Cancelada', 'red'], reagendada: ['Reagendada', 'blue'],
+  agendada: ['Agendada', 'blue'], en_curso: ['En curso', 'orange'], completada: ['Completada', 'green'],
+  cancelada: ['Cancelada', 'gray'], reagendada: ['Reagendada', 'purple'],
 }
 
 // Cancela cargas antiguas al navegar: una respuesta lenta no reemplaza el día actual.
@@ -79,7 +78,7 @@ function Login({ onLogin, notice }) {
     }
     finally { submitting.current = false; setBusy(false) }
   }
-  return <main className="login-page"><div className="login-card"><BrandLogo className="login-logo" /><p className="eyebrow">CONTROL DE PLAGAS</p><h1>Bienvenido a Kill Bichos</h1><p className="muted">Gestiona clientes, visitas y la agenda de tu equipo.</p>
+  return <main className="login-page"><div className="login-card"><div className="brand-mark">KB</div><p className="eyebrow">CONTROL DE PLAGAS</p><h1>Bienvenido a Kill Bichos</h1><p className="muted">Gestiona clientes, visitas y la agenda de tu equipo.</p>
     {notice && <p role="status" className="info">{notice}</p>}
     <form onSubmit={submit} aria-busy={busy}><label>Correo<input required type="email" autoComplete="username" value={form.usuario} onChange={e => setForm({ ...form, usuario: e.target.value })} /></label><label>Contraseña<input required type="password" autoComplete="current-password" value={form.clave} onChange={e => setForm({ ...form, clave: e.target.value })} /></label><Feedback error={error} /><button className="primary full" disabled={busy}>{busy ? 'Ingresando…' : 'Ingresar al panel'}</button></form>
   </div></main>
@@ -95,7 +94,7 @@ export function App() {
     return () => { window.removeEventListener(SESSION_EXPIRED, expired); window.removeEventListener('storage', changed) }
   }, [])
   if (!logged) return <Login notice={notice} onLogin={() => { setNotice(''); setLogged(true) }} />
-  return <div className="app-shell"><aside><div className="logo"><BrandLogo /><div><strong>Kill Bichos</strong><small>Panel operativo</small></div></div>
+  return <div className="app-shell"><aside><div className="logo"><span>KB</span><div><strong>Kill Bichos</strong><small>Panel operativo</small></div></div>
     <nav aria-label="Navegación principal"><button className={view === 'agenda' ? 'active' : ''} aria-current={view === 'agenda' ? 'page' : undefined} onClick={() => setView('agenda')}>▦ <span>Agenda</span></button><button className={view === 'clientes' ? 'active' : ''} aria-current={view === 'clientes' ? 'page' : undefined} onClick={() => setView('clientes')}>♧ <span>Clientes</span></button></nav>
     <div className="sidebar-bottom"><div className="user-chip"><div className="avatar">KB</div><div><strong>Cuenta del panel</strong><small>Gestión administrativa</small></div></div></div>
     <button className="logout" onClick={() => { localStorage.removeItem('token'); setNotice(''); setLogged(false) }}>Cerrar sesión</button>
