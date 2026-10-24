@@ -40,6 +40,7 @@ class CroquisScreen extends StatefulWidget {
   // pueden confirmar, mover ni retirar trampas.
   final bool readOnly;
   final ApiClient? apiClient;
+  final PendingPhotoStore? photoStore;
 
   const CroquisScreen({
     super.key,
@@ -48,6 +49,7 @@ class CroquisScreen extends StatefulWidget {
     this.clienteLng,
     this.readOnly = false,
     this.apiClient,
+    this.photoStore,
   });
 
   @override
@@ -56,7 +58,7 @@ class CroquisScreen extends StatefulWidget {
 
 class _CroquisScreenState extends State<CroquisScreen> {
   late final _apiClient = widget.apiClient ?? ApiClient();
-  final _photos = PendingPhotoStore.instance;
+  late final _photos = widget.photoStore ?? PendingPhotoStore.instance;
   PendingPhoto? _pendingPhoto;
 
   Croquis? _croquis; // null mientras no ha cargado
@@ -475,10 +477,40 @@ class _CroquisScreenState extends State<CroquisScreen> {
   }) async {
     if (widget.readOnly || _updatingId != null) return;
     if (await _photos.read() != null) {
-      _mostrarMensaje(
-        'Reintenta o descarta primero la foto pendiente en su visita original',
+      final owned = await _photos.readForCurrentAccount();
+      if (!mounted) return;
+      if (owned != null) {
+        _mostrarMensaje(
+          'Reintenta o descarta primero la foto pendiente en su visita original',
+        );
+        return;
+      }
+      // No se muestra ni se reasigna la foto ajena. El envío se descarta
+      // únicamente tras una decisión explícita antes de abrir el selector.
+      final discard = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Foto pendiente de otra cuenta'),
+          content: const Text(
+            'Hay un envío pendiente de otra cuenta o de una sesión anterior. '
+            'Para tomar una foto nueva debes descartar ese envío. '
+            'La otra cuenta ya no podrá reintentarlo desde la app. '
+            'No se borra la imagen original.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Volver'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Descartar y continuar'),
+            ),
+          ],
+        ),
       );
-      return;
+      if (discard != true || !mounted) return;
+      await _photos.clear();
     }
     if (!mounted) return;
     origen ??= await showModalBottomSheet<ImageSource>(
@@ -508,6 +540,10 @@ class _CroquisScreenState extends State<CroquisScreen> {
     final PendingPhoto? foto;
     try {
       foto = await _photos.capture(widget.visitaId, dispositivo.id, origen);
+    } on StateError catch (error) {
+      // Un conflicto de pendientes o de sesión no es un fallo de permisos.
+      _mostrarMensaje(error.message.toString());
+      return;
     } catch (_) {
       _mostrarMensaje(
         'No se pudo abrir la cámara o galería. Revisa sus permisos en Ajustes.',
