@@ -37,6 +37,33 @@ beforeEach(() => {
 })
 
 describe('Regresión del panel: interacción con el formulario y respuestas API', () => {
+  it('el login muestra el logo original con un nombre accesible', () => {
+    localStorage.clear()
+    render(<App />)
+    expect(screen.getByRole('img', { name: 'Kill Bichos, control de plagas' })).toHaveAttribute('src', '/brand/kill-bichos.png')
+    expect(screen.getByRole('button', { name: 'Ingresar al panel' })).toBeVisible()
+  })
+
+  it('la navegación conserva el logo y las acciones del panel', async () => {
+    render(<App />)
+    expect(screen.getByRole('img', { name: 'Kill Bichos, control de plagas' })).toHaveClass('company-logo')
+    expect(screen.getByRole('button', { name: /Clientes/ })).toBeVisible()
+    expect(screen.getByRole('button', { name: 'Cerrar sesión' })).toBeVisible()
+    expect(await screen.findByRole('button', { name: /Nueva visita/ })).toBeVisible()
+  })
+
+  for (const [estado, label, tone] of [
+    ['agendada', 'Agendada', 'gray'], ['en_curso', 'En curso', 'yellow'],
+    ['completada', 'Completada', 'green'], ['cancelada', 'Cancelada', 'red'],
+    ['reagendada', 'Reagendada', 'blue'],
+  ]) {
+    it(`mantiene texto y color de estado alineados con la app: ${label}`, async () => {
+      visits = [existingVisit({ estado })]
+      render(<App />)
+      expect(await screen.findByText(label, { selector: 'span' })).toHaveClass('pill', tone)
+    })
+  }
+
   it('crea clientes manuales sin exigir coordenadas', async () => {
     const user = userEvent.setup()
     render(<App />)
