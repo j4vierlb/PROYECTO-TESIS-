@@ -82,8 +82,11 @@ class PhotoUploadApi extends ApiClient {
   PhotoUploadApi(this.onUpload) : super(client: mockApi().client);
 
   @override
-  Future<DispositivoTrampa> uploadFoto(String dispositivoId, String rutaArchivo,
-      {bool reintento = false}) async {
+  Future<DispositivoTrampa> uploadFoto(
+    String dispositivoId,
+    String rutaArchivo, {
+    bool reintento = false,
+  }) async {
     await onUpload(dispositivoId, rutaArchivo);
     return DispositivoTrampa.fromJson({
       'id': dispositivoId,
@@ -139,7 +142,12 @@ void main() {
       );
       expect(tester.takeException(), isNull);
       expect(find.text('T-01 · Cebadero'), findsOneWidget);
-      expect(find.byWidgetPredicate((widget) => widget is Image && widget.image is NetworkImage), findsNothing);
+      expect(
+        find.byWidgetPredicate(
+          (widget) => widget is Image && widget.image is NetworkImage,
+        ),
+        findsNothing,
+      );
       expect(find.byTooltip('Sacar foto'), findsOneWidget);
     });
   }
@@ -208,20 +216,26 @@ void main() {
     'Pendiente propia bloquea cámara sin ofrecer descartar la de otra cuenta',
     (tester) async {
       var captures = 0;
-      final store = PendingPhotoStore(pick: (_) async {
-        captures++;
-        return null;
-      });
+      final store = PendingPhotoStore(
+        pick: (_) async {
+          captures++;
+          return null;
+        },
+      );
       await store.storage.write(
         key: PendingPhotoStore.storageKey,
         value: jsonEncode(photo(visit: 'v2')),
       );
-      await openScreen(tester, CroquisScreen(
-        visitaId: 'v1', apiClient: mockApi(), photoStore: store,
-      ));
+      await openScreen(
+        tester,
+        CroquisScreen(visitaId: 'v1', apiClient: mockApi(), photoStore: store),
+      );
       await tester.tap(find.byTooltip('Sacar foto'));
       await tester.pumpAndSettle();
-      expect(find.textContaining('Reintenta o descarta primero'), findsOneWidget);
+      expect(
+        find.textContaining('Reintenta o descarta primero'),
+        findsOneWidget,
+      );
       expect(find.text('Foto pendiente de otra cuenta'), findsNothing);
       expect(captures, 0);
       expect((await store.read())?.visitId, 'v2');
@@ -230,17 +244,20 @@ void main() {
 
   testWidgets('Volver conserva la foto ajena y no abre cámara', (tester) async {
     var captures = 0;
-    final store = PendingPhotoStore(pick: (_) async {
-      captures++;
-      return null;
-    });
+    final store = PendingPhotoStore(
+      pick: (_) async {
+        captures++;
+        return null;
+      },
+    );
     await store.storage.write(
       key: PendingPhotoStore.storageKey,
       value: jsonEncode(photo(owner: 'owner-b')),
     );
-    await openScreen(tester, CroquisScreen(
-      visitaId: 'v1', apiClient: mockApi(), photoStore: store,
-    ));
+    await openScreen(
+      tester,
+      CroquisScreen(visitaId: 'v1', apiClient: mockApi(), photoStore: store),
+    );
     await tester.tap(find.byTooltip('Sacar foto'));
     await tester.pumpAndSettle();
     expect(find.text('Foto pendiente de otra cuenta'), findsOneWidget);
@@ -254,48 +271,67 @@ void main() {
   });
 
   for (final source in [ImageSource.camera, ImageSource.gallery]) {
-    testWidgets('Descartar envío ajeno permite abrir $source con cuenta actual',
-        (tester) async {
-      var captures = 0;
-      late PendingPhotoStore store;
-      store = PendingPhotoStore(pick: (selectedSource) async {
-        captures++;
-        expect(selectedSource, source);
-        final pending = await store.readForCurrentAccount();
-        expect(pending?.ownerId, 'owner-a');
-        expect(pending?.visitId, 'v1');
-        expect(pending?.deviceId, 'd1');
-        expect(pending?.path, isNull);
-        return null; // Cancelar el selector no debe restaurar el envío ajeno.
-      });
-      await store.storage.write(
-        key: PendingPhotoStore.storageKey,
-        value: jsonEncode(photo(owner: 'owner-b')),
-      );
-      await openScreen(tester, CroquisScreen(
-        visitaId: 'v1', apiClient: mockApi(), photoStore: store,
-      ));
-      await tester.tap(find.byTooltip('Sacar foto'));
-      await tester.pumpAndSettle();
-      expect((await store.read())?.ownerId, 'owner-b');
-      await tester.tap(find.text('Descartar y continuar'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text(source == ImageSource.camera
-          ? 'Sacar foto' : 'Elegir de la galería'));
-      await tester.pumpAndSettle();
-      expect(captures, 1);
-      expect(await store.read(), isNull);
-      expect(find.textContaining('No se pudo abrir la cámara'), findsNothing);
-      expect(tester.takeException(), isNull);
-    });
+    testWidgets(
+      'Descartar envío ajeno permite abrir $source con cuenta actual',
+      (tester) async {
+        var captures = 0;
+        late PendingPhotoStore store;
+        store = PendingPhotoStore(
+          pick: (selectedSource) async {
+            captures++;
+            expect(selectedSource, source);
+            final pending = await store.readForCurrentAccount();
+            expect(pending?.ownerId, 'owner-a');
+            expect(pending?.visitId, 'v1');
+            expect(pending?.deviceId, 'd1');
+            expect(pending?.path, isNull);
+            return null; // Cancelar el selector no debe restaurar el envío ajeno.
+          },
+        );
+        await store.storage.write(
+          key: PendingPhotoStore.storageKey,
+          value: jsonEncode(photo(owner: 'owner-b')),
+        );
+        await openScreen(
+          tester,
+          CroquisScreen(
+            visitaId: 'v1',
+            apiClient: mockApi(),
+            photoStore: store,
+          ),
+        );
+        await tester.tap(find.byTooltip('Sacar foto'));
+        await tester.pumpAndSettle();
+        expect((await store.read())?.ownerId, 'owner-b');
+        await tester.tap(find.text('Descartar y continuar'));
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.text(
+            source == ImageSource.camera
+                ? 'Sacar foto'
+                : 'Elegir de la galería',
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(captures, 1);
+        expect(await store.read(), isNull);
+        expect(find.textContaining('No se pudo abrir la cámara'), findsNothing);
+        expect(tester.takeException(), isNull);
+      },
+    );
   }
 
-  testWidgets('Pendiente antigua sin dueño ofrece descarte explícito', (tester) async {
+  testWidgets('Pendiente antigua sin dueño ofrece descarte explícito', (
+    tester,
+  ) async {
     await const FlutterSecureStorage().write(
       key: PendingPhotoStore.storageKey,
       value: jsonEncode({...photo(), 'ownerId': null}),
     );
-    await openScreen(tester, CroquisScreen(visitaId: 'v1', apiClient: mockApi()));
+    await openScreen(
+      tester,
+      CroquisScreen(visitaId: 'v1', apiClient: mockApi()),
+    );
     await tester.tap(find.byTooltip('Sacar foto'));
     await tester.pumpAndSettle();
     expect(find.text('Foto pendiente de otra cuenta'), findsOneWidget);
@@ -304,8 +340,9 @@ void main() {
     expect((await PendingPhotoStore.instance.read())?.path, '/cache/a.jpg');
   });
 
-  testWidgets('Tras descartar foto ajena captura y sube solo la foto nueva',
-      (tester) async {
+  testWidgets('Tras descartar foto ajena captura y sube solo la foto nueva', (
+    tester,
+  ) async {
     final store = PendingPhotoStore(pick: (_) async => XFile('/cache/new.jpg'));
     await store.storage.write(
       key: PendingPhotoStore.storageKey,
@@ -321,9 +358,10 @@ void main() {
       expect(pending?.visitId, 'v1');
       expect(pending?.path, '/cache/new.jpg');
     });
-    await openScreen(tester, CroquisScreen(
-      visitaId: 'v1', apiClient: api, photoStore: store,
-    ));
+    await openScreen(
+      tester,
+      CroquisScreen(visitaId: 'v1', apiClient: api, photoStore: store),
+    );
     await tester.tap(find.byTooltip('Sacar foto'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Descartar y continuar'));
@@ -336,23 +374,31 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Conflicto al capturar informa pendiente, no permisos de cámara',
-      (tester) async {
-    await openScreen(tester, CroquisScreen(visitaId: 'v1', apiClient: mockApi()));
-    await tester.tap(find.byTooltip('Sacar foto'));
-    await tester.pumpAndSettle();
-    // Aparece un pendiente entre la comprobación y el selector.
-    await const FlutterSecureStorage().write(
-      key: PendingPhotoStore.storageKey,
-      value: jsonEncode(photo()),
-    );
-    await tester.tap(find.text('Sacar foto'));
-    await tester.pumpAndSettle();
-    expect(find.text('Reintenta o descarta primero la foto pendiente'), findsOneWidget);
-    expect(find.textContaining('No se pudo abrir la cámara'), findsNothing);
-    expect((await PendingPhotoStore.instance.read())?.ownerId, 'owner-a');
-    expect(tester.takeException(), isNull);
-  });
+  testWidgets(
+    'Conflicto al capturar informa pendiente, no permisos de cámara',
+    (tester) async {
+      await openScreen(
+        tester,
+        CroquisScreen(visitaId: 'v1', apiClient: mockApi()),
+      );
+      await tester.tap(find.byTooltip('Sacar foto'));
+      await tester.pumpAndSettle();
+      // Aparece un pendiente entre la comprobación y el selector.
+      await const FlutterSecureStorage().write(
+        key: PendingPhotoStore.storageKey,
+        value: jsonEncode(photo()),
+      );
+      await tester.tap(find.text('Sacar foto'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Reintenta o descarta primero la foto pendiente'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('No se pudo abrir la cámara'), findsNothing);
+      expect((await PendingPhotoStore.instance.read())?.ownerId, 'owner-a');
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets(
     'Logout advierte: Volver conserva tokens y foto; confirmar descarta',
