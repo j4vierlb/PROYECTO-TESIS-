@@ -8,9 +8,9 @@ Rama única: `juan`. No se modifica backend, panel web, secretos ni historial pu
 | --- | --- |
 | Cuenta bloqueada por foto ajena | Ya corregido en `b3a010f`: el croquis ofrece Volver o Descartar y continuar. Conserva la foto si se cancela; nunca muestra ni sube la foto de otra cuenta. Las siete regresiones siguen aprobadas |
 | Captura en caché temporal | Corregido en `2287c12`: copia privada en `getApplicationDocumentsDirectory()/pending_field_photos`, también para lostData, migración y reintento |
-| Descripción extensa | Sustituir por el estado vigente; las entregas y contadores anteriores quedan en sus documentos históricos, no mezclados en el resumen de la PR |
+| Descripción extensa | Actualizada con el estado vigente (95/95); las entregas y contadores anteriores quedan en sus documentos históricos, no mezclados en el resumen de la PR |
 | Ruido de formato | `45d4010` restaura 29 miembros sin cambios lógicos al estilo de `main`, en cuatro archivos. Reduce 331 líneas del diff agregado de esos archivos frente a `2287c12` |
-| Bloqueo global de cierre | Decisión de alcance pendiente. No se implementa ni declara validación global del backend |
+| Bloqueo global de cierre | Se acepta el bloqueo local para esta entrega. El bloqueo global queda como mejora futura de backend, fuera de esta PR |
 
 ## Comportamiento de las fotos
 
@@ -54,8 +54,22 @@ Se comparó la salida completa de `dart_style` antes y después de restaurar los
 
 Quedan cambios de formato dentro de algunos métodos que también cambiaron de lógica; no se afirma haber eliminado todo el formato del historial. GitHub permite ocultar diferencias de espacios para facilitar la revisión restante.
 
-## Límite del cierre de visitas — pendiente de decidir
+## Límite del cierre de visitas — bloqueo local aceptado
 
 La comprobación local bloquea el PATCH de cierre cuando la cuenta/visita tiene una foto pendiente en ese teléfono. Otro celular o el panel pueden cerrar esa visita porque el servidor no conoce archivos locales aún no sincronizados. La copia persistente no cambia esa limitación y una visita cerrada puede impedir la subida posterior según el contrato existente del backend.
 
+El usuario acepta expresamente este límite para la entrega actual: no se modifica el backend antes de la entrega. Se documenta también en `app-movil/ANDROID.md` y en la descripción de la PR. El bloqueo global queda como mejora futura, no como corrección incluida ni como decisión pendiente de esta PR.
+
 Para un bloqueo global se necesita acordar con backend el registro y resolución de pendientes, su alcance entre cuentas/dispositivos, tiempos de expiración, concurrencia y comportamiento sin conexión. Validar solo el estado de la visita al subir no evita que otro dispositivo la cierre. No se introduce una falsa garantía global ni se modifica código de backend sin esa decisión.
+
+## Declaración de entorno para el informe 2.4 y la presentación
+
+La validación manual de Android se realizó en un **emulador Android 16 / API 36**, AVD `KillBichos_API36`, perfil Pixel 7, Google APIs x86_64. El GPS fue simulado y la cámara emulada; las imágenes del mapa se descargaron realmente de Google. **No se ejecutaron pruebas en un teléfono Android físico** ni se comprobó paridad con el iPhone instalado. Las 95 pruebas automatizadas se ejecutaron en el entorno de desarrollo; las pruebas nuevas de persistencia usan archivos reales de prueba, no hardware Android real.
+
+## Comprobación de archivos y claves
+
+Se auditó el corte de código `71d4f7b` antes de esta actualización documental: 25 commits de `origin/main..juan` y 179 blobs únicos, incluidos archivos de estados anteriores de la PR. Se buscaron patrones de claves Google/OpenAI/GitHub y llaves privadas, y coincidencias con los valores de claves locales sin imprimirlos. No se encontraron coincidencias. Esta comprobación automática no sustituye una auditoría universal de todos los posibles formatos de secretos.
+
+Tanto el diff vigente como los objetos propios de ese historial están libres de archivos `.env` reales, `secrets.properties`, `Secrets.xcconfig`, `key.properties`, keystores, APK/AAB y carpetas de compilación. Las plantillas `.env.example`, `secrets.example.properties` y `Secrets.example.xcconfig` no contienen las credenciales locales. Los archivos `build.gradle.kts` son configuración versionable, no la carpeta generada `android/build/`.
+
+Se confirmó que los archivos privados locales están ignorados y se añadió `/build/` a `app-movil/android/.gitignore` como prevención explícita. No se cambió ninguna clave, no se publicaron valores secretos y no se incluyeron binarios de compilación.

@@ -7,7 +7,42 @@ registrar también el commit y los valores de `API_BASE_URL` y `MAPS_ENABLED`
 utilizados en ambos dispositivos: el número de versión por sí solo no garantiza
 que sean la misma compilación.
 
-La base sincronizada para esta preparación incluye `origin/main` en
+## Estado vigente — 26/10/2026
+
+- **95/95 pruebas Flutter aprobadas**, análisis estático sin incidencias y APK
+  debug compilado. Los resultados de 16, 50 o 75 pruebas de las secciones
+  posteriores son cortes históricos, no contadores que se sumen al actual.
+- La foto pendiente se copia a un directorio privado persistente, fuera de la
+  caché de `image_picker`, y conserva su cuenta, visita y trampa originales.
+  El croquis permite descartar explícitamente un envío ajeno antes de capturar.
+- Evidencias manuales de Android: **emulador**, no teléfono físico. Se utilizó
+  el AVD `KillBichos_API36`, Android 16 / API 36, Google APIs x86_64 y perfil
+  Pixel 7. El GPS fue simulado y la cámara emulada; el mapa de Google sí cargó
+  imágenes reales. Las pruebas más recientes de persistencia usan archivos
+  reales del entorno de pruebas, no una nueva ejecución en Android.
+- No se declara validación en teléfono Android físico ni equivalencia comprobada
+  con el iPhone instalado. Esas verificaciones siguen pendientes.
+
+### Decisión de alcance aceptada: bloqueo de cierre local
+
+Para esta entrega se acepta el bloqueo **local**: la app impide completar una
+visita si esa cuenta/visita tiene una foto pendiente en ese teléfono. **Otro
+dispositivo o el panel web sí pueden cerrar la visita**, porque el servidor no
+conoce ese envío local. En ese caso, el backend puede rechazar la subida posterior;
+la foto permanece disponible localmente hasta resolver o descartar su envío.
+
+La copia persistente no convierte ese bloqueo en global ni implementa
+sincronización offline completa. El registro/sincronización de pendientes y la
+validación de cierre entre dispositivos quedan como **mejora futura de backend**,
+fuera de PR #21 y de la entrega actual. No se amplía el backend antes de la entrega.
+
+Resultados, límites y evidencia de la versión actual en el
+[registro vigente de revisión](../pruebas/android_revision_PR21_2026-10-26/README.md).
+
+Las secciones de preparación y ejecuciones anteriores que siguen se conservan
+como historial y guía; sus resultados y hashes no corresponden al APK actual.
+
+La base sincronizada del corte inicial de preparación incluye `origin/main` en
 `76aae166f2b2a7ddad848dbfdd6513cb1abb7dff`, con croquis en terreno y sesión
 persistente. No incluye cambios de IA de ramas aún no integradas.
 
@@ -303,7 +338,7 @@ una foto en caché para reintentar no equivale a tener modo offline.
 
 ## Correcciones posteriores a la revisión de PR #21 (23/10/2026)
 
-Estado vigente: **75 pruebas Flutter aprobadas**, análisis sin observaciones y
+Resultado histórico de ese corte: **75 pruebas Flutter aprobadas**, análisis sin observaciones y
 APK debug recompilado. La sesión vencida conserva la foto pendiente, ligada a
 su cuenta original; el logout manual advierte antes de descartarla. Una URL de
 foto inválida produce null y deja la trampa sin foto, sin derribar el croquis.
