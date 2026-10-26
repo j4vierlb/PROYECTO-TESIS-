@@ -80,6 +80,7 @@ app/
 ├── repositories.py       # consultas SQL a Postgres/PostGIS
 ├── geocoding.py          # dirección → lat/lng (Google Geocoding API)
 ├── fotos.py              # guardar/leer fotos de trampas (validación de imagen y tamaño)
+├── whatsapp_saliente.py  # avisos, recordatorios y mensajes del operador (API REST de Twilio)
 ├── ai/
 │   ├── agent.py          # agente conversacional (OpenAI) para WhatsApp
 │   └── croquis_agent.py  # sugerencia de trampas con la foto satelital
@@ -89,7 +90,8 @@ app/
     ├── visitas.py
     ├── croquis.py        # ver y crear croquis, agregar trampas y POST /croquis/{id}/sugerencia (IA)
     ├── dispositivos.py   # confirmar/mover/retirar trampas y sus fotos
-    └── whatsapp.py       # webhook de Twilio: POST /webhooks/whatsapp
+    ├── whatsapp.py       # webhooks de Twilio: mensajes entrantes y estado de entrega
+    └── conversaciones.py # bandeja de WhatsApp del panel y recordatorios manuales
 ```
 
 ## Panel web
@@ -98,7 +100,9 @@ El frontend está en `../frontend/` y consume los endpoints protegidos del panel
 
 - `GET /panel/stats`, `GET /panel/operadores`
 - `GET/POST /clientes`, `PATCH/DELETE /clientes/{id}`
-- `GET/POST /panel/visitas`, `PATCH/DELETE /panel/visitas/{id}`
+- `GET/POST /panel/visitas`, `PATCH/DELETE /panel/visitas/{id}` (el `PATCH` también acepta `fecha_hora` y `operador_id` para reagendar)
+- `GET /panel/conversaciones`, `GET/PATCH /panel/conversaciones/{id}`, `POST /panel/conversaciones/{id}/mensajes`
+- `POST /panel/whatsapp/recordatorios`
 
 El acceso está limitado a usuarios con rol `admin` o `coordinador`; todas las consultas
 se filtran por `empresa_id` para mantener el aislamiento del tenant.
@@ -130,6 +134,11 @@ Copia `.env.example` a `.env` y completa. **Nunca subas el `.env` ni claves real
 | `TWILIO_WHATSAPP_NUMBER` | Número del Sandbox, `whatsapp:+14155238886` |
 | `TWILIO_WEBHOOK_URL` | URL pública exacta configurada en Twilio, terminada en `/webhooks/whatsapp` |
 | `TWILIO_VALIDATE_SIGNATURE` | `true` en producción; `false` solo para probar en local con `curl` |
+| `TWILIO_STATUS_CALLBACK_URL` | Opcional: URL del estado de entrega. Vacía = `TWILIO_WEBHOOK_URL` + `/estado` |
+| `TWILIO_CONTENT_SID_RECORDATORIO`, `TWILIO_CONTENT_SID_AVISO` | Opcionales: plantillas aprobadas (`HX...`) para clientes que no escriben hace más de 24 h |
+| `WHATSAPP_AVISOS_ACTIVOS` | `true`: avisar al cliente cuando el panel agenda, reagenda o cancela su visita |
+| `WHATSAPP_RECORDATORIOS_ACTIVOS`, `WHATSAPP_RECORDATORIO_HORA` | Recordatorio del día anterior, desde esa hora de Chile (por defecto `18:00`) |
+| `WHATSAPP_OPERADOR_MAX_HORAS` | Horas sin actividad del operador tras las que la conversación vuelve sola a la IA (por defecto `2`; `0` = nunca) |
 | `KILLBICHOS_EMPRESA_ID` | Empresa que recibe las visitas (por defecto la del `seed.sql`) |
 | `KILLBICHOS_OPERADOR_ID` | Opcional: operador fijo para las visitas de WhatsApp |
 | `KILLBICHOS_OPEN_TIME`, `KILLBICHOS_CLOSE_TIME` | Horario de atención, por defecto `08:00` a `18:00` |
@@ -173,3 +182,35 @@ En Windows (PowerShell) usa `curl.exe` en lugar de `curl` y escribe el comando e
 6. Escribe al número del Sandbox desde tu WhatsApp.
 
 La URL de ngrok cambia cada vez que lo reinicias: actualízala en Twilio y en el `.env`. En producción `TWILIO_VALIDATE_SIGNATURE` debe quedar en `true`; con `false` cualquiera podría enviar mensajes falsos al webhook.
+
+## Mensajes de WhatsApp que envía el sistema
+
+Además de contestar lo que escribe el cliente (TwiML en el webhook), el backend le escribe por iniciativa propia con la API REST de Twilio (`app/whatsapp_saliente.py`):
+
+| Qué | Cuándo |
+|---|---|
+| **Aviso de visita** | El panel crea una visita, cambia su fecha (Reagendar), la cancela o reactiva una cancelada. Cambiar solo notas, operador o avance (en curso, completada) no se avisa. Tampoco se avisan visitas que ya pasaron. |
+| **Recordatorio** | El día anterior a cada visita agendada, desde `WHATSAPP_RECORDATORIO_HORA`. Un ciclo dentro del backend revisa cada 10 minutos; `visitas.recordatorio_enviado_at` evita duplicados; si Twilio falla por algo pasajero (caída, red, límite de envíos), la marca se quita y se reintenta en la siguiente pasada. Un error permanente (número inválido) no se reintenta. Si se reagenda, la visita vuelve a recibir recordatorio. En el panel, el botón **Enviar recordatorios de mañana** los envía en el momento (`POST /panel/whatsapp/recordatorios`). |
+| **Respuesta de un operador** | Desde la pestaña **WhatsApp** del panel. Al escribir, la conversación queda **atendida por un operador** y la IA deja de responder en ella hasta que se pulse **Devolver a la IA**. Si el operador no escribe en `WHATSAPP_OPERADOR_MAX_HORAS` horas, el siguiente mensaje del cliente lo vuelve a contestar la IA. |
+
+**Ventana de 24 h.** WhatsApp solo deja enviar texto libre hasta 24 h después del último mensaje del cliente. Fuera de esa ventana:
+
+- los avisos y recordatorios usan la plantilla aprobada de `TWILIO_CONTENT_SID_AVISO` o `TWILIO_CONTENT_SID_RECORDATORIO`; si no hay plantilla, el mensaje queda guardado como **no enviado** y no se llama a Twilio;
+- el panel no deja escribir (el backend responde `409`).
+
+En el Sandbox, la plantilla de recordatorio puede ser la de citas que trae Twilio (*Your appointment is coming up on {{1}} at {{2}}*); su `ContentSid` aparece en **Messaging → Content Template Builder**.
+
+**Estado de entrega.** Cada mensaje enviado guarda en `mensajes_whatsapp.estado_entrega` lo que informa Twilio en `POST /webhooks/whatsapp/estado` (`queued`, `sent`, `delivered`, `read`, `failed`, `undelivered`), con el código de error si falló (ej. `63016` = fuera de la ventana de 24 h). Esto también incluye las respuestas de la IA. El webhook valida la firma de Twilio igual que el de mensajes. Por defecto su URL es `TWILIO_WEBHOOK_URL` + `/estado`, y el backend se la indica a Twilio en cada mensaje, así que **no hay que configurarla en la consola**. Los estados que llegan en desorden (ej. `sent` después de `delivered`) no hacen retroceder el estado guardado.
+
+Una base creada antes de este cambio necesita `../database/migracion_whatsapp_saliente.sql` (ver `../database/README.md`).
+
+### Prueba con el Sandbox
+
+Con el Sandbox y ngrok funcionando (sección anterior) y el teléfono que escribió al Sandbox en las últimas 24 h:
+
+1. En el panel, **Clientes**: el cliente creado por WhatsApp tiene el número del teléfono de prueba.
+2. **Agenda → Nueva visita** para ese cliente, mañana: llega el aviso "Agendamos tu visita…".
+3. **Reagendar** esa visita: llega "tu visita… se cambió para…". Cambiar el estado a **Cancelada**: llega el aviso de cancelación.
+4. Volver a dejarla **Agendada** y, en **WhatsApp**, pulsar **Enviar recordatorios de mañana**: llega el recordatorio.
+5. En **WhatsApp**, abrir la conversación y escribir una respuesta: llega al teléfono y la conversación pasa a **Operador**. Escribir desde el teléfono: la IA no responde y el mensaje aparece en el panel. **Devolver a la IA** y escribir de nuevo: la IA vuelve a contestar.
+6. Bajo cada mensaje enviado se ve su estado (✓ enviado, ✓✓ entregado, ✓✓ leído en azul, ⚠ no entregado).
