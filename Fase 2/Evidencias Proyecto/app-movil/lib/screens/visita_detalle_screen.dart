@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 
 import '../models/visita.dart';
 import '../services/api_client.dart';
+import '../services/pending_photo.dart';
 import '../theme/app_theme.dart';
 import '../utils/formato.dart';
 import '../widgets/estado_badge.dart';
@@ -21,15 +22,20 @@ import 'croquis_screen.dart';
 class VisitaDetalleScreen extends StatefulWidget {
   // Id de la visita a mostrar; la pantalla la pide al backend al abrirse.
   final String visitaId;
+  final ApiClient? apiClient;
 
-  const VisitaDetalleScreen({super.key, required this.visitaId});
+  const VisitaDetalleScreen({
+    super.key,
+    required this.visitaId,
+    this.apiClient,
+  });
 
   @override
   State<VisitaDetalleScreen> createState() => _VisitaDetalleScreenState();
 }
 
 class _VisitaDetalleScreenState extends State<VisitaDetalleScreen> {
-  final _apiClient = ApiClient();
+  late final _apiClient = widget.apiClient ?? ApiClient();
 
   Visita? _visita; // null mientras no ha cargado
   String? _loadError;
@@ -65,10 +71,30 @@ class _VisitaDetalleScreenState extends State<VisitaDetalleScreen> {
 
   /// Envía un cambio al backend (PATCH /visitas/{id}) y actualiza la pantalla
   /// con la visita que devuelve. Lo usan iniciar, completar y editar notas.
-  Future<void> _guardar({String? estado, String? notas, String? mensajeOk}) async {
+  Future<void> _guardar({
+    String? estado,
+    String? notas,
+    String? mensajeOk,
+  }) async {
+    if (_saving) return;
     setState(() => _saving = true);
     try {
-      final actualizada = await _apiClient.updateVisita(widget.visitaId, estado: estado, notas: notas);
+      if (estado == 'completada') {
+        final pending = await PendingPhotoStore.instance
+            .readForCurrentAccount();
+        if (!mounted) return;
+        if (pending?.visitId == widget.visitaId) {
+          _mostrarMensaje(
+            'Hay una foto pendiente. Vuelve al croquis y reinténtala o descártala antes de completar.',
+          );
+          return;
+        }
+      }
+      final actualizada = await _apiClient.updateVisita(
+        widget.visitaId,
+        estado: estado,
+        notas: notas,
+      );
       if (!mounted) return;
       setState(() {
         _visita = actualizada;
