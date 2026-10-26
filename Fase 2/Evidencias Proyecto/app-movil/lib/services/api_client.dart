@@ -64,9 +64,7 @@ class ApiClient {
   /// true si se renovó; false si el backend lo rechazó (sesión vencida), y en
   /// ese caso borra los tokens. Sin internet lanza la excepción de red.
   Future<bool> refreshSession() {
-    return _renovando ??= _pedirRenovacion().whenComplete(
-      () => _renovando = null,
-    );
+    return _renovando ??= _pedirRenovacion().whenComplete(() => _renovando = null);
   }
 
   Future<bool> _pedirRenovacion() async {
@@ -126,21 +124,15 @@ class ApiClient {
     final body = await _authenticatedGet('/operadores/me/visitas-hoy');
     final data = jsonDecode(body) as List<dynamic>;
     // Convierte cada elemento del JSON en un objeto Visita.
-    return data
-        .map((item) => Visita.fromJson(item as Map<String, dynamic>))
-        .toList();
+    return data.map((item) => Visita.fromJson(item as Map<String, dynamic>)).toList();
   }
 
   /// Visitas completadas del operador, de la más reciente a la más antigua.
   /// `limit`/`offset` permiten pedirlas por páginas.
   Future<List<Visita>> fetchHistorial({int limit = 20, int offset = 0}) async {
-    final body = await _authenticatedGet(
-      '/operadores/me/visitas-historial?limit=$limit&offset=$offset',
-    );
+    final body = await _authenticatedGet('/operadores/me/visitas-historial?limit=$limit&offset=$offset');
     final data = jsonDecode(body) as List<dynamic>;
-    return data
-        .map((item) => Visita.fromJson(item as Map<String, dynamic>))
-        .toList();
+    return data.map((item) => Visita.fromJson(item as Map<String, dynamic>)).toList();
   }
 
   /// GET /visitas/{id} — detalle de una visita.
@@ -157,17 +149,16 @@ class ApiClient {
 
   /// Actualiza el estado y/o las notas de una visita (PATCH parcial: solo se
   /// envían los campos que se pasan). Devuelve la visita ya actualizada.
-  Future<Visita> updateVisita(
-    String visitaId, {
-    String? estado,
-    String? notas,
-  }) async {
+  Future<Visita> updateVisita(String visitaId, {String? estado, String? notas}) async {
     final body = await _authenticatedRequest(
       'PATCH',
       '/visitas/$visitaId',
       // `'estado': ?estado` solo agrega la clave si el valor no es null, así
       // no se manda "notas": null por error y se borran las notas.
-      body: {'estado': ?estado, 'notas': ?notas},
+      body: {
+        'estado': ?estado,
+        'notas': ?notas,
+      },
     );
     return Visita.fromJson(jsonDecode(body) as Map<String, dynamic>);
   }
@@ -183,7 +174,11 @@ class ApiClient {
     final body = await _authenticatedRequest(
       'PATCH',
       '/dispositivos-trampa/$dispositivoId',
-      body: {'accion': accion, 'lat': ?lat, 'lng': ?lng},
+      body: {
+        'accion': accion,
+        'lat': ?lat,
+        'lng': ?lng,
+      },
     );
     return DispositivoTrampa.fromJson(jsonDecode(body) as Map<String, dynamic>);
   }
@@ -322,8 +317,7 @@ class ApiClient {
   }
 
   /// Atajo para los GET autenticados.
-  Future<String> _authenticatedGet(String path) =>
-      _authenticatedRequest('GET', path);
+  Future<String> _authenticatedGet(String path) => _authenticatedRequest('GET', path);
 
   /// Request autenticado con el access_token guardado. Centraliza el manejo
   /// de "sin sesión", del tiempo de espera y de los errores {"detail": "..."}

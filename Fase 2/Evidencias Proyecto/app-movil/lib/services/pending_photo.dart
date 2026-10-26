@@ -67,8 +67,12 @@ class PendingPhotoStore {
     String? path;
     final value = await storage.read(key: storageKey);
     try {
-      if (value != null) path = (jsonDecode(value) as Map<String, dynamic>)['path'] as String?;
-    } catch (_) { /* Los metadatos corruptos también se pueden descartar. */ }
+      if (value != null) {
+        path = (jsonDecode(value) as Map<String, dynamic>)['path'] as String?;
+      }
+    } catch (_) {
+      /* Los metadatos corruptos también se pueden descartar. */
+    }
     await storage.delete(key: storageKey);
     if (path != null) {
       try {
@@ -83,7 +87,12 @@ class PendingPhotoStore {
     if (photo.path == null) return photo;
     try {
       final path = await files.persist(XFile(photo.path!));
-      final saved = PendingPhoto(photo.visitId, photo.deviceId, path, photo.ownerId);
+      final saved = PendingPhoto(
+        photo.visitId,
+        photo.deviceId,
+        path,
+        photo.ownerId,
+      );
       await _save(saved);
       return saved;
     } catch (_) {
@@ -174,10 +183,10 @@ class PendingPhotoStore {
     final files = lost.files;
     if (pending.path == null && files != null && files.isNotEmpty) {
       final recovered = PendingPhoto(
-          pending.visitId,
-          pending.deviceId,
-          files.first.path,
-          pending.ownerId,
+        pending.visitId,
+        pending.deviceId,
+        files.first.path,
+        pending.ownerId,
       );
       await _save(recovered);
       await _persist(recovered);

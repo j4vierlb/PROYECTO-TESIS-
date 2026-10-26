@@ -92,9 +92,7 @@ class _InicioSesion extends StatefulWidget {
 
 class _InicioSesionState extends State<_InicioSesion> {
   // Se guarda el Future para no repetir la revisión cada vez que se redibuja.
-  late final Future<bool> _haySesion = widget.restaurarSesion().catchError(
-    (_) => false,
-  );
+  late final Future<bool> _haySesion = widget.restaurarSesion().catchError((_) => false);
 
   @override
   Widget build(BuildContext context) {

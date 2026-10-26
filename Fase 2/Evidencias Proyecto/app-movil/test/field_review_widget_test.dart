@@ -346,7 +346,10 @@ void main() {
   testWidgets('Tras descartar foto ajena captura y sube solo la foto nueva', (
     tester,
   ) async {
-    final store = PendingPhotoStore(files: const FakePendingPhotoFiles(), pick: (_) async => XFile('/cache/new.jpg'));
+    final store = PendingPhotoStore(
+      files: const FakePendingPhotoFiles(),
+      pick: (_) async => XFile('/cache/new.jpg'),
+    );
     await store.storage.write(
       key: PendingPhotoStore.storageKey,
       value: jsonEncode(photo(owner: 'owner-b', visit: 'old-visit')),
@@ -403,27 +406,39 @@ void main() {
     },
   );
 
-  testWidgets('Fallo de disco mantiene el envío visible y no simula fallo de cámara', (tester) async {
-    var uploads = 0;
-    final store = PendingPhotoStore(
-      files: const UnavailablePhotoFiles(),
-      pick: (_) async => XFile('/cache/new.jpg'),
-    );
-    await openScreen(tester, CroquisScreen(
-      visitaId: 'v1', photoStore: store,
-      apiClient: PhotoUploadApi((_, _) async { uploads++; }),
-    ));
-    await tester.tap(find.byTooltip('Sacar foto'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Sacar foto'));
-    await tester.pumpAndSettle();
-    expect(find.textContaining('No se pudo conservar la foto'), findsOneWidget);
-    expect(find.textContaining('Hay una foto pendiente'), findsOneWidget);
-    expect(find.textContaining('No se pudo abrir la cámara'), findsNothing);
-    expect((await store.read())?.path, '/cache/new.jpg');
-    expect(uploads, 0);
-    expect(tester.takeException(), isNull);
-  });
+  testWidgets(
+    'Fallo de disco mantiene el envío visible y no simula fallo de cámara',
+    (tester) async {
+      var uploads = 0;
+      final store = PendingPhotoStore(
+        files: const UnavailablePhotoFiles(),
+        pick: (_) async => XFile('/cache/new.jpg'),
+      );
+      await openScreen(
+        tester,
+        CroquisScreen(
+          visitaId: 'v1',
+          photoStore: store,
+          apiClient: PhotoUploadApi((_, _) async {
+            uploads++;
+          }),
+        ),
+      );
+      await tester.tap(find.byTooltip('Sacar foto'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Sacar foto'));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('No se pudo conservar la foto'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Hay una foto pendiente'), findsOneWidget);
+      expect(find.textContaining('No se pudo abrir la cámara'), findsNothing);
+      expect((await store.read())?.path, '/cache/new.jpg');
+      expect(uploads, 0);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets(
     'Logout advierte: Volver conserva tokens y foto; confirmar descarta',

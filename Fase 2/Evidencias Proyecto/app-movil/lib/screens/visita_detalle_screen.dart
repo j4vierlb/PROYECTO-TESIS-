@@ -118,8 +118,7 @@ class _VisitaDetalleScreenState extends State<VisitaDetalleScreen> {
       ..showSnackBar(SnackBar(content: Text(texto)));
   }
 
-  Future<void> _iniciarVisita() =>
-      _guardar(estado: 'en_curso', mensajeOk: 'Visita iniciada');
+  Future<void> _iniciarVisita() => _guardar(estado: 'en_curso', mensajeOk: 'Visita iniciada');
 
   /// Pide confirmación antes de completar, porque una visita completada ya
   /// no se puede editar desde la app.
@@ -132,14 +131,8 @@ class _VisitaDetalleScreenState extends State<VisitaDetalleScreen> {
         title: const Text('Completar visita'),
         content: const Text('¿Marcar esta visita como completada?'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Completar'),
-          ),
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Completar')),
         ],
       ),
     );
@@ -189,10 +182,7 @@ class _VisitaDetalleScreenState extends State<VisitaDetalleScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                _loadError ?? 'No se pudo cargar la visita',
-                textAlign: TextAlign.center,
-              ),
+              Text(_loadError ?? 'No se pudo cargar la visita', textAlign: TextAlign.center),
               const SizedBox(height: 16),
               OutlinedButton(onPressed: _load, child: const Text('Reintentar')),
             ],
@@ -220,29 +210,17 @@ class _VisitaDetalleScreenState extends State<VisitaDetalleScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: Text(
-                          visita.cliente.nombre,
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
+                        child: Text(visita.cliente.nombre, style: Theme.of(context).textTheme.titleLarge),
                       ),
                       EstadoBadge(estado: visita.estado),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  _InfoRow(
-                    icon: Icons.location_on_outlined,
-                    text: visita.cliente.direccionTexto,
-                  ),
+                  _InfoRow(icon: Icons.location_on_outlined, text: visita.cliente.direccionTexto),
                   const SizedBox(height: 8),
-                  _InfoRow(
-                    icon: Icons.schedule_outlined,
-                    text: formatFechaHora(visita.fechaHora),
-                  ),
+                  _InfoRow(icon: Icons.schedule_outlined, text: formatFechaHora(visita.fechaHora)),
                   const SizedBox(height: 8),
-                  _InfoRow(
-                    icon: Icons.phone_outlined,
-                    text: visita.cliente.telefonoWhatsapp,
-                  ),
+                  _InfoRow(icon: Icons.phone_outlined, text: visita.cliente.telefonoWhatsapp),
                   const SizedBox(height: 16),
                   const Divider(),
                   const SizedBox(height: 12),
@@ -250,9 +228,7 @@ class _VisitaDetalleScreenState extends State<VisitaDetalleScreen> {
                   const SizedBox(height: 4),
                   // Sin notas: texto gris "Sin notas"; con notas: texto normal.
                   Text(
-                    (visita.notas == null || visita.notas!.isEmpty)
-                        ? 'Sin notas'
-                        : visita.notas!,
+                    (visita.notas == null || visita.notas!.isEmpty) ? 'Sin notas' : visita.notas!,
                     style: (visita.notas == null || visita.notas!.isEmpty)
                         ? Theme.of(context).textTheme.bodyMedium
                         : Theme.of(context).textTheme.bodyLarge,
@@ -337,9 +313,7 @@ class _InfoRow extends StatelessWidget {
       children: [
         Icon(icon, size: 20, color: AppColors.textSecondary),
         const SizedBox(width: 10),
-        Expanded(
-          child: Text(text, style: Theme.of(context).textTheme.bodyLarge),
-        ),
+        Expanded(child: Text(text, style: Theme.of(context).textTheme.bodyLarge)),
       ],
     );
   }
@@ -358,9 +332,7 @@ class _NotasDialog extends StatefulWidget {
 
 class _NotasDialogState extends State<_NotasDialog> {
   // El campo empieza con las notas actuales para poder editarlas.
-  late final TextEditingController _controller = TextEditingController(
-    text: widget.notasIniciales,
-  );
+  late final TextEditingController _controller = TextEditingController(text: widget.notasIniciales);
 
   @override
   void dispose() {
@@ -377,18 +349,12 @@ class _NotasDialogState extends State<_NotasDialog> {
         autofocus: true, // abre el teclado de inmediato
         minLines: 3,
         maxLines: 6,
-        textCapitalization:
-            TextCapitalization.sentences, // mayúscula al empezar
-        decoration: const InputDecoration(
-          hintText: 'Escribe tus observaciones',
-        ),
+        textCapitalization: TextCapitalization.sentences, // mayúscula al empezar
+        decoration: const InputDecoration(hintText: 'Escribe tus observaciones'),
       ),
       actions: [
         // Cancelar devuelve null (no se guarda nada).
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancelar'),
-        ),
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancelar')),
         // Guardar devuelve el texto, sin espacios sobrantes al inicio o al final.
         TextButton(
           onPressed: () => Navigator.of(context).pop(_controller.text.trim()),

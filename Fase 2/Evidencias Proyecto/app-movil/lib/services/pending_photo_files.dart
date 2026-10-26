@@ -23,12 +23,17 @@ class PendingPhotoFiles {
     if (!await File(source.path).exists()) {
       throw const FileSystemException('La captura ya no está disponible');
     }
-    if (p.equals(p.dirname(p.absolute(source.path)), p.absolute(directory.path))) {
+    if (p.equals(
+      p.dirname(p.absolute(source.path)),
+      p.absolute(directory.path),
+    )) {
       return source.path;
     }
     final extension = p.extension(source.path).toLowerCase() == '.png'
-        ? '.png' : '.jpg';
-    final name = '${DateTime.now().microsecondsSinceEpoch}_'
+        ? '.png'
+        : '.jpg';
+    final name =
+        '${DateTime.now().microsecondsSinceEpoch}_'
         '${Random.secure().nextInt(1 << 32)}$extension';
     final target = File(p.join(directory.path, name));
     try {
@@ -44,7 +49,9 @@ class PendingPhotoFiles {
   Future<void> remove(String path) async {
     if (p.basename(p.dirname(path)) != folder) return;
     final directory = await _directory();
-    if (!p.equals(p.dirname(p.absolute(path)), p.absolute(directory.path))) return;
+    if (!p.equals(p.dirname(p.absolute(path)), p.absolute(directory.path))) {
+      return;
+    }
     final file = File(path);
     if (await file.exists()) await file.delete();
   }
@@ -52,6 +59,7 @@ class PendingPhotoFiles {
 
 class PendingPhotoStorageException implements Exception {
   const PendingPhotoStorageException();
-  String get message => 'No se pudo conservar la foto fuera de la caché. '
+  String get message =>
+      'No se pudo conservar la foto fuera de la caché. '
       'Libera espacio y reintenta, o descarta el envío pendiente.';
 }

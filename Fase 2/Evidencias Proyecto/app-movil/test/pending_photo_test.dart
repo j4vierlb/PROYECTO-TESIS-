@@ -15,7 +15,11 @@ String ownerToken(String owner) =>
 PendingPhotoStore testStore({
   Future<XFile?> Function(ImageSource)? pick,
   Future<LostDataResponse> Function()? recover,
-}) => PendingPhotoStore(files: const FakePendingPhotoFiles(), pick: pick, recover: recover);
+}) => PendingPhotoStore(
+  files: const FakePendingPhotoFiles(),
+  pick: pick,
+  recover: recover,
+);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -47,9 +51,7 @@ void main() {
     expect(await store.read(), isNull);
   });
   test('Error de permisos de camara limpia seleccion sin archivo', () async {
-    final store = testStore(
-      pick: (_) => throw StateError('permission denied'),
-    );
+    final store = testStore(pick: (_) => throw StateError('permission denied'));
     await expectLater(
       store.capture('v1', 'd1', ImageSource.camera),
       throwsStateError,

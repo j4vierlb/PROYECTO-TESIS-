@@ -109,8 +109,7 @@ class _CroquisScreenState extends State<CroquisScreen> {
   }
 
   bool _permisoOk(LocationPermission permiso) =>
-      permiso == LocationPermission.always ||
-      permiso == LocationPermission.whileInUse;
+      permiso == LocationPermission.always || permiso == LocationPermission.whileInUse;
 
   /// Pide el croquis al backend.
   Future<void> _load() async {
@@ -168,20 +167,14 @@ class _CroquisScreenState extends State<CroquisScreen> {
   }) async {
     setState(() => _updatingId = dispositivo.id);
     try {
-      final actualizado = await _apiClient.updateDispositivo(
-        dispositivo.id,
-        accion,
-        lat: lat,
-        lng: lng,
-      );
+      final actualizado = await _apiClient.updateDispositivo(dispositivo.id, accion, lat: lat, lng: lng);
       if (!mounted) return;
       final croquis = _croquis!;
       setState(() {
         // Nueva lista: igual a la anterior, pero con la trampa actualizada
         // en lugar de la vieja (se compara por id).
         _croquis = croquis.copyWithDispositivos([
-          for (final item in croquis.dispositivos)
-            item.id == actualizado.id ? actualizado : item,
+          for (final item in croquis.dispositivos) item.id == actualizado.id ? actualizado : item,
         ]);
         _mapVersion++;
       });
@@ -199,8 +192,7 @@ class _CroquisScreenState extends State<CroquisScreen> {
   }
 
   /// El operador valida en terreno la ubicación que sugirió la IA.
-  Future<void> _confirmar(DispositivoTrampa dispositivo) =>
-      _actualizarDispositivo(
+  Future<void> _confirmar(DispositivoTrampa dispositivo) => _actualizarDispositivo(
         dispositivo,
         'confirmar',
         mensajeOk: '${dispositivo.codigo} confirmada',
@@ -213,51 +205,30 @@ class _CroquisScreenState extends State<CroquisScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Retirar ${dispositivo.codigo}'),
-        content: const Text(
-          'La trampa quedará marcada como retirada. ¿Continuar?',
-        ),
+        content: const Text('La trampa quedará marcada como retirada. ¿Continuar?'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Retirar'),
-          ),
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Retirar')),
         ],
       ),
     );
     if (confirmado == true) {
       // 'eliminar' es el nombre de la acción en la API.
-      await _actualizarDispositivo(
-        dispositivo,
-        'eliminar',
-        mensajeOk: '${dispositivo.codigo} retirada',
-      );
+      await _actualizarDispositivo(dispositivo, 'eliminar', mensajeOk: '${dispositivo.codigo} retirada');
     }
   }
 
   /// Se llama al soltar un pin arrastrado en el mapa: pide confirmación y,
   /// si el operador acepta, guarda la nueva posición.
-  Future<void> _moverConfirmando(
-    DispositivoTrampa dispositivo,
-    LatLng nuevaPosicion,
-  ) async {
+  Future<void> _moverConfirmando(DispositivoTrampa dispositivo, LatLng nuevaPosicion) async {
     final confirmado = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Mover ${dispositivo.codigo}'),
         content: const Text('¿Guardar la nueva ubicación de esta trampa?'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Guardar'),
-          ),
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Guardar')),
         ],
       ),
     );
@@ -280,8 +251,7 @@ class _CroquisScreenState extends State<CroquisScreen> {
     final croquis = _croquis!;
     setState(() {
       _croquis = croquis.copyWithDispositivos([
-        for (final item in croquis.dispositivos)
-          item.id == actualizado.id ? actualizado : item,
+        for (final item in croquis.dispositivos) item.id == actualizado.id ? actualizado : item,
       ]);
       _mapVersion++;
     });
@@ -295,12 +265,7 @@ class _CroquisScreenState extends State<CroquisScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const ListTile(
-              title: Text(
-                '¿Dónde instalaste la trampa?',
-                style: TextStyle(fontWeight: FontWeight.w700),
-              ),
-            ),
+            const ListTile(title: Text('¿Dónde instalaste la trampa?', style: TextStyle(fontWeight: FontWeight.w700))),
             ListTile(
               leading: const Icon(Icons.my_location),
               title: const Text('Aquí, donde estoy parado'),
@@ -725,9 +690,7 @@ class _CroquisScreenState extends State<CroquisScreen> {
       await showDialog<void>(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text(
-            nuevas > 0 ? '$nuevas trampas sugeridas' : 'Sin trampas nuevas',
-          ),
+          title: Text(nuevas > 0 ? '$nuevas trampas sugeridas' : 'Sin trampas nuevas'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -736,33 +699,23 @@ class _CroquisScreenState extends State<CroquisScreen> {
                 if (sugerencia.origen == 'reglas')
                   const Padding(
                     padding: EdgeInsets.only(bottom: 8),
-                    child: Text(
-                      'La IA no estaba disponible: se usó una ubicación por reglas.',
-                      style: TextStyle(fontWeight: FontWeight.w700),
-                    ),
+                    child: Text('La IA no estaba disponible: se usó una ubicación por reglas.',
+                        style: TextStyle(fontWeight: FontWeight.w700)),
                   ),
                 if (sugerencia.resumen != null) Text(sugerencia.resumen!),
                 for (final advertencia in sugerencia.advertencias)
                   Padding(
                     padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      '⚠ $advertencia',
-                      style: const TextStyle(color: AppColors.textSecondary),
-                    ),
+                    child: Text('⚠ $advertencia', style: const TextStyle(color: AppColors.textSecondary)),
                   ),
                 const SizedBox(height: 12),
-                const Text(
-                  'Revisa cada trampa en terreno: confírmala, muévela o retírala.',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
+                const Text('Revisa cada trampa en terreno: confírmala, muévela o retírala.',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
               ],
             ),
           ),
           actions: [
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Entendido'),
-            ),
+            FilledButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Entendido')),
           ],
         ),
       );
@@ -796,11 +749,7 @@ class _CroquisScreenState extends State<CroquisScreen> {
             _sugiriendo
                 ? const Padding(
                     padding: EdgeInsets.all(16),
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
+                    child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
                   )
                 : IconButton(
                     onPressed: _agregando ? null : _sugerirConIa,
@@ -814,11 +763,7 @@ class _CroquisScreenState extends State<CroquisScreen> {
           ? FloatingActionButton.extended(
               onPressed: _agregando ? null : _elegirComoAgregar,
               icon: _agregando
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
+                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
                   : const Icon(Icons.add_location_alt_outlined),
               label: Text(_agregando ? 'Guardando…' : 'Agregar trampa'),
             )
@@ -1000,10 +945,7 @@ class _CroquisScreenState extends State<CroquisScreen> {
       // Satelital con nombres de calles: se ven techos, patios y muros.
       mapType: MapType.hybrid,
       // zoom 19 = nivel de detalle de casa/patio.
-      initialCameraPosition: CameraPosition(
-        target: _centerFor(croquis.dispositivos),
-        zoom: 19,
-      ),
+      initialCameraPosition: CameraPosition(target: _centerFor(croquis.dispositivos), zoom: 19),
       // Punto azul con la posición del técnico (si dio permiso de ubicación).
       myLocationEnabled: _ubicacionPermitida,
       myLocationButtonEnabled: _ubicacionPermitida,
@@ -1019,9 +961,7 @@ class _CroquisScreenState extends State<CroquisScreen> {
           Marker(
             markerId: MarkerId(dispositivo.id),
             position: LatLng(dispositivo.lat, dispositivo.lng),
-            icon: BitmapDescriptor.defaultMarkerWithHue(
-              _markerHue(dispositivo),
-            ),
+            icon: BitmapDescriptor.defaultMarkerWithHue(_markerHue(dispositivo)),
             // Solo se pueden mover las trampas que siguen activas.
             draggable: !widget.readOnly && dispositivo.estado != 'retirado',
             onDragEnd: (posicion) => _moverConfirmando(dispositivo, posicion),
@@ -1051,20 +991,12 @@ class _CroquisScreenState extends State<CroquisScreen> {
               child: Row(
                 children: [
                   const Expanded(
-                    child: Text(
-                      'Toca el mapa donde instalaste la trampa',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.black,
-                      ),
-                    ),
+                    child: Text('Toca el mapa donde instalaste la trampa',
+                        style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.black)),
                   ),
                   TextButton(
                     onPressed: () => setState(() => _modoAgregar = false),
-                    child: const Text(
-                      'Cancelar',
-                      style: TextStyle(color: AppColors.black),
-                    ),
+                    child: const Text('Cancelar', style: TextStyle(color: AppColors.black)),
                   ),
                 ],
               ),
@@ -1087,29 +1019,23 @@ class _CroquisScreenState extends State<CroquisScreen> {
   String _estadoTexto(DispositivoTrampa dispositivo) {
     if (dispositivo.estado == 'retirado') return 'Retirada';
     if (dispositivo.confirmado) return 'Confirmada';
-    return dispositivo.sugeridoPorIa
-        ? 'Sugerida por IA · sin confirmar'
-        : 'De la visita anterior · revisar';
+    return dispositivo.sugeridoPorIa ? 'Sugerida por IA · sin confirmar' : 'De la visita anterior · revisar';
   }
 
   /// Nombre legible del tipo de trampa ("trampa_luz" -> "Trampa de luz").
   String _tipoLabel(String tipo) => switch (tipo) {
-    'cebadero' => 'Cebadero',
-    'trampa_pegamento' => 'Trampa de pegamento',
-    'trampa_luz' => 'Trampa de luz',
-    _ => 'Otro',
-  };
+        'cebadero' => 'Cebadero',
+        'trampa_pegamento' => 'Trampa de pegamento',
+        'trampa_luz' => 'Trampa de luz',
+        _ => 'Otro',
+      };
 
   /// Punto donde se centra el mapa: el promedio de las trampas; si no hay,
   /// la ubicación del cliente; y si tampoco, un punto por defecto.
   LatLng _centerFor(List<DispositivoTrampa> dispositivos) {
     if (dispositivos.isNotEmpty) {
-      final avgLat =
-          dispositivos.map((d) => d.lat).reduce((a, b) => a + b) /
-          dispositivos.length;
-      final avgLng =
-          dispositivos.map((d) => d.lng).reduce((a, b) => a + b) /
-          dispositivos.length;
+      final avgLat = dispositivos.map((d) => d.lat).reduce((a, b) => a + b) / dispositivos.length;
+      final avgLng = dispositivos.map((d) => d.lng).reduce((a, b) => a + b) / dispositivos.length;
       return LatLng(avgLat, avgLng);
     }
     if (widget.clienteLat != null && widget.clienteLng != null) {
@@ -1155,8 +1081,8 @@ class _DispositivoCard extends StatelessWidget {
     final (String etiqueta, Color fondo, Color texto) = retirada
         ? ('Retirada', const Color(0xFFECECE6), AppColors.textSecondary)
         : dispositivo.confirmado
-        ? ('Confirmada', const Color(0xFFDCEFDC), const Color(0xFF2E7D32))
-        : ('Sin confirmar', AppColors.yellow, AppColors.black);
+            ? ('Confirmada', const Color(0xFFDCEFDC), const Color(0xFF2E7D32))
+            : ('Sin confirmar', AppColors.yellow, AppColors.black);
 
     return Card(
       // Una trampa retirada se ve más tenue.
@@ -1176,30 +1102,18 @@ class _DispositivoCard extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: fondo,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(color: fondo, borderRadius: BorderRadius.circular(20)),
                     child: Text(
                       etiqueta,
-                      style: TextStyle(
-                        color: texto,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 11,
-                      ),
+                      style: TextStyle(color: texto, fontWeight: FontWeight.w700, fontSize: 11),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 4),
               Text(
-                dispositivo.sugeridoPorIa
-                    ? 'Ubicación sugerida por la IA'
-                    : 'Ubicación definida por el operador',
+                dispositivo.sugeridoPorIa ? 'Ubicación sugerida por la IA' : 'Ubicación definida por el operador',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               // Miniatura de la foto de referencia; al tocarla se ve en grande.
@@ -1231,11 +1145,7 @@ class _DispositivoCard extends StatelessWidget {
                 const SizedBox(height: 12),
                 if (updating)
                   const Center(
-                    child: SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
+                    child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)),
                   )
                 else
                   Row(
@@ -1247,9 +1157,7 @@ class _DispositivoCard extends StatelessWidget {
                             onPressed: onConfirmar,
                             icon: const Icon(Icons.check, size: 18),
                             label: const Text('Confirmar'),
-                            style: FilledButton.styleFrom(
-                              minimumSize: const Size.fromHeight(44),
-                            ),
+                            style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(44)),
                           ),
                         ),
                       if (!dispositivo.confirmado) const SizedBox(width: 10),
@@ -1258,18 +1166,14 @@ class _DispositivoCard extends StatelessWidget {
                           onPressed: onRetirar,
                           icon: const Icon(Icons.delete_outline, size: 18),
                           label: const Text('Retirar'),
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(44),
-                          ),
+                          style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(44)),
                         ),
                       ),
                       const SizedBox(width: 10),
                       // Foto de referencia: sacar una nueva o reemplazar la actual.
                       IconButton.outlined(
                         onPressed: onFoto,
-                        tooltip: fotoUrl == null
-                            ? 'Sacar foto'
-                            : 'Cambiar foto',
+                        tooltip: fotoUrl == null ? 'Sacar foto' : 'Cambiar foto',
                         icon: const Icon(Icons.photo_camera_outlined),
                       ),
                     ],
@@ -1336,20 +1240,14 @@ class _SugerenciaDialogState extends State<_SugerenciaDialog> {
 
   void _enviar() {
     // Acepta "180" o "180,5"; si no es un número válido, se envía sin superficie.
-    final superficie = double.tryParse(
-      _superficie.text.trim().replaceAll(',', '.'),
-    );
+    final superficie = double.tryParse(_superficie.text.trim().replaceAll(',', '.'));
     final notas = _notas.text.trim();
-    Navigator.of(context).pop(
-      _DatosSugerencia(
-        tipoRecinto: _tipoRecinto,
-        plaga: _plaga,
-        superficieM2: (superficie != null && superficie > 0)
-            ? superficie
-            : null,
-        notas: notas.isEmpty ? null : notas,
-      ),
-    );
+    Navigator.of(context).pop(_DatosSugerencia(
+      tipoRecinto: _tipoRecinto,
+      plaga: _plaga,
+      superficieM2: (superficie != null && superficie > 0) ? superficie : null,
+      notas: notas.isEmpty ? null : notas,
+    ));
   }
 
   @override
@@ -1364,32 +1262,24 @@ class _SugerenciaDialogState extends State<_SugerenciaDialog> {
               initialValue: _tipoRecinto,
               decoration: const InputDecoration(labelText: 'Tipo de recinto'),
               items: [
-                for (final entry in _recintos.entries)
-                  DropdownMenuItem(value: entry.key, child: Text(entry.value)),
+                for (final entry in _recintos.entries) DropdownMenuItem(value: entry.key, child: Text(entry.value)),
               ],
-              onChanged: (valor) =>
-                  setState(() => _tipoRecinto = valor ?? _tipoRecinto),
+              onChanged: (valor) => setState(() => _tipoRecinto = valor ?? _tipoRecinto),
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: _plaga,
               decoration: const InputDecoration(labelText: 'Plaga'),
               items: [
-                for (final entry in _plagas.entries)
-                  DropdownMenuItem(value: entry.key, child: Text(entry.value)),
+                for (final entry in _plagas.entries) DropdownMenuItem(value: entry.key, child: Text(entry.value)),
               ],
               onChanged: (valor) => setState(() => _plaga = valor ?? _plaga),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _superficie,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              decoration: const InputDecoration(
-                labelText: 'Superficie aprox. (m²)',
-                hintText: 'Opcional',
-              ),
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(labelText: 'Superficie aprox. (m²)', hintText: 'Opcional'),
             ),
             const SizedBox(height: 12),
             TextField(
@@ -1405,10 +1295,7 @@ class _SugerenciaDialogState extends State<_SugerenciaDialog> {
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancelar'),
-        ),
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancelar')),
         FilledButton.icon(
           onPressed: _enviar,
           icon: const Icon(Icons.auto_awesome, size: 18),
