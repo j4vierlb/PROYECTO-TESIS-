@@ -4,4 +4,7 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Backend local de pruebas: HTTP solo para loopback y el host del
+         emulador. Esta configuración no se incluye en release. -->
+    <application android:networkSecurityConfig="@xml/network_security_config" />
 </manifest>

@@ -1,0 +1,8 @@
+{
+  "Scope": "Buffered emulator Logcat; query after manual Maps verification",
+  "AuthorizationFailureMatches": 0,
+  "FatalExceptionMatches": 0,
+  "FlutterErrorMatches": 0,
+  "GoogleMapsInitializationObserved": true,
+  "CredentialValuesIncluded": false
+}

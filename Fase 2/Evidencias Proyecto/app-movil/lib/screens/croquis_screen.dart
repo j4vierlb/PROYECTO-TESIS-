@@ -25,6 +25,9 @@ import 'package:image_picker/image_picker.dart';
 import '../config/app_config.dart';
 import '../models/croquis.dart';
 import '../services/api_client.dart';
+import '../services/field_location.dart';
+import '../services/pending_photo.dart';
+import '../services/pending_photo_files.dart';
 import '../theme/app_theme.dart';
 
 class CroquisScreen extends StatefulWidget {
@@ -36,6 +39,8 @@ class CroquisScreen extends StatefulWidget {
   // En una visita ya completada el croquis es solo de consulta: no se
   // pueden confirmar, mover ni retirar trampas.
   final bool readOnly;
+  final ApiClient? apiClient;
+  final PendingPhotoStore? photoStore;
 
   const CroquisScreen({
     super.key,
@@ -43,6 +48,8 @@ class CroquisScreen extends StatefulWidget {
     this.clienteLat,
     this.clienteLng,
     this.readOnly = false,
+    this.apiClient,
+    this.photoStore,
   });
 
   @override
@@ -50,7 +57,9 @@ class CroquisScreen extends StatefulWidget {
 }
 
 class _CroquisScreenState extends State<CroquisScreen> {
-  final _apiClient = ApiClient();
+  late final _apiClient = widget.apiClient ?? ApiClient();
+  late final _photos = widget.photoStore ?? PendingPhotoStore.instance;
+  PendingPhoto? _pendingPhoto;
 
   Croquis? _croquis; // null mientras no ha cargado
   String? _loadError;
@@ -80,12 +89,23 @@ class _CroquisScreenState extends State<CroquisScreen> {
   void initState() {
     super.initState();
     _load();
-    _apiClient.authHeaders().then((headers) {
-      if (mounted) setState(() => _fotoHeaders = headers);
-    });
-    Geolocator.checkPermission().then((permiso) {
-      if (mounted) setState(() => _ubicacionPermitida = _permisoOk(permiso));
-    });
+    _apiClient
+        .authHeaders()
+        .then<void>((headers) {
+          if (mounted) setState(() => _fotoHeaders = headers);
+        })
+        .catchError((Object _) {
+          // _load informa el error sin una excepción asíncrona no controlada.
+        });
+    Geolocator.checkPermission()
+        .then<void>((permiso) {
+          if (mounted) {
+            setState(() => _ubicacionPermitida = _permisoOk(permiso));
+          }
+        })
+        .catchError((Object _) {
+          // El permiso se vuelve a comprobar al solicitar una ubicación.
+        });
   }
 
   bool _permisoOk(LocationPermission permiso) =>
@@ -114,6 +134,14 @@ class _CroquisScreenState extends State<CroquisScreen> {
       // token nuevo.
       final headers = await _apiClient.authHeaders();
       if (mounted) setState(() => _fotoHeaders = headers);
+      final pending = await _photos.readForCurrentAccount();
+      if (mounted) {
+        setState(
+          () => _pendingPhoto = pending?.visitId == widget.visitaId
+              ? pending
+              : null,
+        );
+      }
     } on ApiException catch (error) {
       if (mounted) {
         setState(() {
@@ -268,41 +296,62 @@ class _CroquisScreenState extends State<CroquisScreen> {
 
   /// Pide permiso de ubicación (si hace falta) y agrega la trampa en la
   /// posición actual del teléfono.
-  Future<void> _agregarConGps() async {
-    if (!await Geolocator.isLocationServiceEnabled()) {
-      _mostrarMensaje('Activa la ubicación (GPS) del teléfono');
-      return;
-    }
-    var permiso = await Geolocator.checkPermission();
-    if (permiso == LocationPermission.denied) {
-      permiso = await Geolocator.requestPermission();
-    }
-    if (!_permisoOk(permiso)) {
-      _mostrarMensaje(permiso == LocationPermission.deniedForever
-          ? 'Sin permiso de ubicación: actívalo en Ajustes'
-          : 'Sin permiso de ubicación no se puede usar el GPS');
-      return;
-    }
-    if (!mounted) return;
-    setState(() {
-      _ubicacionPermitida = true;
-      _agregando = true;
-    });
+  Future<void> _agregarConGps({bool networkFallback = false}) async {
+    if (_agregando || widget.readOnly) return;
+    setState(() => _agregando = true);
     Position posicion;
     try {
-      posicion = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high, timeLimit: Duration(seconds: 20)),
+      posicion = await FieldLocation().current(
+        networkFallback: networkFallback,
       );
-    } catch (_) {
-      _mostrarMensaje('No se pudo obtener la ubicación. Prueba al aire libre o márcala en el mapa.');
-      if (mounted) setState(() => _agregando = false);
+      if (mounted) setState(() => _ubicacionPermitida = true);
+    } on FieldLocationException catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(error.message),
+            duration: const Duration(seconds: 10),
+            action: error.canTryNetwork
+                ? SnackBarAction(
+                    label: 'Por red',
+                    onPressed: () => _agregarConGps(networkFallback: true),
+                  )
+                : error.settings == null
+                ? null
+                : SnackBarAction(
+                    label: 'Ajustes',
+                    onPressed: () {
+                      if (error.settings == LocationSettingsTarget.device) {
+                        Geolocator.openLocationSettings();
+                      } else {
+                        Geolocator.openAppSettings();
+                      }
+                    },
+                  ),
+          ),
+        );
+      }
       return;
+    } catch (_) {
+      _mostrarMensaje(
+        'No se pudo consultar el permiso de ubicación. Reintenta.',
+      );
+      return;
+    } finally {
+      if (mounted) setState(() => _agregando = false);
     }
     if (!mounted) return;
     setState(() => _agregando = false);
     // Con poca precisión (bajo techo) se avisa, pero se deja continuar.
-    final aviso = posicion.accuracy > 25 ? 'GPS con precisión de ±${posicion.accuracy.round()} m' : '';
-    await _agregarEn(LatLng(posicion.latitude, posicion.longitude), aviso: aviso);
+    final aviso = networkFallback
+        ? 'Ubicación aproximada (respaldo por red), precisión ±${posicion.accuracy.round()} m. Revisa la posición en el mapa.'
+        : posicion.accuracy > 25
+        ? 'GPS con precisión de ±${posicion.accuracy.round()} m'
+        : '';
+    await _agregarEn(
+      LatLng(posicion.latitude, posicion.longitude),
+      aviso: aviso,
+    );
   }
 
   /// Pide el tipo de trampa y la guarda en `posicion`. Después ofrece sacarle
@@ -315,10 +364,18 @@ class _CroquisScreenState extends State<CroquisScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              title: const Text('¿Qué instalaste?', style: TextStyle(fontWeight: FontWeight.w700)),
+              title: const Text(
+                '¿Qué instalaste?',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
               subtitle: aviso.isEmpty ? null : Text(aviso),
             ),
-            for (final tipo in const ['cebadero', 'trampa_pegamento', 'trampa_luz', 'otro'])
+            for (final tipo in const [
+              'cebadero',
+              'trampa_pegamento',
+              'trampa_luz',
+              'otro',
+            ])
               ListTile(
                 leading: const Icon(Icons.pest_control_outlined),
                 title: Text(_tipoLabel(tipo)),
@@ -341,7 +398,10 @@ class _CroquisScreenState extends State<CroquisScreen> {
       if (!mounted) return;
       final croquis = _croquis!;
       setState(() {
-        _croquis = croquis.copyWithDispositivos([...croquis.dispositivos, nueva]);
+        _croquis = croquis.copyWithDispositivos([
+          ...croquis.dispositivos,
+          nueva,
+        ]);
         _mapVersion++;
         _agregando = false;
       });
@@ -351,12 +411,20 @@ class _CroquisScreenState extends State<CroquisScreen> {
           title: Text('${nueva.codigo} agregada'),
           content: const Text('¿Le sacas una foto de referencia ahora?'),
           actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Después')),
-            FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Sacar foto')),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Después'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Sacar foto'),
+            ),
           ],
         ),
       );
-      if (sacarFoto == true) await _tomarFoto(nueva, origen: ImageSource.camera);
+      if (sacarFoto == true) {
+        await _tomarFoto(nueva, origen: ImageSource.camera);
+      }
     } on ApiException catch (error) {
       _mostrarMensaje(error.message);
     } catch (_) {
@@ -368,7 +436,48 @@ class _CroquisScreenState extends State<CroquisScreen> {
 
   /// Saca (o elige) una foto y la sube como referencia de la trampa. Si no se
   /// indica `origen`, pregunta si usar la cámara o la galería.
-  Future<void> _tomarFoto(DispositivoTrampa dispositivo, {ImageSource? origen}) async {
+  Future<void> _tomarFoto(
+    DispositivoTrampa dispositivo, {
+    ImageSource? origen,
+  }) async {
+    if (widget.readOnly || _updatingId != null) return;
+    if (await _photos.read() != null) {
+      final owned = await _photos.readForCurrentAccount();
+      if (!mounted) return;
+      if (owned != null) {
+        _mostrarMensaje(
+          'Reintenta o descarta primero la foto pendiente en su visita original',
+        );
+        return;
+      }
+      // No se muestra ni se reasigna la foto ajena. El envío se descarta
+      // únicamente tras una decisión explícita antes de abrir el selector.
+      final discard = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Foto pendiente de otra cuenta'),
+          content: const Text(
+            'Hay un envío pendiente de otra cuenta o de una sesión anterior. '
+            'Para tomar una foto nueva debes descartar ese envío. '
+            'La otra cuenta ya no podrá reintentarlo desde la app. '
+            'No se borra la imagen original.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Volver'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Descartar y continuar'),
+            ),
+          ],
+        ),
+      );
+      if (discard != true || !mounted) return;
+      await _photos.clear();
+    }
+    if (!mounted) return;
     origen ??= await showModalBottomSheet<ImageSource>(
       context: context,
       builder: (context) => SafeArea(
@@ -393,32 +502,131 @@ class _CroquisScreenState extends State<CroquisScreen> {
 
     // Se reduce la foto (ancho máx. 1600 px, calidad 70%) para que suba
     // rápido por datos móviles y no supere el límite de 5 MB del backend.
-    final XFile? foto;
+    final PendingPhoto? foto;
     try {
-      foto = await ImagePicker().pickImage(source: origen, maxWidth: 1600, imageQuality: 70);
+      foto = await _photos.capture(widget.visitaId, dispositivo.id, origen);
+    } on PendingPhotoStorageException catch (error) {
+      final pending = await _photos.readForCurrentAccount();
+      if (!mounted) return;
+      setState(() => _pendingPhoto = pending);
+      _mostrarMensaje(error.message);
+      return;
+    } on StateError catch (error) {
+      // Un conflicto de pendientes o de sesión no es un fallo de permisos.
+      _mostrarMensaje(error.message.toString());
+      return;
     } catch (_) {
-      _mostrarMensaje('No se pudo abrir la cámara. Revisa el permiso en Ajustes.');
+      _mostrarMensaje(
+        'No se pudo abrir la cámara o galería. Revisa sus permisos en Ajustes.',
+      );
       return;
     }
     if (foto == null || !mounted) return; // canceló
+    setState(() => _pendingPhoto = foto);
+    await _subirFotoPendiente();
+  }
 
-    setState(() => _updatingId = dispositivo.id);
+  Future<void> _subirFotoPendiente() async {
+    final foto = _pendingPhoto;
+    if (foto == null ||
+        foto.path == null ||
+        widget.readOnly ||
+        _updatingId != null) {
+      return;
+    }
+    final owned = await _photos.readForCurrentAccount();
+    if (!mounted) return;
+    if (owned == null ||
+        owned.deviceId != foto.deviceId ||
+        owned.visitId != foto.visitId) {
+      _mostrarMensaje(
+        'Inicia sesión con la cuenta original para reintentar la foto',
+      );
+      return;
+    }
+    final dispositivos = _croquis?.dispositivos
+        .where((item) => item.id == foto.deviceId)
+        .toList();
+    if (foto.visitId != widget.visitaId ||
+        dispositivos == null ||
+        dispositivos.isEmpty) {
+      _mostrarMensaje(
+        'La foto pendiente no pertenece a una trampa de esta visita',
+      );
+      return;
+    }
+    setState(() => _updatingId = foto.deviceId);
     try {
-      final actualizado = await _apiClient.uploadFoto(dispositivo.id, foto.path);
+      final persistent = await _photos.prepareForUpload();
+      if (persistent == null || persistent.path == null || persistent.visitId != foto.visitId ||
+          persistent.deviceId != foto.deviceId) {
+        _mostrarMensaje('Inicia sesión con la cuenta original para reintentar la foto');
+        return;
+      }
       if (!mounted) return;
+      setState(() => _pendingPhoto = persistent);
+      final actualizado = await _apiClient.uploadFoto(
+        foto.deviceId,
+        persistent.path!,
+      );
+      await _photos.clear();
+      if (!mounted) return;
+      setState(() => _pendingPhoto = null);
       _reemplazar(actualizado);
-      _mostrarMensaje('Foto de ${dispositivo.codigo} guardada');
+      _mostrarMensaje('Foto de ${actualizado.codigo} guardada');
+    } on PendingPhotoStorageException catch (error) {
+      _mostrarMensaje(error.message);
     } on ApiException catch (error) {
       _mostrarMensaje(error.message);
     } catch (_) {
-      _mostrarMensaje('No se pudo subir la foto');
+      _mostrarMensaje(
+        'No se pudo subir la foto. Se conserva para reintentar al recuperar conexión.',
+      );
     } finally {
       if (mounted) setState(() => _updatingId = null);
     }
   }
 
+  Future<void> _descartarFotoPendiente() async {
+    final descartar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Descartar envío pendiente'),
+        content: const Text(
+          'Se quitará el envío pendiente. No se borra la imagen original de la galería.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Volver'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Descartar'),
+          ),
+        ],
+      ),
+    );
+    if (descartar != true) return;
+    await _photos.clear();
+    if (mounted) setState(() => _pendingPhoto = null);
+  }
+
   /// Muestra la foto en pantalla completa (se puede hacer zoom).
-  void _verFoto(DispositivoTrampa dispositivo) {
+  Future<void> _verFoto(DispositivoTrampa dispositivo) async {
+    final fotoUrl = _apiClient.fotoUrlCompleta(dispositivo.fotoUrl);
+    if (fotoUrl == null) return;
+    try {
+      final headers = await _apiClient.authHeaders();
+      if (!mounted) return;
+      setState(() => _fotoHeaders = headers);
+    } catch (_) {
+      _mostrarMensaje(
+        'No se pudo autorizar la foto. Revisa la conexión y reintenta.',
+      );
+      return;
+    }
+    if (!mounted) return;
     showDialog<void>(
       context: context,
       builder: (context) => Dialog(
@@ -427,13 +635,18 @@ class _CroquisScreenState extends State<CroquisScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              title: Text('${dispositivo.codigo} · ${_tipoLabel(dispositivo.tipo)}'),
-              trailing: IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(context).pop()),
+              title: Text(
+                '${dispositivo.codigo} · ${_tipoLabel(dispositivo.tipo)}',
+              ),
+              trailing: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
             ),
             Flexible(
               child: InteractiveViewer(
                 child: Image.network(
-                  _apiClient.fotoUrlCompleta(dispositivo.fotoUrl!),
+                  fotoUrl,
                   headers: _fotoHeaders,
                   errorBuilder: (_, _, _) => const Padding(
                     padding: EdgeInsets.all(32),
@@ -571,7 +784,11 @@ class _CroquisScreenState extends State<CroquisScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.map_outlined, size: 48, color: AppColors.textSecondary),
+              Icon(
+                Icons.map_outlined,
+                size: 48,
+                color: AppColors.textSecondary,
+              ),
               SizedBox(height: 12),
               Text(
                 'Esta visita no tiene croquis',
@@ -598,7 +815,10 @@ class _CroquisScreenState extends State<CroquisScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(_loadError ?? 'No se pudo cargar el croquis', textAlign: TextAlign.center),
+              Text(
+                _loadError ?? 'No se pudo cargar el croquis',
+                textAlign: TextAlign.center,
+              ),
               const SizedBox(height: 16),
               OutlinedButton(onPressed: _load, child: const Text('Reintentar')),
             ],
@@ -610,15 +830,54 @@ class _CroquisScreenState extends State<CroquisScreen> {
     return Column(
       children: [
         if (widget.readOnly)
-          const _Aviso(texto: 'Visita completada: este croquis es solo de consulta.'),
+          const _Aviso(
+            texto: 'Visita completada: este croquis es solo de consulta.',
+          ),
+        if (_pendingPhoto != null)
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                children: [
+                  const Text('Hay una foto pendiente de envío en esta visita'),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      if (!widget.readOnly)
+                        TextButton(
+                          onPressed: _updatingId == null
+                              ? _subirFotoPendiente
+                              : null,
+                          child: const Text('Reintentar envío'),
+                        ),
+                      TextButton(
+                        onPressed: _updatingId == null
+                            ? _descartarFotoPendiente
+                            : null,
+                        child: const Text('Descartar'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
         // Con mapa habilitado: selector Lista / Mapa. Sin mapa: un aviso.
         if (AppConfig.mapsEnabled)
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
             child: SegmentedButton<bool>(
               segments: const [
-                ButtonSegment(value: false, label: Text('Lista'), icon: Icon(Icons.list)),
-                ButtonSegment(value: true, label: Text('Mapa'), icon: Icon(Icons.map_outlined)),
+                ButtonSegment(
+                  value: false,
+                  label: Text('Lista'),
+                  icon: Icon(Icons.list),
+                ),
+                ButtonSegment(
+                  value: true,
+                  label: Text('Mapa'),
+                  icon: Icon(Icons.map_outlined),
+                ),
               ],
               selected: {_showMap},
               onSelectionChanged: (selection) => setState(() {
@@ -635,7 +894,9 @@ class _CroquisScreenState extends State<CroquisScreen> {
           ),
         // Expanded: la lista o el mapa ocupan todo el espacio restante.
         Expanded(
-          child: (AppConfig.mapsEnabled && _showMap) ? _buildMap(croquis) : _buildList(croquis),
+          child: (AppConfig.mapsEnabled && _showMap)
+              ? _buildMap(croquis)
+              : _buildList(croquis),
         ),
       ],
     );
@@ -648,9 +909,7 @@ class _CroquisScreenState extends State<CroquisScreen> {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            widget.readOnly
-                ? 'Este croquis no tiene trampas'
-                : 'Aún no hay trampas.\nToca ✨ para que la IA sugiera dónde ponerlas,\no "Agregar trampa" cuando instales una.',
+            widget.readOnly ? 'Este croquis no tiene trampas' : 'Aún no hay trampas.\nToca ✨ para que la IA sugiera dónde ponerlas,\no "Agregar trampa" cuando instales una.',
             textAlign: TextAlign.center,
           ),
         ),
@@ -671,7 +930,7 @@ class _CroquisScreenState extends State<CroquisScreen> {
           onRetirar: () => _retirar(dispositivo),
           onFoto: () => _tomarFoto(dispositivo),
           onVerFoto: () => _verFoto(dispositivo),
-          fotoUrl: dispositivo.fotoUrl == null ? null : _apiClient.fotoUrlCompleta(dispositivo.fotoUrl!),
+          fotoUrl: _apiClient.fotoUrlCompleta(dispositivo.fotoUrl),
           fotoHeaders: _fotoHeaders,
         );
       },
@@ -935,7 +1194,12 @@ class _DatosSugerencia {
   final double? superficieM2;
   final String? notas;
 
-  const _DatosSugerencia({required this.tipoRecinto, required this.plaga, this.superficieM2, this.notas});
+  const _DatosSugerencia({
+    required this.tipoRecinto,
+    required this.plaga,
+    this.superficieM2,
+    this.notas,
+  });
 }
 
 /// Formulario corto antes de llamar a la IA. Los valores coinciden con los

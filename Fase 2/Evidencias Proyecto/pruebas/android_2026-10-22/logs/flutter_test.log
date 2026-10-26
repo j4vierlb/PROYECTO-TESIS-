@@ -1,0 +1,20 @@
+00:00 +0: loading C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/cliente_test.dart
+00:00 +0: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/cliente_test.dart: Cliente de WhatsApp sin dirección ni coordenadas no rompe la app
+00:00 +1: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/cliente_test.dart: Cliente con dirección pero todavía sin coordenadas
+00:00 +2: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/cliente_test.dart: Cliente completo sigue funcionando igual
+00:00 +3: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/croquis_test.dart: Trampa con foto guarda la dirección relativa de la foto
+00:00 +4: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/croquis_test.dart: Trampa sin foto (o de un backend antiguo sin el campo) no rompe la app
+00:00 +5: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/croquis_test.dart: Croquis recién creado sin trampas
+00:00 +6: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/croquis_test.dart: Agregar una trampa al croquis conserva las anteriores
+00:00 +7: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/croquis_test.dart: Sugerencia de la IA trae el croquis, el resumen y las advertencias
+00:00 +8: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/croquis_test.dart: Sugerencia por reglas sin resumen ni advertencias
+00:00 +9: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/historial_test.dart: Visita.fromJson lee dispositivos_instalados del historial
+00:00 +10: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/historial_test.dart: Visita.fromJson funciona sin dispositivos_instalados (agenda)
+00:00 +11: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/historial_test.dart: La barra inferior cambia de Hoy a Historial
+00:00 +12: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/historial_test.dart: La barra inferior cambia de Hoy a Historial
+00:00 +13: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/historial_test.dart: La barra inferior cambia de Hoy a Historial
+00:00 +14: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/historial_test.dart: La barra inferior cambia de Hoy a Historial
+00:00 +15: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/historial_test.dart: La barra inferior cambia de Hoy a Historial
+00:01 +16: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/widget_test.dart: Sin sesión guardada muestra la pantalla de login al arrancar
+00:01 +17: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/widget_test.dart: Con sesión guardada entra directo a la agenda, sin pedir la clave
+00:01 +18: All tests passed!

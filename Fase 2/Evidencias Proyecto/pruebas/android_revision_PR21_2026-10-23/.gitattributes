@@ -1,0 +1,3 @@
+# Evidencias originales: no normalizar bytes ni reformatear la salida de logs.
+* -text whitespace=cr-at-eol
+logs/* -whitespace

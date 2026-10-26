@@ -14,6 +14,16 @@ Kill Bichos IA es una plataforma web y móvil para apoyar el contacto con client
 - `Evidencias Grupales`: guías del estudiante de la fase (2.4 Desarrollo del Proyecto APT y 2.6 Informe Final).
 - `Evidencias Individuales`: diarios de reflexión de cada integrante (2.1).
 
+## Aportes individuales y evidencias
+
+- [Informe de Juan Bórquez: panel, pruebas, documentación y Android](Evidencias%20Individuales/Borquez_Juan_Informe_Evidencias_Fase2.md).
+- [Evidencias Android del 21/10/2026](Evidencias%20Proyecto/pruebas/android_2026-10-21/README.md): siete capturas originales, hashes y alcance de la comprobación.
+- [Android con Maps real, 22/10/2026](Evidencias%20Proyecto/pruebas/android_2026-10-22/README.md): APK debug actualizado, mapa y marcadores comprobados, 18 pruebas Flutter y 12 comprobaciones HTTP separadas, con logs y límites.
+
+Estos índices complementan los formatos Word. Distinguen las ejecuciones
+históricas de los pendientes y no constituyen aceptación del cliente ni una
+certificación de todos los componentes del sistema.
+
 ## Inicio rápido
 
 ### Entorno completo con Docker
@@ -112,6 +122,24 @@ errores y sin anticipar la aceptación del cliente. Su contenido y estructura
 se comprobaron; la revisión visual sigue pendiente porque el renderizador
 empaquetado no dispone de LibreOffice. El acta conserva sus resultados como
 No evaluado por el cliente y sus campos de sesión y firma sin completar.
+
+## Actualización Android del 23/10/2026
+
+El [registro de terreno Android](Evidencias%20Proyecto/pruebas/android_campo_2026-10-23/README.md)
+documenta GPS simulado, mapa real, cámara/galería, recuperación y reintento de
+foto, edición de trampas, notas y cierre en emulador. Incluye 50 pruebas Flutter
+aprobadas y 16 comprobaciones HTTP separadas en base desechable, sin modificar
+la base de trabajo ni invocar OpenAI/Twilio. Son resultados locales, no una
+entrega release ni una equivalencia certificada con iPhone. La IA ya está
+integrada en el código de `main` tomado para esta versión, aunque no se llamó
+en estas pruebas; la afirmación de ausencia del corte del 20/10 es histórica.
+Continúa pendiente la sincronización offline completa.
+
+La [revisión posterior de PR #21](Evidencias%20Proyecto/pruebas/android_revision_PR21_2026-10-23/README.md)
+eleva la suite a **75 pruebas Flutter** y corrige la conservación de fotos al
+vencer sesión, URLs inválidas y cierre con fotos pendientes. Añade respaldo de
+ubicación optativo y separa formato/estilo en otro commit. Los 16 controles HTTP
+y las capturas anteriores no se repitieron en esa revisión; no se suman a las 75.
 
 ## Seguridad y datos
 

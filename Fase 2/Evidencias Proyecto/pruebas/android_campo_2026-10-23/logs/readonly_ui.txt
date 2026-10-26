@@ -1,0 +1,20 @@
+Back | [11,147][137,273] |  | click true
+Croquis | [189,181][364,238] |  | click false
+Visita completada: este croquis es solo de consulta. | [74,346][1006,393] |  | click false
+Lista | [305,467][540,593] |  | click true
+Mapa | [540,467][775,593] |  | click true
+T-01 · Cebadero
+Retirada
+Ubicación sugerida por la IA | [0,624][1080,1260] |  | click true
+T-02 · Cebadero
+Sin confirmar
+Ubicación sugerida por la IA | [0,1260][1080,1895] |  | click true
+T-03 · Trampa de pegamento
+Sin confirmar
+Ubicación sugerida por la IA | [0,1895][1080,2136] |  | click false
+T-04 · Cebadero
+Confirmada
+Ubicación definida por el operador | [0,2136][1080,2378] |  | click false
+T-05 · Trampa de pegamento
+Confirmada
+Ubicación definida por el operador | [0,2378][1080,2400] |  | click false

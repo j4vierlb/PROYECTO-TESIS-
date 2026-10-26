@@ -7,6 +7,8 @@
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import 'pending_photo.dart';
+
 /// Guarda los tokens JWT cifrados (Keychain en iOS, Keystore/EncryptedSharedPreferences
 /// en Android) en vez de en texto plano, como pide la decisión de formato del proyecto.
 class AuthStorage {
@@ -21,7 +23,13 @@ class AuthStorage {
   static const String _refreshTokenKey = 'refresh_token';
 
   /// Guarda los dos tokens después de un login exitoso.
-  Future<void> saveTokens({required String accessToken, required String refreshToken}) async {
+  Future<void> saveTokens({
+    required String accessToken,
+    required String refreshToken,
+  }) async {
+    await PendingPhotoStore.instance.bindLegacyOwner(
+      await getAccessToken() ?? await getRefreshToken(),
+    );
     await _storage.write(key: _accessTokenKey, value: accessToken);
     await _storage.write(key: _refreshTokenKey, value: refreshToken);
   }
@@ -33,9 +41,16 @@ class AuthStorage {
   /// POST /auth/refresh sin volver a escribir la clave.
   Future<String?> getRefreshToken() => _storage.read(key: _refreshTokenKey);
 
-  /// Borra la sesión (se usa al cerrar sesión).
-  Future<void> clear() async {
+  /// Invalidar tokens no descarta trabajo de campo. Solo el logout manual,
+  /// confirmado por el usuario, puede eliminar el envío pendiente.
+  Future<void> clear({bool manualLogout = false}) async {
+    if (!manualLogout) {
+      await PendingPhotoStore.instance.bindLegacyOwner(
+        await getAccessToken() ?? await getRefreshToken(),
+      );
+    }
     await _storage.delete(key: _accessTokenKey);
     await _storage.delete(key: _refreshTokenKey);
+    if (manualLogout) await PendingPhotoStore.instance.clear();
   }
 }

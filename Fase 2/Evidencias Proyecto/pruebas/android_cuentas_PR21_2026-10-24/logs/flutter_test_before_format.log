@@ -1,0 +1,91 @@
+00:00 +0: loading C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart
+00:00 +0: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Agenda transmite token en header, nunca en URL
+00:00 +1: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Agenda transmite token en header, nunca en URL
+00:00 +2: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Agenda transmite token en header, nunca en URL
+00:00 +3: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Agenda transmite token en header, nunca en URL
+00:00 +4: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: 401 renueva y repite una sola vez con el token nuevo
+00:00 +5: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Segundo 401 no forma bucle: cierra sesion y avisa una vez
+00:00 +6: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Sin red conserva tokens para reintentar
+00:00 +7: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: 401 al renovar conserva foto pendiente y solicita reingreso
+00:00 +8: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Timeout de login tambien esta acotado
+00:00 +9: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Timeout contempla el cuerpo, no solo los headers
+00:00 +10: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: 422 mantiene el mensaje de validacion del backend
+00:00 +11: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Foto relativa conserva la version de cache del backend
+00:00 +12: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: null
+00:00 +13: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato:
+00:00 +14: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: http://[
+00:00 +15: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: https://other.invalid/foto
+00:00 +16: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: //other.invalid/foto
+00:00 +17: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: /other/foto
+00:00 +18: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: /dispositivos-trampa/d1/foto?token=secret
+00:00 +19: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: /dispositivos-trampa/../foto
+00:00 +20: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: /dispositivos-trampa/%FF/foto
+00:00 +21: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: /dispositivos-trampa/d1/foto?v=%FF
+00:00 +22: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: /dispositivos-trampa/d1/otra/foto
+00:00 +23: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: /dispositivos-trampa/%2F../foto
+00:00 +24: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Cabeceras de fotos renuevan access vencido antes de abrir imagen
+00:00 +25: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Upload PNG conserva MIME y Authorization
+00:00 +26: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: Conserva la paleta compartida con iOS
+00:00 +27: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: Conserva la paleta compartida con iOS
+00:00 +28: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: Conserva la paleta compartida con iOS
+00:00 +29: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: Conserva la paleta compartida con iOS
+00:00 +30: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: Conserva la paleta compartida con iOS
+00:00 +31: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: Conserva la paleta compartida con iOS
+00:00 +32: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: Conserva la paleta compartida con iOS
+00:00 +33: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:01 +34: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:01 +35: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:01 +36: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:01 +37: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:01 +38: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:01 +39: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:01 +40: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:01 +41: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:01 +42: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:01 +43: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:01 +44: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:01 +45: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:01 +46: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:01 +47: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +48: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +49: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +50: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +51: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +52: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +53: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +54: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +55: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +56: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +57: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +58: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +59: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +60: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +61: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +62: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +63: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +64: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +65: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +66: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +67: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:02 +68: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:02 +69: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:02 +70: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:02 +71: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:03 +72: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:04 +73: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/historial_test.dart: La barra inferior cambia de Hoy a Historial
+00:04 +74: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/widget_test.dart: Sin sesión guardada muestra la pantalla de login al arrancar
+00:04 +75: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/widget_test.dart: Sin sesión guardada muestra la pantalla de login al arrancar
+00:04 +76: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/widget_test.dart: Sin sesión guardada muestra la pantalla de login al arrancar
+00:04 +77: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Bloquea PATCH de cierre con foto pendiente; descartar permite cerrar
+00:05 +78: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Bloquea PATCH de cierre con foto pendiente; descartar permite cerrar
+00:05 +79: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Foto de otra visita no impide completar esta
+00:05 +80: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis no muestra la foto pendiente de otra cuenta
+00:06 +81: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Pendiente propia bloquea cámara sin ofrecer descartar la de otra cuenta
+00:06 +82: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Volver conserva la foto ajena y no abre cámara
+00:06 +83: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Descartar envío ajeno permite abrir ImageSource.camera con cuenta actual
+00:07 +84: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Descartar envío ajeno permite abrir ImageSource.gallery con cuenta actual
+00:07 +85: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Pendiente antigua sin dueño ofrece descarte explícito
+00:07 +86: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Tras descartar foto ajena captura y sube solo la foto nueva
+00:08 +87: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Conflicto al capturar informa pendiente, no permisos de cámara
+00:08 +88: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Logout advierte: Volver conserva tokens y foto; confirmar descarta
+00:09 +89: All tests passed!

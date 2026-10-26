@@ -39,6 +39,7 @@ services:
       - "./Fase 2/Evidencias Proyecto/database/demo_historial.sql:/docker-entrypoint-initdb.d/3_demo_historial.sql:ro"
       - "./Fase 2/Evidencias Proyecto/database/migracion_message_sid.sql:/docker-entrypoint-initdb.d/4_migracion_message_sid.sql:ro"
       - "./Fase 2/Evidencias Proyecto/database/migracion_croquis_terreno.sql:/docker-entrypoint-initdb.d/5_migracion_croquis_terreno.sql:ro"
+      - "./Fase 2/Evidencias Proyecto/database/migracion_whatsapp_saliente.sql:/docker-entrypoint-initdb.d/6_migracion_whatsapp_saliente.sql:ro"
     healthcheck:
       # "Lista" solo cuando acepta conexiones por red. Mientras corre los
       # scripts de arriba solo escucha internamente, así que el backend no
