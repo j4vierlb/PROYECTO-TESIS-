@@ -7,8 +7,15 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'support/fake_pending_photo_files.dart';
+
 String ownerToken(String owner) =>
     'header.${base64Url.encode(utf8.encode(jsonEncode({'sub': owner}))).replaceAll('=', '')}.signature';
+
+PendingPhotoStore testStore({
+  Future<XFile?> Function(ImageSource)? pick,
+  Future<LostDataResponse> Function()? recover,
+}) => PendingPhotoStore(files: const FakePendingPhotoFiles(), pick: pick, recover: recover);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -21,7 +28,7 @@ void main() {
     'Antes de abrir camara se registra visita y trampa, no otro destino',
     () async {
       late PendingPhotoStore store;
-      store = PendingPhotoStore(
+      store = testStore(
         pick: (_) async {
           final pending = await store.read();
           expect(pending?.visitId, 'v1');
@@ -35,12 +42,12 @@ void main() {
     },
   );
   test('Cancelar galeria no deja foto pendiente', () async {
-    final store = PendingPhotoStore(pick: (_) async => null);
+    final store = testStore(pick: (_) async => null);
     expect(await store.capture('v1', 'd1', ImageSource.gallery), isNull);
     expect(await store.read(), isNull);
   });
   test('Error de permisos de camara limpia seleccion sin archivo', () async {
-    final store = PendingPhotoStore(
+    final store = testStore(
       pick: (_) => throw StateError('permission denied'),
     );
     await expectLater(
@@ -52,9 +59,9 @@ void main() {
   test(
     'Foto no enviada persiste entre instancias sin cambiar el destino',
     () async {
-      await PendingPhotoStore(pick: (_) async => XFile('/cache/photo.png'))
+      await testStore(pick: (_) async => XFile('/cache/photo.png'))
           .capture('v1', 'd1', ImageSource.gallery);
-      final reopened = await PendingPhotoStore().read();
+      final reopened = await testStore().read();
       expect(reopened?.path, '/cache/photo.png');
       expect(reopened?.deviceId, 'd1');
     },
@@ -62,7 +69,7 @@ void main() {
   test(
     'Una segunda captura no sobreescribe silenciosamente la pendiente',
     () async {
-      final store = PendingPhotoStore(pick: (_) async => XFile('/cache/a.jpg'));
+      final store = testStore(pick: (_) async => XFile('/cache/a.jpg'));
       await store.capture('v1', 'd1', ImageSource.camera);
       await expectLater(
         store.capture('v2', 'd2', ImageSource.camera),
@@ -81,7 +88,7 @@ void main() {
           'path': null,
         }),
       });
-      final store = PendingPhotoStore(
+      final store = testStore(
         recover: () async =>
             LostDataResponse(files: [XFile('/cache/recovered.jpg')]),
       );
@@ -93,7 +100,7 @@ void main() {
     },
   );
   test('LostData sin destino conocido no se adjunta a otra trampa', () async {
-    final store = PendingPhotoStore(
+    final store = testStore(
       recover: () async =>
           LostDataResponse(files: [XFile('/cache/orphan.jpg')]),
     );
@@ -101,7 +108,7 @@ void main() {
     expect(await store.read(), isNull);
   });
   test('Logout elimina pendiente de la sesion anterior', () async {
-    final store = PendingPhotoStore(pick: (_) async => XFile('/cache/a.jpg'));
+    final store = testStore(pick: (_) async => XFile('/cache/a.jpg'));
     await store.capture('v1', 'd1', ImageSource.camera);
     await AuthStorage.instance.clear(manualLogout: true);
     expect(await store.read(), isNull);
@@ -110,10 +117,10 @@ void main() {
     FlutterSecureStorage.setMockInitialValues({
       PendingPhotoStore.storageKey: 'invalid',
     });
-    expect(await PendingPhotoStore().read(), isNull);
+    expect(await testStore().read(), isNull);
   });
   test('Vencimiento borra tokens, no la foto ni su cuenta original', () async {
-    final store = PendingPhotoStore(pick: (_) async => XFile('/cache/a.jpg'));
+    final store = testStore(pick: (_) async => XFile('/cache/a.jpg'));
     await store.capture('v1', 'd1', ImageSource.camera);
     await AuthStorage.instance.clear();
     expect(await AuthStorage.instance.getAccessToken(), isNull);
@@ -127,7 +134,7 @@ void main() {
     expect((await store.readForCurrentAccount())?.deviceId, 'd1');
   });
   test('Otra cuenta no puede ver ni reasignar el envio pendiente', () async {
-    final store = PendingPhotoStore(pick: (_) async => XFile('/cache/a.jpg'));
+    final store = testStore(pick: (_) async => XFile('/cache/a.jpg'));
     await store.capture('v1', 'd1', ImageSource.camera);
     await AuthStorage.instance.clear();
     await AuthStorage.instance.saveTokens(
@@ -153,12 +160,12 @@ void main() {
         }),
       });
       await AuthStorage.instance.clear();
-      expect((await PendingPhotoStore().read())?.ownerId, 'owner-a');
+      expect((await testStore().read())?.ownerId, 'owner-a');
       await AuthStorage.instance.saveTokens(
         accessToken: ownerToken('owner-b'),
         refreshToken: 'refresh',
       );
-      expect(await PendingPhotoStore().readForCurrentAccount(), isNull);
+      expect(await testStore().readForCurrentAccount(), isNull);
     },
   );
   test(
@@ -175,22 +182,22 @@ void main() {
         accessToken: ownerToken('owner-b'),
         refreshToken: 'refresh',
       );
-      expect(await PendingPhotoStore().readForCurrentAccount(), isNull);
-      expect((await PendingPhotoStore().read())?.path, '/cache/legacy.jpg');
+      expect(await testStore().readForCurrentAccount(), isNull);
+      expect((await testStore().read())?.path, '/cache/legacy.jpg');
     },
   );
   test('No inicia una captura sin identidad de sesion', () async {
     FlutterSecureStorage.setMockInitialValues({});
     await expectLater(
-      PendingPhotoStore().capture('v1', 'd1', ImageSource.camera),
+      testStore().capture('v1', 'd1', ImageSource.camera),
       throwsStateError,
     );
-    expect(await PendingPhotoStore().read(), isNull);
+    expect(await testStore().read(), isNull);
   });
   test(
     'Arranque con refresh vencido vuelve a login sin perder la foto',
     () async {
-      final store = PendingPhotoStore(pick: (_) async => XFile('/cache/a.jpg'));
+      final store = testStore(pick: (_) async => XFile('/cache/a.jpg'));
       await store.capture('v1', 'd1', ImageSource.camera);
       expect(await SessionService.restaurar(), isFalse);
       expect(await AuthStorage.instance.getAccessToken(), isNull);

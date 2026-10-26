@@ -27,6 +27,7 @@ import '../models/croquis.dart';
 import '../services/api_client.dart';
 import '../services/field_location.dart';
 import '../services/pending_photo.dart';
+import '../services/pending_photo_files.dart';
 import '../theme/app_theme.dart';
 
 class CroquisScreen extends StatefulWidget {
@@ -539,6 +540,12 @@ class _CroquisScreenState extends State<CroquisScreen> {
     final PendingPhoto? foto;
     try {
       foto = await _photos.capture(widget.visitaId, dispositivo.id, origen);
+    } on PendingPhotoStorageException catch (error) {
+      final pending = await _photos.readForCurrentAccount();
+      if (!mounted) return;
+      setState(() => _pendingPhoto = pending);
+      _mostrarMensaje(error.message);
+      return;
     } on StateError catch (error) {
       // Un conflicto de pendientes o de sesión no es un fallo de permisos.
       _mostrarMensaje(error.message.toString());
@@ -585,15 +592,25 @@ class _CroquisScreenState extends State<CroquisScreen> {
     }
     setState(() => _updatingId = foto.deviceId);
     try {
+      final persistent = await _photos.prepareForUpload();
+      if (persistent == null || persistent.path == null || persistent.visitId != foto.visitId ||
+          persistent.deviceId != foto.deviceId) {
+        _mostrarMensaje('Inicia sesión con la cuenta original para reintentar la foto');
+        return;
+      }
+      if (!mounted) return;
+      setState(() => _pendingPhoto = persistent);
       final actualizado = await _apiClient.uploadFoto(
         foto.deviceId,
-        foto.path!,
+        persistent.path!,
       );
       await _photos.clear();
       if (!mounted) return;
       setState(() => _pendingPhoto = null);
       _reemplazar(actualizado);
       _mostrarMensaje('Foto de ${actualizado.codigo} guardada');
+    } on PendingPhotoStorageException catch (error) {
+      _mostrarMensaje(error.message);
     } on ApiException catch (error) {
       _mostrarMensaje(error.message);
     } catch (_) {

@@ -14,6 +14,8 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'support/fake_pending_photo_files.dart';
+
 String token() =>
     'header.${base64Url.encode(utf8.encode(jsonEncode({'sub': 'owner-a', 'exp': DateTime.now().add(const Duration(hours: 8)).millisecondsSinceEpoch ~/ 1000}))).replaceAll('=', '')}.signature';
 
@@ -100,6 +102,12 @@ class PhotoUploadApi extends ApiClient {
       'foto_url': null,
     });
   }
+}
+
+class UnavailablePhotoFiles extends FakePendingPhotoFiles {
+  const UnavailablePhotoFiles();
+  @override
+  Future<String> persist(XFile source) async => throw StateError('sin espacio');
 }
 
 Future<void> openScreen(WidgetTester tester, Widget screen) async {
@@ -338,7 +346,7 @@ void main() {
   testWidgets('Tras descartar foto ajena captura y sube solo la foto nueva', (
     tester,
   ) async {
-    final store = PendingPhotoStore(pick: (_) async => XFile('/cache/new.jpg'));
+    final store = PendingPhotoStore(files: const FakePendingPhotoFiles(), pick: (_) async => XFile('/cache/new.jpg'));
     await store.storage.write(
       key: PendingPhotoStore.storageKey,
       value: jsonEncode(photo(owner: 'owner-b', visit: 'old-visit')),
@@ -394,6 +402,28 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('Fallo de disco mantiene el envío visible y no simula fallo de cámara', (tester) async {
+    var uploads = 0;
+    final store = PendingPhotoStore(
+      files: const UnavailablePhotoFiles(),
+      pick: (_) async => XFile('/cache/new.jpg'),
+    );
+    await openScreen(tester, CroquisScreen(
+      visitaId: 'v1', photoStore: store,
+      apiClient: PhotoUploadApi((_, _) async { uploads++; }),
+    ));
+    await tester.tap(find.byTooltip('Sacar foto'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Sacar foto'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('No se pudo conservar la foto'), findsOneWidget);
+    expect(find.textContaining('Hay una foto pendiente'), findsOneWidget);
+    expect(find.textContaining('No se pudo abrir la cámara'), findsNothing);
+    expect((await store.read())?.path, '/cache/new.jpg');
+    expect(uploads, 0);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets(
     'Logout advierte: Volver conserva tokens y foto; confirmar descarta',

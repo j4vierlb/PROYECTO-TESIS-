@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'pending_photo_files.dart';
+
 class PendingPhoto {
   final String visitId;
   final String deviceId;
@@ -24,11 +26,13 @@ class PendingPhotoStore {
   static const storageKey = 'pending_field_photo';
   static final instance = PendingPhotoStore();
   final FlutterSecureStorage storage;
+  final PendingPhotoFiles files;
   final Future<XFile?> Function(ImageSource) pick;
   final Future<LostDataResponse> Function() recover;
 
   PendingPhotoStore({
     this.storage = const FlutterSecureStorage(),
+    this.files = const PendingPhotoFiles(),
     Future<XFile?> Function(ImageSource)? pick,
     Future<LostDataResponse> Function()? recover,
   }) : pick =
@@ -59,7 +63,39 @@ class PendingPhotoStore {
 
   Future<void> _save(PendingPhoto photo) =>
       storage.write(key: storageKey, value: jsonEncode(photo.toJson()));
-  Future<void> clear() => storage.delete(key: storageKey);
+  Future<void> clear() async {
+    String? path;
+    final value = await storage.read(key: storageKey);
+    try {
+      if (value != null) path = (jsonDecode(value) as Map<String, dynamic>)['path'] as String?;
+    } catch (_) { /* Los metadatos corruptos también se pueden descartar. */ }
+    await storage.delete(key: storageKey);
+    if (path != null) {
+      try {
+        await files.remove(path);
+      } catch (_) {
+        // Un fallo de limpieza no debe impedir cerrar sesión o descartar.
+      }
+    }
+  }
+
+  Future<PendingPhoto> _persist(PendingPhoto photo) async {
+    if (photo.path == null) return photo;
+    try {
+      final path = await files.persist(XFile(photo.path!));
+      final saved = PendingPhoto(photo.visitId, photo.deviceId, path, photo.ownerId);
+      await _save(saved);
+      return saved;
+    } catch (_) {
+      // Conserva los metadatos previos para reintentar; no borra el original.
+      throw const PendingPhotoStorageException();
+    }
+  }
+
+  Future<PendingPhoto?> prepareForUpload() async {
+    final photo = await readForCurrentAccount();
+    return photo == null ? null : _persist(photo);
+  }
 
   // El sub solo separa archivos locales entre cuentas. La autorización real
   // sigue siendo responsabilidad del backend; nunca se guarda el JWT aquí.
@@ -120,8 +156,9 @@ class PendingPhotoStore {
       return null;
     }
     final pending = PendingPhoto(visitId, deviceId, photo.path, owner);
+    // Registrar primero la ruta recuperable permite informar un fallo de disco.
     await _save(pending);
-    return pending;
+    return _persist(pending);
   }
 
   /// Android puede destruir MainActivity al usar la cámara con poca RAM.
@@ -135,15 +172,18 @@ class PendingPhotoStore {
     final pending = await read();
     if (pending == null) return; // nunca adjuntar a una trampa desconocida
     final files = lost.files;
-    if (files != null && files.isNotEmpty) {
-      await _save(
-        PendingPhoto(
+    if (pending.path == null && files != null && files.isNotEmpty) {
+      final recovered = PendingPhoto(
           pending.visitId,
           pending.deviceId,
           files.first.path,
           pending.ownerId,
-        ),
       );
+      await _save(recovered);
+      await _persist(recovered);
+    } else if (pending.path != null) {
+      // Migra capturas antiguas y no sustituye un envío por lostData ajeno.
+      await _persist(pending);
     } else if (pending.path == null) {
       await clear(); // selección cancelada o sin archivo recuperable
     }

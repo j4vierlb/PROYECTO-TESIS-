@@ -51,6 +51,6 @@ class AuthStorage {
     }
     await _storage.delete(key: _accessTokenKey);
     await _storage.delete(key: _refreshTokenKey);
-    if (manualLogout) await _storage.delete(key: PendingPhotoStore.storageKey);
+    if (manualLogout) await PendingPhotoStore.instance.clear();
   }
 }
