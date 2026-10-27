@@ -40,7 +40,7 @@ export async function requestPhoto(path, options = {}) {
 }
 
 async function execute(path, options, photo = false) {
-  const token = path === '/auth/login' ? null : localStorage.token
+  const token = ['/auth/login', '/auth/forgot-password', '/auth/reset-password'].includes(path) ? null : localStorage.token
   const controller = new AbortController()
   const abort = () => controller.abort()
   if (options.signal?.aborted) controller.abort()
