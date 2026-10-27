@@ -43,6 +43,17 @@ class Cliente {
         lat: (json['lat'] as num?)?.toDouble(),
         lng: (json['lng'] as num?)?.toDouble(),
       );
+
+  /// Inverso de fromJson: lo usa el modo offline para guardar la visita en el
+  /// teléfono con el mismo formato que entrega el backend.
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'nombre': nombre,
+        'telefono_whatsapp': telefonoWhatsapp,
+        'direccion': direccion,
+        'lat': lat,
+        'lng': lng,
+      };
 }
 
 /// Una visita agendada al cliente.
@@ -82,4 +93,16 @@ class Visita {
         notas: json['notas'] as String?,
         dispositivosInstalados: json['dispositivos_instalados'] as int?,
       );
+
+  /// Inverso de fromJson (ver Cliente.toJson).
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'cliente': cliente.toJson(),
+        'operador_id': operadorId,
+        'fecha_hora': fechaHora.toUtc().toIso8601String(),
+        'estado': estado,
+        'origen_agendamiento': origenAgendamiento,
+        'notas': notas,
+        'dispositivos_instalados': dispositivosInstalados,
+      };
 }

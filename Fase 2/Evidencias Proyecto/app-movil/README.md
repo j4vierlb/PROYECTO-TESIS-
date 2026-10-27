@@ -39,6 +39,20 @@ Usuario de prueba: `tecnico1@killbichos.cl` / `demo1234`.
 
 El mapa de Google viene **apagado por defecto**. Sin una API key válida, el croquis se gestiona desde la lista de trampas. Con una key configurada (`ios/Flutter/Secrets.xcconfig` y `android/secrets.properties`, ver sus `.example`), se activa con `--dart-define=MAPS_ENABLED=true`. Cada plataforma necesita su autorización en Google Cloud; una clave restringida a iOS o al navegador no autoriza Android. Ver [preparación y pruebas de Android](ANDROID.md).
 
+## Modo offline
+
+El técnico puede trabajar sin señal. Con conexión, la app deja guardado en el teléfono lo del día (agenda, visitas y croquis); sin ella, sigue mostrando esa copia y los cambios quedan en una cola que se envía sola al volver la señal.
+
+- **Se puede hacer sin señal:** iniciar y completar visitas, editar notas, confirmar, mover y retirar trampas, agregar trampas nuevas y sacar fotos.
+- **Franja de estado:** arriba de cualquier pantalla aparece "Sin conexión" y cuántos cambios esperan enviarse. Se envían solos cada 20 segundos y al volver a la app, o con el botón "Enviar ahora".
+- **Conflictos, el servidor gana:** si el panel cerró o canceló la visita mientras el técnico estaba sin señal, ese cambio se descarta y se le avisa en la franja.
+- **Trampas nuevas:** quedan como "Trampa nueva" hasta sincronizar, y el servidor les asigna su código (T-05...). El teléfono genera el id de la trampa, así reintentar un envío cortado no la duplica.
+- **Cuentas:** lo guardado se separa por técnico. Otro técnico en el mismo teléfono no ve ni envía los cambios del anterior. Al cerrar sesión con cambios sin enviar, la app avisa.
+- **Para que funcione hay que haber abierto la agenda con señal** al menos una vez ese día. Sin copia guardada, una pantalla nueva necesita conexión.
+- **Límites:** el historial guarda solo su primera página; la sugerencia con IA y subir el croquis por primera vez requieren conexión.
+
+Código en `lib/offline/` (motor y cola) y `lib/db/` (SQLite).
+
 ## Pruebas
 
 ```bash
