@@ -326,3 +326,76 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
     await waitFor(() => expect(writes[0]?.body.fecha_hora).toBe('2026-07-15T14:00:00.000Z'))
   })
 })
+
+describe('Bandeja de WhatsApp y reagendamiento', () => {
+  const conversationId = '88888888-8888-8888-8888-888888888888'
+  const message = (id, emisor, contenido, extra = {}) => ({ id, emisor, contenido, created_at: '2026-10-22T13:00:00Z', estado_entrega: null, error_entrega: null, ...extra })
+  let detail
+
+  beforeEach(() => {
+    detail = {
+      id: conversationId, cliente: client, atendida_por_humano: false, ventana_abierta: true,
+      mensajes: [
+        message('m1', 'cliente', 'Hola, ¿atienden hoy?'),
+        message('m2', 'agente_ia', 'Hola 😊 Sí, ¿qué necesitas?', { estado_entrega: 'read' }),
+        message('m3', 'sistema', 'Recordatorio de tu visita', { estado_entrega: 'undelivered', error_entrega: '63016: Fuera de la ventana' }),
+      ],
+    }
+    const summary = () => ({ ...detail, mensajes: undefined, ultimo_mensaje: detail.mensajes.at(-1).contenido, ultimo_emisor: detail.mensajes.at(-1).emisor })
+    vi.stubGlobal('fetch', vi.fn(async (url, options = {}) => {
+      const path = new URL(url).pathname
+      const body = options.body ? JSON.parse(options.body) : null
+      if (body) writes.push({ path, method: options.method, body })
+      if (path === `/panel/conversaciones/${conversationId}/mensajes`) {
+        detail = { ...detail, atendida_por_humano: true, mensajes: [...detail.mensajes, message('m4', 'operador', body.contenido, { estado_entrega: 'queued' })] }
+        return new Response(JSON.stringify(detail.mensajes.at(-1)), { status: 201 })
+      }
+      if (path === `/panel/conversaciones/${conversationId}` && options.method === 'PATCH') detail = { ...detail, ...body }
+      if (path.startsWith('/panel/visitas/') && options.method === 'PATCH') return new Response(JSON.stringify({}), { status: 200 })
+      const responses = { '/panel/conversaciones': [summary()], [`/panel/conversaciones/${conversationId}`]: detail, '/panel/visitas': visits, '/panel/operadores': operators, '/panel/stats': { clientes: 1, visitas_hoy: 0, pendientes: 0 }, '/clientes': clients }
+      return new Response(JSON.stringify(responses[path]), { status: 200 })
+    }))
+  })
+
+  it('muestra la conversación con quién escribió y el estado de entrega', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: /WhatsApp/ }))
+    expect(await screen.findByText('Hola, ¿atienden hoy?')).toBeVisible()
+    expect(screen.getByText(/✓✓ Leído/)).toBeVisible()
+    expect(screen.getByText(/No entregado · 63016: Fuera de la ventana/)).toBeVisible()
+    expect(screen.getByText(/^Aviso automático ·/)).toBeVisible()
+  })
+
+  it('el operador responde y la conversación pasa a estar atendida por un humano', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: /WhatsApp/ }))
+    await user.type(await screen.findByLabelText('Mensaje para el cliente'), 'Hola, soy Juan')
+    await user.click(screen.getByRole('button', { name: 'Enviar' }))
+    await waitFor(() => expect(writes.at(-1)).toEqual({ path: `/panel/conversaciones/${conversationId}/mensajes`, method: 'POST', body: { contenido: 'Hola, soy Juan' } }))
+    expect(await screen.findByText('Hola, soy Juan')).toBeVisible()
+    expect(screen.getByLabelText('Mensaje para el cliente')).toHaveValue('')
+    expect(await screen.findByRole('button', { name: 'Devolver a la IA' })).toBeVisible()
+    await user.click(screen.getByRole('button', { name: 'Devolver a la IA' }))
+    await waitFor(() => expect(writes.at(-1).body).toEqual({ atendida_por_humano: false }))
+    expect(await screen.findByRole('button', { name: 'Tomar conversación' })).toBeVisible()
+  })
+
+  it('fuera de la ventana de 24 h no deja escribir', async () => {
+    detail.ventana_abierta = false
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: /WhatsApp/ }))
+    expect(await screen.findByText(/no escribe hace más de 24 h/)).toBeVisible()
+    expect(screen.queryByLabelText('Mensaje para el cliente')).not.toBeInTheDocument()
+  })
+
+  it('al editar una visita avisa que el cambio de fecha se le informa al cliente', async () => {
+    visits = [existingVisit()]
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(await screen.findByRole('button', { name: 'Editar visita' }))
+    expect(screen.getByText(/se le avisará al cliente por WhatsApp/)).toBeVisible()
+  })
+})

@@ -1,0 +1,13 @@
+
+> kill-bichos-panel@0.1.0 test
+> vitest run --reporter=dot
+
+
+ RUN  v5.0.3 C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/frontend
+
+··························································································································
+
+ Test Files  9 passed (9)
+      Tests  122 passed (122)
+   Start at  22:08:55
+   Duration  9.29s (environment 48%, tests 35%, setup 11%, transform 4%, import 2%)

@@ -5,7 +5,7 @@ import { request, SESSION_EXPIRED } from './api.js'
 import { CroquisViewer } from './CroquisViewer.jsx'
 import { PasswordRecovery } from './PasswordRecovery.jsx'
 import { BrandLogo } from './BrandLogo.jsx'
-import { addDays, chileDate, chileTime, chileDateTimeInput, clientLocation, clientPayload, visitPayload } from './panel-utils.js'
+import { addDays, chileDate, chileDateTime, chileTime, chileDateTimeInput, clientLocation, clientPayload, visitPayload } from './panel-utils.js'
 
 const statuses = {
   agendada: ['Agendada', 'gray'], en_curso: ['En curso', 'yellow'], completada: ['Completada', 'green'],
@@ -117,10 +117,10 @@ export function App() {
   }} />
   if (!logged) return <Login notice={notice} onForgot={() => setRecovering(true)} onLogin={() => { setNotice(''); setLogged(true) }} />
   return <div className="app-shell"><aside><div className="logo"><BrandLogo /><div><strong>Kill Bichos</strong><small>Panel operativo</small></div></div>
-    <nav aria-label="Navegación principal"><button className={view === 'agenda' ? 'active' : ''} aria-current={view === 'agenda' ? 'page' : undefined} onClick={() => setView('agenda')}>▦ <span>Agenda</span></button><button className={view === 'clientes' ? 'active' : ''} aria-current={view === 'clientes' ? 'page' : undefined} onClick={() => setView('clientes')}>♧ <span>Clientes</span></button></nav>
+    <nav aria-label="Navegación principal"><button className={view === 'agenda' ? 'active' : ''} aria-current={view === 'agenda' ? 'page' : undefined} onClick={() => setView('agenda')}>▦ <span>Agenda</span></button><button className={view === 'clientes' ? 'active' : ''} aria-current={view === 'clientes' ? 'page' : undefined} onClick={() => setView('clientes')}>♧ <span>Clientes</span></button><button className={view === 'whatsapp' ? 'active' : ''} aria-current={view === 'whatsapp' ? 'page' : undefined} onClick={() => setView('whatsapp')}>✉ <span>WhatsApp</span></button></nav>
     <div className="sidebar-bottom"><div className="user-chip"><div className="avatar">KB</div><div><strong>Cuenta del panel</strong><small>Gestión administrativa</small></div></div></div>
     <button className="logout" onClick={() => { localStorage.removeItem('token'); setNotice(''); setLogged(false) }}>Cerrar sesión</button>
-  </aside><main className="content">{view === 'agenda' ? <Agenda /> : <Clientes />}</main></div>
+  </aside><main className="content">{{ agenda: <Agenda />, clientes: <Clientes />, whatsapp: <Bandeja /> }[view]}</main></div>
 }
 
 function Stat({ label, value, tone }) { return <div className="stat"><span aria-hidden="true" className={`stat-icon ${tone}`}>●</span><div><small>{label}</small><strong>{value}</strong></div></div> }
@@ -209,10 +209,29 @@ function VisitModal({ date, visit, clients, operators, onClose, onSaved }) {
     {closed && <p className="info">Para cambiar la fecha u operador, reactiva la visita desde su estado en la agenda. Puedes editar sus notas.</p>}
     <label>Operador<select disabled={closed || busy} {...field('operador_id')}><option value="">Sin asignar</option>{missingOperator && <option value={visit.operador_id}>{visit.operador.nombre} (inactivo)</option>}{operators.map(o => <option key={o.id} value={o.id}>{o.nombre}</option>)}</select></label>
     <label>Fecha y hora (Chile)<input required disabled={closed || busy} type="datetime-local" {...field('fecha_hora')} /></label>
-    <p className="field-help">Se aplican los días y horas de atención configurados. Cada operador necesita al menos una hora entre visitas.{visit && ' Cambiar la fecha marcará la visita como Reagendada.'}</p>
+    <p className="field-help">Se aplican los días y horas de atención configurados. Cada operador necesita al menos una hora entre visitas.{visit && ' Cambiar la fecha marcará la visita como Reagendada y se le avisará al cliente por WhatsApp.'}</p>
     <label>Notas<textarea rows="3" disabled={busy} {...field('notas')} /></label><Feedback error={error} />
     <div className="modal-actions"><button type="button" className="secondary" disabled={busy} onClick={onClose}>Cancelar</button><button className="primary" disabled={busy || (!visit && !clients.length)}>{busy ? 'Guardando…' : visit ? 'Guardar cambios' : 'Agendar visita'}</button></div>
   </Modal>
+}
+
+// Estado de entrega que informa Twilio para cada mensaje enviado al cliente.
+const DELIVERY = { accepted: ['🕓', 'En cola'], queued: ['🕓', 'En cola'], sending: ['🕓', 'Enviando'], sent: ['✓', 'Enviado'], delivered: ['✓✓', 'Entregado'], read: ['✓✓', 'Leído'], failed: ['⚠', 'No entregado'], undelivered: ['⚠', 'No entregado'], no_enviado: ['⚠', 'No enviado'] }
+const SENDERS = { cliente: 'Cliente', agente_ia: 'Agente IA', sistema: 'Aviso automático', operador: 'Operador' }
+
+function Delivery({ message }) { const [icon, label] = DELIVERY[message.estado_entrega] || []; if (!icon) return null; return <span className={`delivery ${message.estado_entrega}`} title={message.error_entrega || label}>{icon} {label}{message.error_entrega ? ` · ${message.error_entrega}` : ''}</span> }
+
+function Bandeja() {
+  const [conversations, setConversations] = useState([]), [selected, setSelected] = useState(null), [detail, setDetail] = useState(null), [text, setText] = useState(''), [error, setError] = useState(''), [notice, setNotice] = useState(''), [sending, setSending] = useState(false)
+  const loadList = () => request('/panel/conversaciones').then(list => { setConversations(list); setSelected(current => current ?? list[0]?.id ?? null) }).catch(e => setError(e.message))
+  const loadDetail = id => id ? request(`/panel/conversaciones/${id}`).then(d => setDetail(d.id === id ? d : null)).catch(e => setError(e.message)) : Promise.resolve()
+  // Se actualiza solo: los mensajes nuevos y los estados de entrega llegan por el webhook de Twilio.
+  useEffect(() => { loadList(); const timer = setInterval(loadList, 10000); return () => clearInterval(timer) }, [])
+  useEffect(() => { setDetail(null); loadDetail(selected); const timer = setInterval(() => loadDetail(selected), 5000); return () => clearInterval(timer) }, [selected])
+  async function send(e) { e.preventDefault(); if (!text.trim()) return; setSending(true); setError(''); try { await request(`/panel/conversaciones/${selected}/mensajes`, { method: 'POST', body: JSON.stringify({ contenido: text }) }); setText(''); await Promise.all([loadDetail(selected), loadList()]) } catch (err) { setError(err.message) } finally { setSending(false) } }
+  async function toggle() { try { setDetail(await request(`/panel/conversaciones/${selected}`, { method: 'PATCH', body: JSON.stringify({ atendida_por_humano: !detail.atendida_por_humano }) })); loadList() } catch (err) { setError(err.message) } }
+  async function reminders() { setError(''); try { const r = await request('/panel/whatsapp/recordatorios', { method: 'POST' }); setNotice(`Recordatorios de mañana enviados: ${r.enviados}${r.no_enviados ? ` · no enviados: ${r.no_enviados}` : ''}`) } catch (err) { setError(err.message) } }
+  return <><header className="topbar"><div><p className="eyebrow">ATENCIÓN AL CLIENTE</p><h1>WhatsApp</h1><p className="muted">Revisa lo que conversa el agente IA y responde tú cuando haga falta.</p></div><button className="secondary" onClick={reminders}>Enviar recordatorios de mañana</button></header>{error && <div className="error banner">{error}</div>}{notice && <div className="notice banner">{notice}</div>}<section className="inbox"><div className="inbox-list">{conversations.map(c => <button key={c.id} className={`inbox-item ${c.id === selected ? 'active' : ''}`} onClick={() => setSelected(c.id)}><strong>{c.cliente.nombre}</strong><small>{c.cliente.telefono_whatsapp}</small><span>{c.ultimo_emisor && `${SENDERS[c.ultimo_emisor] || c.ultimo_emisor}: `}{c.ultimo_mensaje}</span><span className={`pill ${c.atendida_por_humano ? 'orange' : 'green'}`}>{c.atendida_por_humano ? 'Operador' : 'IA'}</span></button>)}{!conversations.length && <div className="empty">Todavía no hay conversaciones de WhatsApp.</div>}</div><div className="thread">{detail ? <><div className="thread-head"><div><strong>{detail.cliente.nombre}</strong><small>{detail.cliente.telefono_whatsapp}</small></div><button className={detail.atendida_por_humano ? 'primary' : 'secondary'} onClick={toggle}>{detail.atendida_por_humano ? 'Devolver a la IA' : 'Tomar conversación'}</button></div><div className="messages">{detail.mensajes.map(m => <div key={m.id} className={`bubble ${m.emisor}`}><small>{SENDERS[m.emisor] || m.emisor} · {chileDateTime(m.created_at)}</small><p>{m.contenido}</p><Delivery message={m} /></div>)}</div>{detail.ventana_abierta ? <form className="composer" onSubmit={send}><textarea rows="2" aria-label="Mensaje para el cliente" placeholder={detail.atendida_por_humano ? 'Escribe tu respuesta' : 'Al enviar, la IA deja de responder en esta conversación'} value={text} onChange={e => setText(e.target.value)} /><button className="primary" disabled={sending || !text.trim()}>Enviar</button></form> : <div className="composer closed">El cliente no escribe hace más de 24 h: WhatsApp solo permite responder cuando vuelva a escribir.</div>}</> : <div className="empty">Selecciona una conversación.</div>}</div></section></>
 }
 
 function Clientes() {

@@ -290,6 +290,49 @@ class DeviceUpdate(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Bandeja de WhatsApp del panel
+# ---------------------------------------------------------------------------
+class ConversationSummary(BaseModel):
+    """Una conversación en la lista de la bandeja."""
+    id: UUID
+    cliente: ClientSummary
+    atendida_por_humano: bool       # True = la IA está pausada y responde un operador
+    ventana_abierta: bool           # el cliente escribió en las últimas 24 h
+    ultimo_mensaje: str | None = None
+    ultimo_emisor: str | None = None
+    ultimo_at: datetime | None = None
+
+
+class WhatsAppMessage(BaseModel):
+    id: UUID
+    emisor: str                     # cliente, agente_ia, sistema u operador
+    contenido: str
+    intencion_detectada: str | None = None
+    # Solo mensajes enviados al cliente: queued, sent, delivered, read,
+    # failed, undelivered o no_enviado.
+    estado_entrega: str | None = None
+    error_entrega: str | None = None
+    created_at: datetime
+
+
+class ConversationDetail(ConversationSummary):
+    mensajes: list[WhatsAppMessage]
+
+
+class OperatorMessageCreate(BaseModel):
+    contenido: str = Field(min_length=1, max_length=1600)
+
+
+class ConversationUpdate(BaseModel):
+    atendida_por_humano: bool
+
+
+class RemindersResult(BaseModel):
+    enviados: int
+    no_enviados: int
+
+
+# ---------------------------------------------------------------------------
 # Usuario de la sesión
 # ---------------------------------------------------------------------------
 class CurrentUser(BaseModel):
