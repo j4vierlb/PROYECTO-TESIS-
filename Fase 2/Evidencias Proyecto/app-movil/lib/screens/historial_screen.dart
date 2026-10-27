@@ -15,6 +15,7 @@ import '../services/api_client.dart';
 import '../theme/app_theme.dart';
 import '../utils/formato.dart';
 import '../widgets/logout_button.dart';
+import '../widgets/company_brand.dart';
 import 'visita_detalle_screen.dart';
 
 /// Registro de las visitas que el operador ya completó, de la más reciente a
@@ -101,7 +102,7 @@ class _HistorialScreenState extends State<HistorialScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Historial de visitas'),
+        title: const CompanyTitle('Historial de visitas'),
         actions: const [LogoutButton()],
       ),
       body: _loading

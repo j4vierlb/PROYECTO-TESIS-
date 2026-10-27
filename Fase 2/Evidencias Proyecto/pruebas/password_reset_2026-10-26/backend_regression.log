@@ -1,0 +1,208 @@
+test_admin_de_otra_empresa_no_puede_modificar_la_visita (test_acceso_empresa.AccesoEntreEmpresasTest.test_admin_de_otra_empresa_no_puede_modificar_la_visita) ... /usr/local/lib/python3.12/site-packages/jose/jwt.py:311: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  now = timegm(datetime.utcnow().utctimetuple())
+ok
+test_admin_y_coordinador_no_ven_visitas_ni_croquis_de_otra_empresa (test_acceso_empresa.AccesoEntreEmpresasTest.test_admin_y_coordinador_no_ven_visitas_ni_croquis_de_otra_empresa) ... ok
+test_admin_y_coordinador_si_ven_las_de_su_empresa (test_acceso_empresa.AccesoEntreEmpresasTest.test_admin_y_coordinador_si_ven_las_de_su_empresa) ... ok
+test_operador_de_otra_empresa_no_crea_croquis_ni_agrega_trampas (test_acceso_empresa.AccesoEntreEmpresasTest.test_operador_de_otra_empresa_no_crea_croquis_ni_agrega_trampas) ... ok
+test_operador_sigue_limitado_a_sus_propias_visitas (test_acceso_empresa.AccesoEntreEmpresasTest.test_operador_sigue_limitado_a_sus_propias_visitas) ... ok
+test_visita_inexistente_sigue_respondiendo_404 (test_acceso_empresa.AccesoEntreEmpresasTest.test_visita_inexistente_sigue_respondiendo_404) ... ok
+test_cuenta_desactivada_o_borrada_no_renueva (test_auth_refresh.RefreshTest.test_cuenta_desactivada_o_borrada_no_renueva) ... ok
+test_falta_el_refresh_token_responde_422 (test_auth_refresh.RefreshTest.test_falta_el_refresh_token_responde_422) ... ok
+test_rechaza_tokens_invalidos_con_401 (test_auth_refresh.RefreshTest.test_rechaza_tokens_invalidos_con_401) ... ok
+test_refresh_valido_entrega_tokens_nuevos_del_mismo_usuario (test_auth_refresh.RefreshTest.test_refresh_valido_entrega_tokens_nuevos_del_mismo_usuario) ... ok
+test_usuario_del_panel_conserva_su_rol (test_auth_refresh.RefreshTest.test_usuario_del_panel_conserva_su_rol) ... ok
+test_TENANT_admin_A_to_A_croquis (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_A_to_A_croquis) ... ok
+test_TENANT_admin_A_to_A_photo (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_A_to_A_photo) ... ok
+test_TENANT_admin_A_to_A_visit (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_A_to_A_visit) ... ok
+test_TENANT_admin_A_to_B_croquis (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_A_to_B_croquis) ... ok
+test_TENANT_admin_A_to_B_photo (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_A_to_B_photo) ... ok
+test_TENANT_admin_A_to_B_visit (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_A_to_B_visit) ... ok
+test_TENANT_admin_B_to_A_croquis (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_B_to_A_croquis) ... ok
+test_TENANT_admin_B_to_A_photo (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_B_to_A_photo) ... ok
+test_TENANT_admin_B_to_A_visit (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_B_to_A_visit) ... ok
+test_TENANT_admin_B_to_B_croquis (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_B_to_B_croquis) ... ok
+test_TENANT_admin_B_to_B_photo (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_B_to_B_photo) ... ok
+test_TENANT_admin_B_to_B_visit (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_admin_B_to_B_visit) ... ok
+test_TENANT_anonymous_to_A_croquis (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_anonymous_to_A_croquis) ... ok
+test_TENANT_anonymous_to_A_photo (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_anonymous_to_A_photo) ... ok
+test_TENANT_anonymous_to_A_visit (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_anonymous_to_A_visit) ... ok
+test_TENANT_anonymous_to_B_croquis (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_anonymous_to_B_croquis) ... ok
+test_TENANT_anonymous_to_B_photo (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_anonymous_to_B_photo) ... ok
+test_TENANT_anonymous_to_B_visit (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_anonymous_to_B_visit) ... ok
+test_TENANT_coordinador_A_to_A_croquis (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_A_to_A_croquis) ... ok
+test_TENANT_coordinador_A_to_A_photo (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_A_to_A_photo) ... ok
+test_TENANT_coordinador_A_to_A_visit (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_A_to_A_visit) ... ok
+test_TENANT_coordinador_A_to_B_croquis (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_A_to_B_croquis) ... ok
+test_TENANT_coordinador_A_to_B_photo (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_A_to_B_photo) ... ok
+test_TENANT_coordinador_A_to_B_visit (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_A_to_B_visit) ... ok
+test_TENANT_coordinador_B_to_A_croquis (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_B_to_A_croquis) ... ok
+test_TENANT_coordinador_B_to_A_photo (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_B_to_A_photo) ... ok
+test_TENANT_coordinador_B_to_A_visit (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_B_to_A_visit) ... ok
+test_TENANT_coordinador_B_to_B_croquis (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_B_to_B_croquis) ... ok
+test_TENANT_coordinador_B_to_B_photo (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_B_to_B_photo) ... ok
+test_TENANT_coordinador_B_to_B_visit (test_company_access_postgis.CompanyAccessPostgisTest.test_TENANT_coordinador_B_to_B_visit) ... ok
+test_la_foto_de_esri_coincide_con_la_conversion_de_pixeles (test_croquis_agent.EsriTest.test_la_foto_de_esri_coincide_con_la_conversion_de_pixeles) ... ok
+test_centro_de_la_imagen_es_el_predio (test_croquis_agent.GeometriaTest.test_centro_de_la_imagen_es_el_predio) ... ok
+test_ida_y_vuelta (test_croquis_agent.GeometriaTest.test_ida_y_vuelta) ... ok
+test_orientacion_y_escala (test_croquis_agent.GeometriaTest.test_orientacion_y_escala) ... ok
+test_max_dispositivos (test_croquis_agent.ReglasTest.test_max_dispositivos) ... ok
+test_plan_b_esquinas_y_perimetro (test_croquis_agent.ReglasTest.test_plan_b_esquinas_y_perimetro) ... ok
+test_plan_b_no_repite_trampas_instaladas (test_croquis_agent.ReglasTest.test_plan_b_no_repite_trampas_instaladas) ... ok
+test_plan_b_tipo_segun_plaga (test_croquis_agent.ReglasTest.test_plan_b_tipo_segun_plaga) ... ok
+test_croquis_anterior_lleno_no_agrega_nada (test_croquis_agent.SugerirDispositivosTest.test_croquis_anterior_lleno_no_agrega_nada) ... ok
+test_falla_la_foto_usa_reglas (test_croquis_agent.SugerirDispositivosTest.test_falla_la_foto_usa_reglas) ... WARNING:     app.ai.croquis_agent - No se pudo descargar la foto satelital (-33.487, -70.599): HTTP 403
+ok
+test_falla_openai_usa_reglas_pero_guarda_la_foto (test_croquis_agent.SugerirDispositivosTest.test_falla_openai_usa_reglas_pero_guarda_la_foto) ... ERROR:     app.ai.croquis_agent - Falló la IA del croquis
+Traceback (most recent call last):
+  File "/workspace/backend/app/ai/croquis_agent.py", line 371, in sugerir_dispositivos
+    result = _ask_openai(
+             ^^^^^^^^^^^^
+  File "/workspace/backend/app/ai/croquis_agent.py", line 314, in _ask_openai
+    response.raise_for_status()
+  File "/usr/local/lib/python3.12/site-packages/httpx/_models.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Server error '500 Internal Server Error' for url 'https://api.openai.com/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+ok
+test_flujo_completo_con_ia (test_croquis_agent.SugerirDispositivosTest.test_flujo_completo_con_ia) ... ok
+test_ia_sin_ubicaciones_validas_usa_reglas (test_croquis_agent.SugerirDispositivosTest.test_ia_sin_ubicaciones_validas_usa_reglas) ... INFO:     app.ai.croquis_agent - Croquis IA: 0 de 1 dispositivos pasaron las validaciones
+ok
+test_sin_clave_de_google_usa_la_foto_de_esri (test_croquis_agent.SugerirDispositivosTest.test_sin_clave_de_google_usa_la_foto_de_esri) ... ok
+test_descarta_duplicados_a_menos_de_3_m (test_croquis_agent.ValidacionTest.test_descarta_duplicados_a_menos_de_3_m) ... INFO:     app.ai.croquis_agent - Croquis IA: 1 de 2 dispositivos pasaron las validaciones
+ok
+test_descarta_lejos_del_predio (test_croquis_agent.ValidacionTest.test_descarta_lejos_del_predio) ... INFO:     app.ai.croquis_agent - Croquis IA: 0 de 1 dispositivos pasaron las validaciones
+ok
+test_descarta_tipo_invalido_y_pixeles_fuera (test_croquis_agent.ValidacionTest.test_descarta_tipo_invalido_y_pixeles_fuera) ... INFO:     app.ai.croquis_agent - Croquis IA: 0 de 4 dispositivos pasaron las validaciones
+ok
+test_descuenta_las_trampas_instaladas_del_maximo (test_croquis_agent.ValidacionTest.test_descuenta_las_trampas_instaladas_del_maximo) ... INFO:     app.ai.croquis_agent - Croquis IA: 2 de 9 dispositivos pasaron las validaciones
+ok
+test_dispositivo_valido (test_croquis_agent.ValidacionTest.test_dispositivo_valido) ... ok
+test_json_raro_no_falla (test_croquis_agent.ValidacionTest.test_json_raro_no_falla) ... ok
+test_respeta_el_maximo_y_prefiere_mayor_confianza (test_croquis_agent.ValidacionTest.test_respeta_el_maximo_y_prefiere_mayor_confianza) ... INFO:     app.ai.croquis_agent - Croquis IA: 7 de 15 dispositivos pasaron las validaciones
+ok
+test_agrega_las_trampas_sugeridas (test_croquis_sugerencia.CroquisSugerenciaTest.test_agrega_las_trampas_sugeridas) ... ok
+test_cliente_sin_ubicacion_ni_direccion_util (test_croquis_sugerencia.CroquisSugerenciaTest.test_cliente_sin_ubicacion_ni_direccion_util) ... ok
+test_cliente_sin_ubicacion_se_geocodifica (test_croquis_sugerencia.CroquisSugerenciaTest.test_cliente_sin_ubicacion_se_geocodifica) ... ok
+test_informa_a_la_ia_las_trampas_que_ya_estan (test_croquis_sugerencia.CroquisSugerenciaTest.test_informa_a_la_ia_las_trampas_que_ya_estan) ... ok
+test_sin_trampas_nuevas_no_inserta_nada (test_croquis_sugerencia.CroquisSugerenciaTest.test_sin_trampas_nuevas_no_inserta_nada) ... ok
+test_solo_operadores (test_croquis_sugerencia.CroquisSugerenciaTest.test_solo_operadores) ... ok
+test_valida_el_body (test_croquis_sugerencia.CroquisSugerenciaTest.test_valida_el_body) ... ok
+test_visita_cerrada (test_croquis_sugerencia.CroquisSugerenciaTest.test_visita_cerrada) ... ok
+test_visita_de_otro_operador (test_croquis_sugerencia.CroquisSugerenciaTest.test_visita_de_otro_operador) ... ok
+test_agregar_trampa_valida_tipo_coordenadas_y_croquis (test_croquis_terreno.CroquisTerrenoTest.test_agregar_trampa_valida_tipo_coordenadas_y_croquis) ... ok
+test_agregar_trampas_asigna_codigos_correlativos_y_queda_confirmada (test_croquis_terreno.CroquisTerrenoTest.test_agregar_trampas_asigna_codigos_correlativos_y_queda_confirmada) ... ok
+test_crear_croquis_copia_trampas_activas_de_la_visita_anterior_sin_confirmar (test_croquis_terreno.CroquisTerrenoTest.test_crear_croquis_copia_trampas_activas_de_la_visita_anterior_sin_confirmar) ... ok
+test_crear_croquis_dos_veces_no_lo_duplica (test_croquis_terreno.CroquisTerrenoTest.test_crear_croquis_dos_veces_no_lo_duplica) ... ok
+test_foto_en_visita_cerrada_o_por_otro_operador_se_rechaza (test_croquis_terreno.CroquisTerrenoTest.test_foto_en_visita_cerrada_o_por_otro_operador_se_rechaza) ... ok
+test_foto_no_es_publica_ni_visible_para_otros (test_croquis_terreno.CroquisTerrenoTest.test_foto_no_es_publica_ni_visible_para_otros) ... ok
+test_foto_png_tambien_se_acepta (test_croquis_terreno.CroquisTerrenoTest.test_foto_png_tambien_se_acepta) ... ok
+test_foto_rechaza_archivos_que_no_son_imagen_o_muy_grandes (test_croquis_terreno.CroquisTerrenoTest.test_foto_rechaza_archivos_que_no_son_imagen_o_muy_grandes) ... ok
+test_no_se_agregan_trampas_en_visita_cerrada_ni_ajena (test_croquis_terreno.CroquisTerrenoTest.test_no_se_agregan_trampas_en_visita_cerrada_ni_ajena) ... ok
+test_no_se_crea_croquis_en_visita_ajena_cerrada_o_por_un_admin (test_croquis_terreno.CroquisTerrenoTest.test_no_se_crea_croquis_en_visita_ajena_cerrada_o_por_un_admin) ... ok
+test_patch_rechaza_trampa_de_otro_operador_y_de_visita_cerrada (test_croquis_terreno.CroquisTerrenoTest.test_patch_rechaza_trampa_de_otro_operador_y_de_visita_cerrada) ... ok
+test_patch_sigue_funcionando_para_el_dueno_en_visita_abierta (test_croquis_terreno.CroquisTerrenoTest.test_patch_sigue_funcionando_para_el_dueno_en_visita_abierta) ... ok
+test_primer_croquis_del_cliente_parte_vacio_en_version_1 (test_croquis_terreno.CroquisTerrenoTest.test_primer_croquis_del_cliente_parte_vacio_en_version_1) ... ok
+test_subir_y_ver_foto (test_croquis_terreno.CroquisTerrenoTest.test_subir_y_ver_foto) ... ok
+test_trampa_sin_foto_responde_404 (test_croquis_terreno.CroquisTerrenoTest.test_trampa_sin_foto_responde_404) ... ok
+test_agrega_region_si_no_hay_comuna (test_geocoding.GeocodificarTest.test_agrega_region_si_no_hay_comuna) ... ok
+test_coincidencia_parcial_se_descarta (test_geocoding.GeocodificarTest.test_coincidencia_parcial_se_descarta) ... INFO:     app.geocoding - Coincidencia parcial, no se guarda: 'Av. Macul 99999'
+ok
+test_direccion_precisa_devuelve_coordenadas (test_geocoding.GeocodificarTest.test_direccion_precisa_devuelve_coordenadas) ... ok
+test_direccion_vacia (test_geocoding.GeocodificarTest.test_direccion_vacia) ... ok
+test_error_http_no_lanza_excepcion (test_geocoding.GeocodificarTest.test_error_http_no_lanza_excepcion) ... WARNING:     app.geocoding - Falló la geocodificación de 'Av. Macul 1234, Macul': HTTP 500
+ok
+test_no_agrega_region_si_trae_comuna_con_tildes (test_geocoding.GeocodificarTest.test_no_agrega_region_si_trae_comuna_con_tildes) ... ok
+test_punto_fuera_del_rectangulo (test_geocoding.GeocodificarTest.test_punto_fuera_del_rectangulo) ... INFO:     app.geocoding - Punto fuera de la Región Metropolitana (-36.827, -73.05), no se guarda: 'Av. Brasil 1000'
+ok
+test_resultados_cercanos_usan_el_primero (test_geocoding.GeocodificarTest.test_resultados_cercanos_usan_el_primero) ... ok
+test_resultados_lejanos_entre_si_son_ambiguos (test_geocoding.GeocodificarTest.test_resultados_lejanos_entre_si_son_ambiguos) ... INFO:     app.geocoding - Dirección ambigua (2 resultados distintos), no se guarda: 'Los Aromos 100'
+ok
+test_sin_clave_no_llama_a_google (test_geocoding.GeocodificarTest.test_sin_clave_no_llama_a_google) ... ok
+test_sin_region_informada_se_descarta (test_geocoding.GeocodificarTest.test_sin_region_informada_se_descarta) ... INFO:     app.geocoding - Punto fuera de la Región Metropolitana (-33.487, -70.599), no se guarda: 'Av. Macul 1234, Macul'
+ok
+test_sin_resultados (test_geocoding.GeocodificarTest.test_sin_resultados) ... ok
+test_ubicacion_aproximada_se_descarta (test_geocoding.GeocodificarTest.test_ubicacion_aproximada_se_descarta) ... INFO:     app.geocoding - Ubicación imprecisa (APPROXIMATE), no se guarda: 'Macul'
+ok
+test_valparaiso_cae_en_el_rectangulo_pero_se_descarta (test_geocoding.GeocodificarTest.test_valparaiso_cae_en_el_rectangulo_pero_se_descarta) ... INFO:     app.geocoding - Punto fuera de la Región Metropolitana (-33.0458, -71.6197), no se guarda: 'Av. Brasil 1000'
+ok
+test_agenda_con_cliente_sin_coordenadas_y_sin_operador_devuelve_200 (test_panel_contract.PanelContractTest.test_agenda_con_cliente_sin_coordenadas_y_sin_operador_devuelve_200) ... ok
+test_cadena_vacia_reproduce_el_422_que_el_frontend_corrige (test_panel_contract.PanelContractTest.test_cadena_vacia_reproduce_el_422_que_el_frontend_corrige) ... ok
+test_cliente_nuevo_admite_ubicacion_vacia (test_panel_contract.PanelContractTest.test_cliente_nuevo_admite_ubicacion_vacia) ... ok
+test_conflicto_de_operador_devuelve_409_sin_guardar (test_panel_contract.PanelContractTest.test_conflicto_de_operador_devuelve_409_sin_guardar) ... ok
+test_coordenadas_incompletas_y_nombre_vacio_son_rechazados (test_panel_contract.PanelContractTest.test_coordenadas_incompletas_y_nombre_vacio_son_rechazados) ... ok
+test_editar_cliente_sin_coordenadas_conserva_null (test_panel_contract.PanelContractTest.test_editar_cliente_sin_coordenadas_conserva_null) ... ok
+test_fecha_estado_nulos_y_campos_ajenos_son_rechazados (test_panel_contract.PanelContractTest.test_fecha_estado_nulos_y_campos_ajenos_son_rechazados) ... ok
+test_fuera_de_horario_incluso_sin_operador (test_panel_contract.PanelContractTest.test_fuera_de_horario_incluso_sin_operador) ... ok
+test_no_amplia_el_contrato_movil (test_panel_contract.PanelContractTest.test_no_amplia_el_contrato_movil) ... ok
+test_no_reprograma_visita_finalizada_pero_permite_notas (test_panel_contract.PanelContractTest.test_no_reprograma_visita_finalizada_pero_permite_notas) ... ok
+test_operador_inactivo_o_externo_es_rechazado (test_panel_contract.PanelContractTest.test_operador_inactivo_o_externo_es_rechazado) ... ok
+test_panel_clientes_con_ubicacion_null_devuelve_200 (test_panel_contract.PanelContractTest.test_panel_clientes_con_ubicacion_null_devuelve_200) ... ok
+test_quitar_operador_no_cambia_fecha_ni_estado (test_panel_contract.PanelContractTest.test_quitar_operador_no_cambia_fecha_ni_estado) ... ok
+test_reagendada_requiere_una_nueva_fecha (test_panel_contract.PanelContractTest.test_reagendada_requiere_una_nueva_fecha) ... ok
+test_rechaza_fechas_sin_zona_en_creacion_y_edicion (test_panel_contract.PanelContractTest.test_rechaza_fechas_sin_zona_en_creacion_y_edicion) ... ok
+test_reprogramar_actualiza_fecha_estado_y_operador (test_panel_contract.PanelContractTest.test_reprogramar_actualiza_fecha_estado_y_operador) ... ok
+test_sin_asignar_null_devuelve_201_y_conserva_utc (test_panel_contract.PanelContractTest.test_sin_asignar_null_devuelve_201_y_conserva_utc) ... ok
+test_usa_horario_configurado_y_no_horario_fijo (test_panel_contract.PanelContractTest.test_usa_horario_configurado_y_no_horario_fijo) ... ok
+test_uuid_de_operador_devuelve_201 (test_panel_contract.PanelContractTest.test_uuid_de_operador_devuelve_201) ... ok
+test_visita_de_otra_empresa_no_se_modifica (test_panel_contract.PanelContractTest.test_visita_de_otra_empresa_no_se_modifica) ... ok
+test_CRB01_admin_y_coordinador_consultan_croquis_completado_con_retiradas (test_panel_croquis_readonly.PanelCroquisReadTest.test_CRB01_admin_y_coordinador_consultan_croquis_completado_con_retiradas) ... ok
+test_CRB02_admin_y_coordinador_descargan_foto_de_su_empresa (test_panel_croquis_readonly.PanelCroquisReadTest.test_CRB02_admin_y_coordinador_descargan_foto_de_su_empresa) ... ok
+test_CRB03_get_inexistente_no_crea_croquis (test_panel_croquis_readonly.PanelCroquisReadTest.test_CRB03_get_inexistente_no_crea_croquis) ... ok
+test_CRB04_foto_y_croquis_exigen_token (test_panel_croquis_readonly.PanelCroquisReadTest.test_CRB04_foto_y_croquis_exigen_token) ... ok
+test_CRB05_fotos_rechazan_admin_y_coordinador_de_otra_empresa (test_panel_croquis_readonly.PanelCroquisReadTest.test_CRB05_fotos_rechazan_admin_y_coordinador_de_otra_empresa) ... ok
+test_2330_chile_se_guarda_en_utc_del_dia_siguiente_sin_cambiar_dia_agenda (test_panel_postgis.PanelPostgisTest.test_2330_chile_se_guarda_en_utc_del_dia_siguiente_sin_cambiar_dia_agenda) ... ok
+test_asignar_y_desasignar_visita_existente (test_panel_postgis.PanelPostgisTest.test_asignar_y_desasignar_visita_existente) ... ok
+test_bloquea_choques_y_permite_separacion_exacta_de_una_hora (test_panel_postgis.PanelPostgisTest.test_bloquea_choques_y_permite_separacion_exacta_de_una_hora) ... ok
+test_cancelar_con_croquis_conserva_visita_croquis_y_trampas (test_panel_postgis.PanelPostgisTest.test_cancelar_con_croquis_conserva_visita_croquis_y_trampas) ... ok
+test_cancelar_libera_el_horario (test_panel_postgis.PanelPostgisTest.test_cancelar_libera_el_horario) ... ok
+test_cliente_con_coordenadas_cero_roundtrip_postgis (test_panel_postgis.PanelPostgisTest.test_cliente_con_coordenadas_cero_roundtrip_postgis) ... ok
+test_cliente_con_visitas_no_se_elimina (test_panel_postgis.PanelPostgisTest.test_cliente_con_visitas_no_se_elimina) ... ok
+test_cliente_sin_visitas_se_puede_eliminar (test_panel_postgis.PanelPostgisTest.test_cliente_sin_visitas_se_puede_eliminar) ... ok
+test_cliente_whatsapp_sin_ubicacion_se_lista_y_edita_sin_inventar_coordenadas (test_panel_postgis.PanelPostgisTest.test_cliente_whatsapp_sin_ubicacion_se_lista_y_edita_sin_inventar_coordenadas) ... ok
+test_crear_sin_coordenadas_y_telefono_duplicado_controlado (test_panel_postgis.PanelPostgisTest.test_crear_sin_coordenadas_y_telefono_duplicado_controlado) ... ok
+test_estadisticas_cuentan_hoy_segun_chile (test_panel_postgis.PanelPostgisTest.test_estadisticas_cuentan_hoy_segun_chile) ... ok
+test_hora_de_invierno_10_chile_persiste_14_utc (test_panel_postgis.PanelPostgisTest.test_hora_de_invierno_10_chile_persiste_14_utc) ... ok
+test_hora_de_verano_10_chile_persiste_13_utc (test_panel_postgis.PanelPostgisTest.test_hora_de_verano_10_chile_persiste_13_utc) ... ok
+test_no_asigna_operador_de_otra_empresa (test_panel_postgis.PanelPostgisTest.test_no_asigna_operador_de_otra_empresa) ... ok
+test_no_asigna_operador_inactivo (test_panel_postgis.PanelPostgisTest.test_no_asigna_operador_inactivo) ... ok
+test_no_permite_domingo_cierre_ni_madrugada_sin_asignar (test_panel_postgis.PanelPostgisTest.test_no_permite_domingo_cierre_ni_madrugada_sin_asignar) ... ok
+test_no_puede_modificar_visita_de_otra_empresa (test_panel_postgis.PanelPostgisTest.test_no_puede_modificar_visita_de_otra_empresa) ... ok
+test_no_se_puede_agendar_cliente_de_otra_empresa (test_panel_postgis.PanelPostgisTest.test_no_se_puede_agendar_cliente_de_otra_empresa) ... ok
+test_operador_asignado_y_filtro (test_panel_postgis.PanelPostgisTest.test_operador_asignado_y_filtro) ... ok
+test_operador_vacio_es_rechazado_sin_guardar_visita (test_panel_postgis.PanelPostgisTest.test_operador_vacio_es_rechazado_sin_guardar_visita) ... ok
+test_reprogramacion_conflictiva_no_altera_la_visita (test_panel_postgis.PanelPostgisTest.test_reprogramacion_conflictiva_no_altera_la_visita) ... ok
+test_reprogramacion_real_cambia_agenda_estado_y_operador (test_panel_postgis.PanelPostgisTest.test_reprogramacion_real_cambia_agenda_estado_y_operador) ... ok
+test_sin_asignar_se_guarda_null_y_reaparece_en_la_agenda (test_panel_postgis.PanelPostgisTest.test_sin_asignar_se_guarda_null_y_reaparece_en_la_agenda) ... ok
+test_sin_token_no_se_puede_entrar_al_panel (test_panel_postgis.PanelPostgisTest.test_sin_token_no_se_puede_entrar_al_panel) ... ok
+test_tecnico_no_puede_editar_por_el_endpoint_del_panel (test_panel_postgis.PanelPostgisTest.test_tecnico_no_puede_editar_por_el_endpoint_del_panel) ... ok
+test_telefono_duplicado_al_editar_no_cambia_cliente (test_panel_postgis.PanelPostgisTest.test_telefono_duplicado_al_editar_no_cambia_cliente) ... ok
+test_envia_solo_con_starttls_y_no_registra_enlace_al_fallar (test_password_reset.MailConfigurationTest.test_envia_solo_con_starttls_y_no_registra_enlace_al_fallar) ... ok
+test_falla_cerrada_sin_https_o_con_fragmento_host_credenciales (test_password_reset.MailConfigurationTest.test_falla_cerrada_sin_https_o_con_fragmento_host_credenciales) ... ok
+test_cambio_invalida_todos_los_enlaces_previos (test_password_reset.PasswordResetTest.test_cambio_invalida_todos_los_enlaces_previos) ... ok
+test_cuentas_inexistentes_operadores_e_inactivas_mismo_mensaje (test_password_reset.PasswordResetTest.test_cuentas_inexistentes_operadores_e_inactivas_mismo_mensaje) ... ok
+test_dos_canjes_simultaneos_solo_uno_puede_cambiar_la_clave (test_password_reset.PasswordResetTest.test_dos_canjes_simultaneos_solo_uno_puede_cambiar_la_clave) ... ok
+test_enlace_de_un_uso_cambia_clave_y_no_autentica_automaticamente (test_password_reset.PasswordResetTest.test_enlace_de_un_uso_cambia_clave_y_no_autentica_automaticamente) ... ok
+test_limita_canje_y_libera_cupo_al_vencer (test_password_reset.PasswordResetTest.test_limita_canje_y_libera_cupo_al_vencer) ... ok
+test_limita_por_ip_aunque_cambie_correo (test_password_reset.PasswordResetTest.test_limita_por_ip_aunque_cambie_correo) ... ok
+test_limita_solicitudes_por_email_incluso_inexistente (test_password_reset.PasswordResetTest.test_limita_solicitudes_por_email_incluso_inexistente) ... ok
+test_mensaje_503_para_todas_las_cuentas_si_no_hay_correo_configurado (test_password_reset.PasswordResetTest.test_mensaje_503_para_todas_las_cuentas_si_no_hay_correo_configurado) ... ok
+test_no_permite_token_de_sesion_como_enlace (test_password_reset.PasswordResetTest.test_no_permite_token_de_sesion_como_enlace) ... ok
+test_normaliza_correo_y_no_refleja_host_de_request (test_password_reset.PasswordResetTest.test_normaliza_correo_y_no_refleja_host_de_request) ... ok
+test_rechaza_cuenta_desactivada_despues_de_solicitar (test_password_reset.PasswordResetTest.test_rechaza_cuenta_desactivada_despues_de_solicitar) ... ok
+test_rechaza_enlace_alterado_sin_cambiar_cuenta (test_password_reset.PasswordResetTest.test_rechaza_enlace_alterado_sin_cambiar_cuenta) ... ok
+test_rechaza_enlace_vencido (test_password_reset.PasswordResetTest.test_rechaza_enlace_vencido) ... ok
+test_restaura_coordinador_sin_cambiar_su_rol (test_password_reset.PasswordResetTest.test_restaura_coordinador_sin_cambiar_su_rol) ... ok
+test_revoca_acceso_y_refresh_previos_permite_nueva_sesion (test_password_reset.PasswordResetTest.test_revoca_acceso_y_refresh_previos_permite_nueva_sesion) ... ok
+test_se_guarda_solo_hash_no_token_ni_clave_en_texto (test_password_reset.PasswordResetTest.test_se_guarda_solo_hash_no_token_ni_clave_en_texto) ... ok
+test_tokens_legacy_sin_version_quedan_revocados_despues_del_cambio (test_password_reset.PasswordResetTest.test_tokens_legacy_sin_version_quedan_revocados_despues_del_cambio) ... ok
+test_valida_clave_longitud_y_bytes_utf8 (test_password_reset.PasswordResetTest.test_valida_clave_longitud_y_bytes_utf8) ... ok
+test_despues_de_las_21_sigue_siendo_hoy_en_chile (test_zona_horaria.HoyEnChileTest.test_despues_de_las_21_sigue_siendo_hoy_en_chile) ... ok
+test_despues_de_medianoche_cambia_el_dia (test_zona_horaria.HoyEnChileTest.test_despues_de_medianoche_cambia_el_dia) ... ok
+test_durante_el_dia_coincide_con_utc (test_zona_horaria.HoyEnChileTest.test_durante_el_dia_coincide_con_utc) ... ok
+test_horario_de_invierno (test_zona_horaria.HoyEnChileTest.test_horario_de_invierno) ... ok
+test_ultimo_minuto_del_dia (test_zona_horaria.HoyEnChileTest.test_ultimo_minuto_del_dia) ... ok
+
+----------------------------------------------------------------------
+Ran 176 tests in 48.277s
+
+OK

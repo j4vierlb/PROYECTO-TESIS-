@@ -18,7 +18,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routers import auth, conversaciones, croquis, dispositivos, panel, visitas, whatsapp
+from app.routers import auth, conversaciones, croquis, dispositivos, panel, password_reset, visitas, whatsapp
 from app.whatsapp_saliente import ejecutar_recordatorios
 
 # Muestra en consola los mensajes de log del backend (logger.info, .warning,
@@ -80,6 +80,7 @@ app.add_middleware(
 
 # Registra cada grupo de endpoints en la aplicación.
 app.include_router(auth.router)
+app.include_router(password_reset.router)
 app.include_router(visitas.router)       # agenda del día, historial y visitas
 app.include_router(panel.router)         # panel web: clientes y agendamiento
 app.include_router(croquis.router)       # croquis de la visita y agregar trampas

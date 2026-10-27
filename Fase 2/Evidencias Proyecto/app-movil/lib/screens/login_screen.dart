@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 
 import '../services/api_client.dart';
 import '../theme/app_theme.dart';
+import '../widgets/company_brand.dart';
 import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -214,12 +215,7 @@ class _Brand extends StatelessWidget {
           ],
         ),
         // La imagen está registrada en pubspec.yaml (sección assets).
-        child: Image.asset(
-          'assets/images/logo.png',
-          width: 140,
-          height: 140,
-          fit: BoxFit.cover,
-        ),
+        child: const CompanyLogo(size: 140),
       ),
     );
   }

@@ -28,6 +28,7 @@ import 'services/api_client.dart';
 import 'services/session.dart';
 import 'services/pending_photo.dart';
 import 'theme/app_theme.dart';
+import 'widgets/company_brand.dart';
 import 'widgets/sync_banner.dart';
 
 /// Permite navegar desde fuera de una pantalla: lo usa el aviso de "sesión
@@ -70,7 +71,7 @@ class KillBichosApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Kill Bichos IA',
+      title: 'Kill Bichos',
       navigatorKey: navigatorKey,
       // Oculta la cinta roja "DEBUG" de la esquina superior derecha.
       debugShowCheckedModeBanner: false,
@@ -112,7 +113,7 @@ class _InicioSesionState extends State<_InicioSesion> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Image.asset('assets/images/logo.png', height: 96),
+                  const CompanyLogo(size: 96),
                   const SizedBox(height: 24),
                   const CircularProgressIndicator(),
                 ],

@@ -1,0 +1,99 @@
+CREATE EXTENSION
+NOTICE:  extension "postgis" already exists, skipping
+CREATE EXTENSION
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+NOTICE:  column "message_sid" of relation "mensajes_whatsapp" already exists, skipping
+ALTER TABLE
+ALTER TABLE
+CREATE INDEX
+CREATE INDEX
+NOTICE:  column "atendida_por_humano" of relation "conversaciones_whatsapp" already exists, skipping
+NOTICE:  column "atendida_por_humano_desde" of relation "conversaciones_whatsapp" already exists, skipping
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+NOTICE:  column "estado_entrega" of relation "mensajes_whatsapp" already exists, skipping
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+NOTICE:  column "error_entrega" of relation "mensajes_whatsapp" already exists, skipping
+NOTICE:  column "recordatorio_enviado_at" of relation "visitas" already exists, skipping
+BEGIN
+NOTICE:  column "session_version" of relation "usuarios" already exists, skipping
+NOTICE:  relation "password_reset_tokens" already exists, skipping
+ALTER TABLE
+CREATE TABLE
+NOTICE:  relation "password_reset_expiry_idx" already exists, skipping
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+NOTICE:  relation "password_reset_limits" already exists, skipping
+NOTICE:  relation "password_reset_limits_expiry_idx" already exists, skipping
+COMMIT
+CREATE EXTENSION
+CREATE EXTENSION
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+NOTICE:  column "message_sid" of relation "mensajes_whatsapp" already exists, skipping
+ALTER TABLE
+ALTER TABLE
+CREATE INDEX
+CREATE INDEX
+NOTICE:  column "atendida_por_humano" of relation "conversaciones_whatsapp" already exists, skipping
+ALTER TABLE
+NOTICE:  column "atendida_por_humano_desde" of relation "conversaciones_whatsapp" already exists, skipping
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+NOTICE:  column "estado_entrega" of relation "mensajes_whatsapp" already exists, skipping
+ALTER TABLE
+NOTICE:  column "error_entrega" of relation "mensajes_whatsapp" already exists, skipping
+ALTER TABLE
+NOTICE:  column "recordatorio_enviado_at" of relation "visitas" already exists, skipping
+ALTER TABLE
+BEGIN
+ALTER TABLE
+NOTICE:  column "session_version" of relation "usuarios" already exists, skipping
+NOTICE:  relation "password_reset_tokens" already exists, skipping
+CREATE TABLE
+CREATE INDEX
+NOTICE:  relation "password_reset_expiry_idx" already exists, skipping
+CREATE TABLE
+NOTICE:  relation "password_reset_limits" already exists, skipping
+CREATE INDEX
+NOTICE:  relation "password_reset_limits_expiry_idx" already exists, skipping
+COMMIT
