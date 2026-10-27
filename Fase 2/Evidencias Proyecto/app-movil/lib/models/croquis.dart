@@ -44,6 +44,20 @@ class DispositivoTrampa {
         estado: json['estado'] as String,
         fotoUrl: json['foto_url'] as String?,
       );
+
+  /// Inverso de fromJson: el modo offline guarda el croquis en el teléfono
+  /// con el mismo formato que entrega el backend.
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'codigo': codigo,
+        'tipo': tipo,
+        'lat': lat,
+        'lng': lng,
+        'sugerido_por_ia': sugeridoPorIa,
+        'confirmado': confirmado,
+        'estado': estado,
+        'foto_url': fotoUrl,
+      };
 }
 
 /// El croquis de una visita, con todas sus trampas.
@@ -96,6 +110,18 @@ class Croquis {
             .map((item) => DispositivoTrampa.fromJson(item as Map<String, dynamic>))
             .toList(),
       );
+
+  /// Inverso de fromJson (ver DispositivoTrampa.toJson).
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'visita_id': visitaId,
+        'cliente_id': clienteId,
+        'version': version,
+        'imagen_satelital_url': imagenSatelitalUrl,
+        'sugerido_por_ia': sugeridoPorIa,
+        'validado_por_operador': validadoPorOperador,
+        'dispositivos': [for (final d in dispositivos) d.toJson()],
+      };
 }
 
 /// Respuesta de POST /croquis/{visita_id}/sugerencia: el croquis con las

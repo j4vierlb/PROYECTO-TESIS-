@@ -9,6 +9,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/visita.dart';
+import '../offline/offline_api_client.dart';
 import '../services/api_client.dart';
 import '../theme/app_theme.dart';
 import '../utils/formato.dart';
@@ -25,7 +26,7 @@ class AgendaScreen extends StatefulWidget {
 }
 
 class _AgendaScreenState extends State<AgendaScreen> {
-  final _apiClient = ApiClient();
+  final _apiClient = OfflineApiClient.shared;
   // Un Future es un resultado que llegará más adelante (la respuesta del
   // backend). `late` = se asigna en initState, antes de usarse.
   late Future<List<Visita>> _visitasFuture;
@@ -35,6 +36,23 @@ class _AgendaScreenState extends State<AgendaScreen> {
   void initState() {
     super.initState();
     _visitasFuture = _apiClient.fetchVisitasHoy();
+    _apiClient.sync.status.addListener(_alCambiarConexion);
+  }
+
+  @override
+  void dispose() {
+    _apiClient.sync.status.removeListener(_alCambiarConexion);
+    super.dispose();
+  }
+
+  // Estaba sin señal y volvió (o terminó de enviar lo pendiente): se recarga la
+  // agenda sola para mostrar lo que quedó en el servidor.
+  bool _estabaSinSenal = false;
+  void _alCambiarConexion() {
+    final estado = _apiClient.sync.status.value;
+    final recuperada = _estabaSinSenal && !estado.offline && estado.pending == 0 && !estado.syncing;
+    _estabaSinSenal = estado.offline || estado.pending > 0;
+    if (recuperada && mounted) _refresh();
   }
 
   /// Vuelve a pedir la agenda (pull-to-refresh o al volver con cambios).

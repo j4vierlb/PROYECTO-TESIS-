@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../screens/login_screen.dart';
+import '../offline/sync_service.dart';
 import '../services/auth_storage.dart';
 import '../services/pending_photo.dart';
 
@@ -38,6 +39,37 @@ class LogoutButton extends StatelessWidget {
           ),
         );
         if (confirmed != true) return;
+      }
+      // Cambios hechos sin señal que todavía no llegaron al servidor: no se
+      // pierden al salir, pero solo se envían al volver a entrar con la misma
+      // cuenta, así que se avisa antes.
+      final enCola = await SyncService.shared.pendingCount();
+      if (!context.mounted) return;
+      if (enCola > 0) {
+        final salir = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: const Text('Cambios sin enviar'),
+            content: Text(
+              enCola == 1
+                  ? 'Tienes 1 cambio guardado en el teléfono que aún no se envía. '
+                      'Se conserva y se enviará cuando vuelvas a iniciar sesión con esta cuenta y haya señal.'
+                  : 'Tienes $enCola cambios guardados en el teléfono que aún no se envían. '
+                      'Se conservan y se enviarán cuando vuelvas a iniciar sesión con esta cuenta y haya señal.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('Volver'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: const Text('Salir de todos modos'),
+              ),
+            ],
+          ),
+        );
+        if (salir != true) return;
       }
       await AuthStorage.instance.clear(manualLogout: true);
     } catch (_) {

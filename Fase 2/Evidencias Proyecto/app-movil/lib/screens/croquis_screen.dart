@@ -24,6 +24,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../config/app_config.dart';
 import '../models/croquis.dart';
+import '../offline/offline_api_client.dart';
 import '../services/api_client.dart';
 import '../services/field_location.dart';
 import '../services/pending_photo.dart';
@@ -58,7 +59,7 @@ class CroquisScreen extends StatefulWidget {
 }
 
 class _CroquisScreenState extends State<CroquisScreen> {
-  late final _apiClient = widget.apiClient ?? ApiClient();
+  late final _apiClient = widget.apiClient ?? OfflineApiClient.shared;
   late final _photos = widget.photoStore ?? PendingPhotoStore.instance;
   PendingPhoto? _pendingPhoto;
 
@@ -179,7 +180,7 @@ class _CroquisScreenState extends State<CroquisScreen> {
         ]);
         _mapVersion++;
       });
-      _mostrarMensaje(mensajeOk);
+      _mostrarMensaje(mensajeGuardado(_apiClient, mensajeOk));
     } on ApiException catch (error) {
       _mostrarMensaje(error.message);
       // Redibuja el mapa para que un pin movido vuelva a su lugar original.
@@ -574,7 +575,7 @@ class _CroquisScreenState extends State<CroquisScreen> {
       if (!mounted) return;
       setState(() => _pendingPhoto = null);
       _reemplazar(actualizado);
-      _mostrarMensaje('Foto de ${actualizado.codigo} guardada');
+      _mostrarMensaje(mensajeGuardado(_apiClient, 'Foto de ${actualizado.codigo} guardada'));
     } on PendingPhotoStorageException catch (error) {
       _mostrarMensaje(error.message);
     } on ApiException catch (error) {

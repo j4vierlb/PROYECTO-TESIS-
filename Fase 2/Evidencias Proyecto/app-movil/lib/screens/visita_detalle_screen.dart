@@ -12,6 +12,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/visita.dart';
+import '../offline/offline_api_client.dart';
 import '../services/api_client.dart';
 import '../services/pending_photo.dart';
 import '../theme/app_theme.dart';
@@ -36,7 +37,7 @@ class VisitaDetalleScreen extends StatefulWidget {
 }
 
 class _VisitaDetalleScreenState extends State<VisitaDetalleScreen> {
-  late final _apiClient = widget.apiClient ?? ApiClient();
+  late final _apiClient = widget.apiClient ?? OfflineApiClient.shared;
 
   Visita? _visita; // null mientras no ha cargado
   String? _loadError;
@@ -101,11 +102,11 @@ class _VisitaDetalleScreenState extends State<VisitaDetalleScreen> {
         _visita = actualizada;
         _changed = true;
       });
-      _mostrarMensaje(mensajeOk ?? 'Cambios guardados');
+      _mostrarMensaje(mensajeGuardado(_apiClient, mensajeOk ?? 'Cambios guardados'));
     } on ApiException catch (error) {
       _mostrarMensaje(error.message);
     } catch (_) {
-      _mostrarMensaje('No se pudo conectar con el servidor');
+      _mostrarMensaje('No se pudo guardar el cambio');
     } finally {
       if (mounted) setState(() => _saving = false);
     }

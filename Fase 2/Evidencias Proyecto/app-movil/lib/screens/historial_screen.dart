@@ -10,6 +10,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/visita.dart';
+import '../offline/offline_api_client.dart';
 import '../services/api_client.dart';
 import '../theme/app_theme.dart';
 import '../utils/formato.dart';
@@ -29,7 +30,7 @@ class HistorialScreen extends StatefulWidget {
 class _HistorialScreenState extends State<HistorialScreen> {
   static const int _pageSize = 20; // visitas por página
 
-  final _apiClient = ApiClient();
+  final _apiClient = OfflineApiClient.shared;
   // Todas las visitas cargadas hasta ahora (se van sumando las páginas).
   final List<Visita> _visitas = [];
 

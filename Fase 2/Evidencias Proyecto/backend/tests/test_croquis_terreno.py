@@ -194,6 +194,33 @@ class CroquisTerrenoTest(unittest.TestCase):
         croquis = self.client.get(f'/croquis/{VISITA_HOY}', headers=self.op()).json()
         self.assertEqual([d['codigo'] for d in croquis['dispositivos']], ['T-01', 'T-02', 'T-03'])
 
+    def test_agregar_trampa_con_id_de_la_app_es_idempotente(self):
+        # La app genera el id sin señal; si el envío se corta y se reintenta,
+        # no debe quedar la misma trampa dos veces.
+        self._crear_croquis()
+        url = f'/croquis/{VISITA_HOY}/dispositivos'
+        nuevo = '80000000-0000-0000-0000-000000000001'
+        body = dict(id=nuevo, tipo='cebadero', lat=-33.4870, lng=-70.5990)
+        primera = self.client.post(url, headers=self.op(), json=body)
+        segunda = self.client.post(url, headers=self.op(), json=body)
+        self.assertEqual((primera.status_code, segunda.status_code), (201, 201), segunda.text)
+        self.assertEqual(primera.json()['id'], nuevo)
+        self.assertEqual(segunda.json()['id'], nuevo)
+        self.assertEqual(primera.json()['codigo'], segunda.json()['codigo'])
+        croquis = self.client.get(f'/croquis/{VISITA_HOY}', headers=self.op()).json()
+        self.assertEqual([d['id'] for d in croquis['dispositivos']].count(nuevo), 1)
+        self.assertEqual([d['codigo'] for d in croquis['dispositivos']], ['T-01', 'T-02'])
+
+    def test_agregar_trampa_con_id_de_otro_croquis_se_rechaza(self):
+        self._crear_croquis()
+        # TRAMPA_ACTIVA ya existe en el croquis de la visita anterior.
+        repetido = self.client.post(f'/croquis/{VISITA_HOY}/dispositivos', headers=self.op(),
+                                    json=dict(id=TRAMPA_ACTIVA, tipo='cebadero', lat=-33.48, lng=-70.59))
+        self.assertEqual(repetido.status_code, 409, repetido.text)
+        mal_id = self.client.post(f'/croquis/{VISITA_HOY}/dispositivos', headers=self.op(),
+                                  json=dict(id='no-es-uuid', tipo='cebadero', lat=-33.48, lng=-70.59))
+        self.assertEqual(mal_id.status_code, 422)
+
     def test_agregar_trampa_valida_tipo_coordenadas_y_croquis(self):
         url = f'/croquis/{VISITA_HOY}/dispositivos'
         sin_croquis = self.client.post(url, headers=self.op(), json=dict(tipo='cebadero', lat=-33.48, lng=-70.59))

@@ -99,7 +99,9 @@ def create_device(
     ensure_visit_access(user, visit)
     ensure_visit_open(visit["estado"])
     croquis = fetch_croquis_for_visit(db, visit_id)  # 404 si todavía no se creó
-    device_id = add_device(db, croquis["id"], payload.tipo.value, payload.lat, payload.lng)
+    device_id = add_device(db, croquis["id"], payload.tipo.value, payload.lat, payload.lng, payload.id)
+    if device_id is None:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Ese identificador de trampa ya está en uso")
     return DeviceResponse.from_row(fetch_device(db, device_id))
 
 

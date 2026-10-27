@@ -39,7 +39,7 @@ dependencies:
   http: ^1.2.2
   # Guarda access_token/refresh_token cifrados (Keychain en iOS, Keystore en Android)
   flutter_secure_storage: ^9.2.2
-  # Base de datos local SQLite, para el trabajo offline (todavía sin implementar)
+  # Base de datos local SQLite del modo offline (copia guardada y cola de cambios)
   sqflite: ^2.4.1
   path: ^1.9.0
   path_provider: ^2.1.6
@@ -63,6 +63,7 @@ dev_dependencies:
 
   # Genera el ícono de la app (iOS/Android) a partir de assets/images/logo.png
   flutter_launcher_icons: ^0.14.3
+  sqflite_common_ffi: ^2.4.5
 
 flutter_launcher_icons:
   image_path: assets/images/logo.png
