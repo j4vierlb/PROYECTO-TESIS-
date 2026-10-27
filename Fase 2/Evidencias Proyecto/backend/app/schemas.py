@@ -264,7 +264,11 @@ class CroquisSuggestionResponse(CroquisResponse):
 class DeviceCreate(BaseModel):
     """Body de POST /croquis/{visita_id}/dispositivos: una trampa que el
     operador instala en terreno. El código (T-01, T-02...) lo asigna el
-    backend, para que nunca se repita dentro del croquis."""
+    backend, para que nunca se repita dentro del croquis.
+
+    `id` es opcional: la app móvil lo genera cuando la trampa se instala sin
+    señal, así reintentar el envío no crea la misma trampa dos veces."""
+    id: UUID | None = None
     tipo: DeviceType
     lat: float = Field(ge=-90, le=90)
     lng: float = Field(ge=-180, le=180)
