@@ -7,7 +7,30 @@ registrar también el commit y los valores de `API_BASE_URL` y `MAPS_ENABLED`
 utilizados en ambos dispositivos: el número de versión por sí solo no garantiza
 que sean la misma compilación.
 
-## Estado vigente — 26/10/2026
+## Actualización visual — 26/10/2026
+
+Entrega posterior al corte funcional integrado en PR #21. Estos cambios
+visuales se publican desde `juan` para una nueva revisión, sin reabrir esa PR.
+
+- **102/102 pruebas Flutter**, análisis sin incidencias y APK debug reconstruido.
+  Son las 95 pruebas funcionales anteriores más 7 de identidad visual, no 197.
+- Logo original en arranque, login y cabeceras de agenda, historial, detalle y
+  croquis; nombre visible de Android: **Kill Bichos**. Se conserva la paleta
+  amarillo/negro del tema compartido, sin modificar la configuración de iOS.
+- No hay cambios de lógica de fotos, GPS, sesiones o cierre de visitas en esta
+  actualización visual. La modificación de JWT del panel corresponde al trabajo
+  independiente de recuperación de contraseña, documentado en el backend.
+- APK instalado y actividad iniciada en el emulador, pero su interfaz del
+  sistema mostró un ANR con memoria del computador casi agotada. Se cerró el
+  emulador para liberar recursos: **no se declara validación visual manual
+  aprobada de este APK**, ni prueba en teléfono físico.
+- Se mantiene `API_BASE_URL=http://127.0.0.1:8000` y `MAPS_ENABLED=true` en este
+  APK. Requiere la conexión de pruebas por ADB; no es aún la variante Wi-Fi
+  para el Redmi. No se cambiaron permisos HTTP, claves ni certificados.
+- Resultados, capturas web y hash del APK:
+  [evidencia de identidad visual](../pruebas/identidad_visual_2026-10-26/README.md).
+
+## Corte funcional publicado en PR #21 — 26/10/2026
 
 - **95/95 pruebas Flutter aprobadas**, análisis estático sin incidencias y APK
   debug compilado. Los resultados de 16, 50 o 75 pruebas de las secciones

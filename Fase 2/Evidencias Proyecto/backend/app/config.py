@@ -78,6 +78,16 @@ class Settings(BaseSettings):
     upload_dir: str = "uploads"
     max_photo_bytes: int = 5 * 1024 * 1024  # 5 MB
 
+    # Recuperación del panel: deshabilitada hasta configurar correo y URL.
+    password_reset_enabled: bool = False
+    password_reset_panel_url: str = "http://localhost:8080"
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_from: str = ""
+    smtp_security: str = "starttls"  # starttls (587) o ssl (465); nunca texto plano
+
     # env_file=".env": busca los valores en ese archivo.
     # extra="ignore": si el .env trae variables que no se usan aquí, no falla.
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")

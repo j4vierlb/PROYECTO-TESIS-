@@ -417,7 +417,7 @@ def fetch_web_user_by_email(db: Connection, email: str) -> dict[str, Any] | None
     """Busca un usuario del panel web activo por email (para el login)."""
     row = db.execute(
         text(
-            "SELECT id, nombre, empresa_id, rol, password_hash FROM usuarios "
+            "SELECT id, nombre, empresa_id, rol, password_hash, session_version FROM usuarios "
             "WHERE email = :email AND activo = TRUE"
         ),
         {"email": email},
@@ -437,7 +437,7 @@ def fetch_operator_by_id(db: Connection, user_id: UUID) -> dict[str, Any] | None
 def fetch_web_user_by_id(db: Connection, user_id: UUID) -> dict[str, Any] | None:
     """Busca un usuario del panel web activo por id (para validar su token)."""
     row = db.execute(
-        text("SELECT id, nombre, empresa_id FROM usuarios WHERE id = :id AND activo = TRUE"),
+        text("SELECT id, nombre, empresa_id, rol, session_version FROM usuarios WHERE id = :id AND activo = TRUE"),
         {"id": str(user_id)},
     ).mappings().first()
     return dict(row) if row else None

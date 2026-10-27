@@ -36,6 +36,7 @@ def login(credentials: LoginRequest, db: Connection = Depends(get_db)) -> TokenR
     email = credentials.usuario.strip().lower()
 
     # 1) ¿Es un operador de terreno?
+    session_version = 0
     operator = fetch_operator_by_email(db, email)
     if operator is not None:
         user_id, rol, password_hash = operator["id"], "operador", operator["password_hash"]
@@ -45,22 +46,23 @@ def login(credentials: LoginRequest, db: Connection = Depends(get_db)) -> TokenR
         if web_user is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuario o clave incorrectos")
         user_id, rol, password_hash = web_user["id"], web_user["rol"], web_user["password_hash"]
+        session_version = web_user.get("session_version", 0)
 
     # 3) Compara la clave escrita con el hash guardado en la base.
     if not verify_password(credentials.clave, password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuario o clave incorrectos")
 
     # 4) Todo correcto: se generan los dos tokens firmados.
-    return _tokens_for(user_id, rol)
+    return _tokens_for(user_id, rol, session_version)
 
 
-def _tokens_for(user_id: UUID, rol: str) -> TokenResponse:
+def _tokens_for(user_id: UUID, rol: str, session_version: int = 0) -> TokenResponse:
     """Genera el par de tokens firmados:
     - access_token: se manda en cada request, dura 8 horas.
     - refresh_token: dura 30 días y sirve para pedir un par nuevo."""
     return TokenResponse(
-        access_token=create_token(user_id, rol, timedelta(minutes=ACCESS_TOKEN_MINUTES), "access", settings.jwt_secret),
-        refresh_token=create_token(user_id, rol, timedelta(days=REFRESH_TOKEN_DAYS), "refresh", settings.jwt_secret),
+        access_token=create_token(user_id, rol, timedelta(minutes=ACCESS_TOKEN_MINUTES), "access", settings.jwt_secret, session_version),
+        refresh_token=create_token(user_id, rol, timedelta(days=REFRESH_TOKEN_DAYS), "refresh", settings.jwt_secret, session_version),
     )
 
 
@@ -86,4 +88,9 @@ def refresh(payload: RefreshRequest, db: Connection = Depends(get_db)) -> TokenR
     user = fetch_operator_by_id(db, user_id) if rol == "operador" else fetch_web_user_by_id(db, user_id)
     if user is None:
         raise invalid
-    return _tokens_for(user_id, rol)
+    if rol != "operador" and (
+        data.get("sv", 0) != user.get("session_version", 0)
+        or rol != user.get("rol", rol)
+    ):
+        raise invalid
+    return _tokens_for(user_id, rol, user.get("session_version", 0))
