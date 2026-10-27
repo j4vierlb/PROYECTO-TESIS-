@@ -42,13 +42,13 @@ def verify_password(password: str, password_hash: str) -> bool:
     return pwd_context.verify(password, password_hash)
 
 
-def create_token(user_id: UUID, rol: str, expires_delta: timedelta, token_type: str, secret: str) -> str:
+def create_token(user_id: UUID, rol: str, expires_delta: timedelta, token_type: str, secret: str, session_version: int = 0) -> str:
     """Genera un JWT firmado. El payload lleva el id del usuario (sub), su
     rol, si es access o refresh token, y la expiración (exp)."""
     expires_at = utc_now() + expires_delta
     # El payload es la información que viaja dentro del token. Cualquiera puede
     # leerla, pero nadie puede modificarla sin invalidar la firma.
-    payload = {"sub": str(user_id), "rol": rol, "type": token_type, "exp": expires_at}
+    payload = {"sub": str(user_id), "rol": rol, "type": token_type, "exp": expires_at, "sv": session_version}
     return jwt.encode(payload, secret, algorithm=JWT_ALGORITHM)
 
 

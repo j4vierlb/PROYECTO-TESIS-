@@ -24,6 +24,14 @@ API FastAPI conectada a PostgreSQL + PostGIS (carpeta `../database/`).
 
 Swagger queda disponible en <http://127.0.0.1:8000/docs>.
 
+## Recuperación de contraseña del panel
+
+El login web incluye **Olvidé mi contraseña** para administradores/coordinadores.
+Requiere configurar SMTP y aplicar `../database/migracion_password_reset.sql`
+**antes de desplegar este backend**, incluso si el envío sigue deshabilitado.
+Ver [configuración, endpoints, seguridad y despliegue](docs/recuperacion_password_panel.md).
+Deshabilitado por defecto: no envía correos ni cambia claves sin configuración.
+
 ## Credenciales de prueba (seed.sql)
 
 - Operador: `tecnico1@killbichos.cl` / `demo1234`

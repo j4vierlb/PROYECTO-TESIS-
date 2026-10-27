@@ -56,6 +56,11 @@ def get_current_user(
         user = fetch_web_user_by_id(db, user_id)
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuario no encontrado")
+    if rol != "operador" and (
+        payload.get("sv", 0) != user.get("session_version", 0)
+        or rol != user.get("rol", rol)
+    ):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Sesión revocada: vuelve a iniciar sesión")
     return CurrentUser(id=user["id"], nombre=user["nombre"], rol=rol, empresa_id=user["empresa_id"])
 
 
