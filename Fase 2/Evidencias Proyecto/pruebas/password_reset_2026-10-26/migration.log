@@ -1,0 +1,9 @@
+ usuario_preservado | version_cero | hash_sin_cambios
+--------------------+--------------+------------------
+ t                  | t            | t
+(1 row)
+
+ tabla_tokens | tabla_limites
+--------------+---------------
+ t            | t
+(1 row)

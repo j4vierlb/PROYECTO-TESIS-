@@ -1,0 +1,14 @@
+
+> kill-bichos-panel@0.1.0 build
+> vite build
+
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.53 kB │ gzip:  0.32 kB
+dist/assets/index-BwULqQ9Y.css   12.02 kB │ gzip:  3.51 kB
+dist/assets/index-BYgGxWCd.js   256.82 kB │ gzip: 80.05 kB
+
+✓ built in 214ms

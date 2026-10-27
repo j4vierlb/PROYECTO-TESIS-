@@ -1,0 +1,27 @@
+test_envia_solo_con_starttls_y_no_registra_enlace_al_fallar (test_password_reset.MailConfigurationTest.test_envia_solo_con_starttls_y_no_registra_enlace_al_fallar) ... ok
+test_falla_cerrada_sin_https_o_con_fragmento_host_credenciales (test_password_reset.MailConfigurationTest.test_falla_cerrada_sin_https_o_con_fragmento_host_credenciales) ... ok
+test_cambio_invalida_todos_los_enlaces_previos (test_password_reset.PasswordResetTest.test_cambio_invalida_todos_los_enlaces_previos) ... ok
+test_cuentas_inexistentes_operadores_e_inactivas_mismo_mensaje (test_password_reset.PasswordResetTest.test_cuentas_inexistentes_operadores_e_inactivas_mismo_mensaje) ... ok
+test_dos_canjes_simultaneos_solo_uno_puede_cambiar_la_clave (test_password_reset.PasswordResetTest.test_dos_canjes_simultaneos_solo_uno_puede_cambiar_la_clave) ... ok
+test_enlace_de_un_uso_cambia_clave_y_no_autentica_automaticamente (test_password_reset.PasswordResetTest.test_enlace_de_un_uso_cambia_clave_y_no_autentica_automaticamente) ... ok
+test_limita_canje_y_libera_cupo_al_vencer (test_password_reset.PasswordResetTest.test_limita_canje_y_libera_cupo_al_vencer) ... ok
+test_limita_por_ip_aunque_cambie_correo (test_password_reset.PasswordResetTest.test_limita_por_ip_aunque_cambie_correo) ... ok
+test_limita_solicitudes_por_email_incluso_inexistente (test_password_reset.PasswordResetTest.test_limita_solicitudes_por_email_incluso_inexistente) ... ok
+test_mensaje_503_para_todas_las_cuentas_si_no_hay_correo_configurado (test_password_reset.PasswordResetTest.test_mensaje_503_para_todas_las_cuentas_si_no_hay_correo_configurado) ... ok
+test_no_permite_token_de_sesion_como_enlace (test_password_reset.PasswordResetTest.test_no_permite_token_de_sesion_como_enlace) ... ok
+test_normaliza_correo_y_no_refleja_host_de_request (test_password_reset.PasswordResetTest.test_normaliza_correo_y_no_refleja_host_de_request) ... ok
+test_rechaza_cuenta_desactivada_despues_de_solicitar (test_password_reset.PasswordResetTest.test_rechaza_cuenta_desactivada_despues_de_solicitar) ... ok
+test_rechaza_enlace_alterado_sin_cambiar_cuenta (test_password_reset.PasswordResetTest.test_rechaza_enlace_alterado_sin_cambiar_cuenta) ... ok
+test_rechaza_enlace_vencido (test_password_reset.PasswordResetTest.test_rechaza_enlace_vencido) ... ok
+test_restaura_coordinador_sin_cambiar_su_rol (test_password_reset.PasswordResetTest.test_restaura_coordinador_sin_cambiar_su_rol) ... /usr/local/lib/python3.12/site-packages/jose/jwt.py:311: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  now = timegm(datetime.utcnow().utctimetuple())
+ok
+test_revoca_acceso_y_refresh_previos_permite_nueva_sesion (test_password_reset.PasswordResetTest.test_revoca_acceso_y_refresh_previos_permite_nueva_sesion) ... ok
+test_se_guarda_solo_hash_no_token_ni_clave_en_texto (test_password_reset.PasswordResetTest.test_se_guarda_solo_hash_no_token_ni_clave_en_texto) ... ok
+test_tokens_legacy_sin_version_quedan_revocados_despues_del_cambio (test_password_reset.PasswordResetTest.test_tokens_legacy_sin_version_quedan_revocados_despues_del_cambio) ... ok
+test_valida_clave_longitud_y_bytes_utf8 (test_password_reset.PasswordResetTest.test_valida_clave_longitud_y_bytes_utf8) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 4.681s
+
+OK
