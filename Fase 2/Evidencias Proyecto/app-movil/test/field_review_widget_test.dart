@@ -133,6 +133,27 @@ void main() {
     ApiClient.onSesionVencida = null;
   });
 
+  for (final state in ['en_curso', 'completada']) {
+    testWidgets('Detalle transmite nombre, dirección y punto al croquis: $state', (tester) async {
+      final api = ApiClient(client: MockClient((request) async {
+        if (request.url.path == '/visitas/v1') {
+          return http.Response(jsonEncode(visitJson(state)), 200);
+        }
+        return mockApi().client!.send(request).then(http.Response.fromStream);
+      }));
+      await openScreen(tester, VisitaDetalleScreen(visitaId: 'v1', apiClient: api));
+      await tester.tap(find.text('Ver croquis'));
+      await tester.pumpAndSettle();
+      final screen = tester.widget<CroquisScreen>(find.byType(CroquisScreen));
+      expect(screen.clienteNombre, 'Cliente QA');
+      expect(screen.clienteDireccion, 'Dirección demo');
+      expect(screen.clienteLat, -33.48);
+      expect(screen.clienteLng, -70.59);
+      expect(screen.readOnly, state == 'completada');
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   for (final url in [
     'https://other.invalid/photo',
     'http://[',

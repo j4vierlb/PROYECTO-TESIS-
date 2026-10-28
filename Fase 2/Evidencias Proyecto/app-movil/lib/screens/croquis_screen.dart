@@ -29,6 +29,7 @@ import '../services/field_location.dart';
 import '../services/pending_photo.dart';
 import '../services/pending_photo_files.dart';
 import '../theme/app_theme.dart';
+import '../utils/client_map_marker.dart';
 import '../widgets/company_brand.dart';
 
 class CroquisScreen extends StatefulWidget {
@@ -37,6 +38,8 @@ class CroquisScreen extends StatefulWidget {
   // todavía no tiene dispositivos ubicados.
   final double? clienteLat;
   final double? clienteLng;
+  final String? clienteNombre;
+  final String? clienteDireccion;
   // En una visita ya completada el croquis es solo de consulta: no se
   // pueden confirmar, mover ni retirar trampas.
   final bool readOnly;
@@ -48,6 +51,8 @@ class CroquisScreen extends StatefulWidget {
     required this.visitaId,
     this.clienteLat,
     this.clienteLng,
+    this.clienteNombre,
+    this.clienteDireccion,
     this.readOnly = false,
     this.apiClient,
     this.photoStore,
@@ -940,6 +945,12 @@ class _CroquisScreenState extends State<CroquisScreen> {
 
   /// Vista de mapa: un pin por trampa (requiere la API key de Google Maps).
   Widget _buildMap(Croquis croquis) {
+    final clientMarker = clientMapMarker(
+      lat: widget.clienteLat,
+      lng: widget.clienteLng,
+      name: widget.clienteNombre,
+      address: widget.clienteDireccion,
+    );
     final mapa = GoogleMap(
       // Cambiar la key obliga a Flutter a reconstruir el mapa desde cero.
       key: ValueKey(_mapVersion),
@@ -958,6 +969,8 @@ class _CroquisScreenState extends State<CroquisScreen> {
             }
           : null,
       markers: {
+        // Fijo y rojo: no se confirma, mueve ni retira como una trampa.
+        ?clientMarker,
         for (final dispositivo in croquis.dispositivos)
           Marker(
             markerId: MarkerId(dispositivo.id),
