@@ -7,6 +7,18 @@ registrar también el commit y los valores de `API_BASE_URL` y `MAPS_ENABLED`
 utilizados en ambos dispositivos: el número de versión por sí solo no garantiza
 que sean la misma compilación.
 
+## Integración para publicación — 28/10/2026
+
+Se incorporó `origin/main` en `d870ddf`, conservando su modo offline junto al
+pin del cliente y la configuración Wi-Fi. Corte de código integrado:
+**157/157 pruebas Flutter y análisis sin incidencias**. El ajuste adicional
+de Windows solo cierra las bases SQLite de los tests antes de limpiar sus
+temporales; no cambia la lógica offline de producción.
+
+Los APK nombrados en los cortes siguientes se generaron **antes** de esa
+integración. No se recompiló ni probó físicamente un APK nuevo en esta tarea
+de publicación. [Registro integrado](../pruebas/integracion_publicacion_2026-10-28/README.md).
+
 ## Pin rojo del cliente — 28/10/2026
 
 Nueva variante `kill-bichos-wifi-pin-rojo-debug.apk`, para instalar como

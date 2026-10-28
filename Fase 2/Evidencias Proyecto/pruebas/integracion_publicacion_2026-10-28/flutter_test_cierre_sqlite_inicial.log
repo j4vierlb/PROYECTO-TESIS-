@@ -1,0 +1,193 @@
+00:00 +0: loading C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/android_network_policy_test.dart
+00:00 +0: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/android_network_policy_test.dart: HTTP debug permite solo los cuatro destinos de prueba explícitos
+00:00 +1: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/android_network_policy_test.dart: La excepción HTTP permanece en el manifiesto debug, no en main
+00:00 +2: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/android_network_policy_test.dart: Si se compila para HTTP, su destino coincide con la lista debug
+00:00 +3: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Agenda transmite token en header, nunca en URL
+00:00 +4: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: 401 renueva y repite una sola vez con el token nuevo
+00:01 +5: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Segundo 401 no forma bucle: cierra sesion y avisa una vez
+00:01 +6: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Sin red conserva tokens para reintentar
+00:01 +7: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: 401 al renovar conserva foto pendiente y solicita reingreso
+00:01 +8: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/cliente_test.dart: Cliente de WhatsApp sin dirección ni coordenadas no rompe la app
+00:01 +9: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/cliente_test.dart: Cliente de WhatsApp sin dirección ni coordenadas no rompe la app
+00:01 +10: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Timeout contempla el cuerpo, no solo los headers
+00:01 +11: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Timeout contempla el cuerpo, no solo los headers
+00:01 +12: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Timeout contempla el cuerpo, no solo los headers
+00:01 +13: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: 422 mantiene el mensaje de validacion del backend
+00:01 +14: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Foto relativa conserva la version de cache del backend
+00:01 +15: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: null
+00:01 +16: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato:
+00:01 +17: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: http://[
+00:01 +18: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: https://other.invalid/foto
+00:01 +19: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: //other.invalid/foto
+00:01 +20: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: /other/foto
+00:01 +21: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: /dispositivos-trampa/d1/foto?token=secret
+00:01 +22: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: /dispositivos-trampa/../foto
+00:01 +23: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: /dispositivos-trampa/%FF/foto
+00:01 +24: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: /dispositivos-trampa/d1/foto?v=%FF
+00:01 +25: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: /dispositivos-trampa/d1/otra/foto
+00:01 +26: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Rechaza foto fuera del contrato: /dispositivos-trampa/%2F../foto
+00:01 +27: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Cabeceras de fotos renuevan access vencido antes de abrir imagen
+00:01 +28: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/api_client_test.dart: Upload PNG conserva MIME y Authorization
+00:01 +29: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/client_map_marker_test.dart: El cliente tiene un pin rojo fijo en su punto exacto y con su dirección
+00:01 +30: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/client_map_marker_test.dart: Sin nombre o dirección no inventa datos en la etiqueta
+00:01 +31: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/client_map_marker_test.dart: No coloca pin en el centro por defecto si faltan coordenadas
+00:01 +32: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/client_map_marker_test.dart: Rechaza coordenadas no finitas o fuera del rango geográfico
+00:01 +33: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/client_map_marker_test.dart: Cero es una coordenada válida, no un dato ausente
+00:01 +34: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/client_map_marker_test.dart: El pin no cambia de identidad cuando se corrige la dirección
+00:02 +35: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: Conserva la paleta compartida con iOS
+00:02 +36: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/croquis_test.dart: Trampa con foto guarda la dirección relativa de la foto
+00:02 +37: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +38: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +39: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +40: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +41: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +42: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:03 +43: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:03 +44: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:03 +45: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:03 +46: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:03 +47: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:03 +48: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:03 +49: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:03 +50: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:03 +51: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:03 +52: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:03 +53: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:03 +54: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:03 +55: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: Cabecera mantiene logo y título: Agenda del día
+00:03 +56: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: Cabecera mantiene logo y título: Historial de visitas
+00:03 +57: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: Cabecera mantiene logo y título: Detalle de visita
+00:03 +58: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: Cabecera mantiene logo y título: Croquis
+00:04 +59: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: Cabecera pequeña con texto grande no desborda ni tapa acciones
+00:04 +60: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/company_brand_test.dart: Cabecera pequeña con texto grande no desborda ni tapa acciones
+00:04 +61: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:04 +62: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +63: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +64: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +65: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +66: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +67: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +68: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +69: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +70: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +71: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +72: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +73: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +74: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +75: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +76: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +77: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +78: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +79: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +80: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +81: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +82: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +83: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +84: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +85: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +86: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +87: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +88: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +89: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +90: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +91: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +92: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +93: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +94: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Detalle transmite nombre, dirección y punto al croquis: en_curso
+00:05 +95: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/historial_test.dart: La barra inferior cambia de Hoy a Historial
+00:05 +96: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +97: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +98: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +99: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +100: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +101: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +102: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +103: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +104: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +105: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +106: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +107: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +108: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +109: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +110: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +111: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +112: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +113: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +114: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +115: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +116: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +117: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +118: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +119: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +120: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +121: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +122: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +123: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +124: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +125: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +126: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: http://[
+00:06 +127: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: http://[
+00:06 +128: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: http://[
+00:06 +129: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: http://[
+00:06 +130: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: http://[
+00:06 +131: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión sin señal muestra el contador y, al volver, "Enviar ahora" lo vacía
+00:07 +132: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/offline_ui_test.dart: Franja de conexión sin señal muestra el contador y, al volver, "Enviar ahora" lo vacía
+00:07 +133: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Bloquea PATCH de cierre con foto pendiente; descartar permite cerrar
+00:07 +134: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Bloquea PATCH de cierre con foto pendiente; descartar permite cerrar
+00:07 +135: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Bloquea PATCH de cierre con foto pendiente; descartar permite cerrar
+00:07 +136: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/sqlite_local_store_test.dart: (setUpAll)
+00:07 +137: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/sqlite_local_store_test.dart: (setUpAll)
+00:07 +138: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/sqlite_local_store_test.dart: (setUpAll)
+00:07 +139: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/sqlite_local_store_test.dart: (setUpAll)
+00:07 +140: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/sqlite_local_store_test.dart: (setUpAll)
+00:08 +141: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/sqlite_local_store_test.dart: (setUpAll)
+00:08 +142: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/sqlite_local_store_test.dart: (setUpAll)
+00:08 +142: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/widget_test.dart: Sin sesión guardada muestra la pantalla de login al arrancar
+00:08 +143: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/widget_test.dart: Sin sesión guardada muestra la pantalla de login al arrancar
+00:08 +143 -1: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/widget_test.dart: Sin sesión guardada muestra la pantalla de login al arrancar
+00:08 +143 -1: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/sqlite_local_store_test.dart: guarda y lee la cache por cuenta; reemplazar pisa el valor anterior [E]
+  PathAccessException: Deletion failed, path = 'C:\Users\user\AppData\Local\Temp\kb_sqlite_testb636af5e' (OS Error: El proceso no tiene acceso al archivo porque está siendo utilizado por otro proceso, errno = 32)
+  dart:io                                  FileSystemEntity.deleteSync
+  test\sqlite_local_store_test.dart 39:26  main.<fn>
+
+00:08 +143 -2: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/widget_test.dart: Sin sesión guardada muestra la pantalla de login al arrancar
+00:08 +143 -2: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/sqlite_local_store_test.dart: la cola conserva el orden de creación y separa cuentas [E]
+  PathAccessException: Deletion failed, path = 'C:\Users\user\AppData\Local\Temp\kb_sqlite_test97c92294' (OS Error: El proceso no tiene acceso al archivo porque está siendo utilizado por otro proceso, errno = 32)
+  dart:io                                  FileSystemEntity.deleteSync
+  test\sqlite_local_store_test.dart 39:26  main.<fn>
+
+00:08 +144 -2: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/widget_test.dart: Sin sesión guardada muestra la pantalla de login al arrancar
+00:08 +145 -2: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/sqlite_local_store_test.dart: quitar un cambio y registrar intentos fallidos
+00:08 +145 -3: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Pendiente antigua sin dueño ofrece descarte explícito
+00:08 +145 -3: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/sqlite_local_store_test.dart: quitar un cambio y registrar intentos fallidos [E]
+  PathAccessException: Deletion failed, path = 'C:\Users\user\AppData\Local\Temp\kb_sqlite_testf474f6e1' (OS Error: El proceso no tiene acceso al archivo porque está siendo utilizado por otro proceso, errno = 32)
+  dart:io                                  FileSystemEntity.deleteSync
+  test\sqlite_local_store_test.dart 39:26  main.<fn>
+
+00:08 +145 -4: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Pendiente antigua sin dueño ofrece descarte explícito
+00:08 +145 -4: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/sqlite_local_store_test.dart: guarda cambios con texto largo y caracteres especiales sin perderlos [E]
+  PathAccessException: Deletion failed, path = 'C:\Users\user\AppData\Local\Temp\kb_sqlite_tested12ad92' (OS Error: El proceso no tiene acceso al archivo porque está siendo utilizado por otro proceso, errno = 32)
+  dart:io                                  FileSystemEntity.deleteSync
+  test\sqlite_local_store_test.dart 39:26  main.<fn>
+
+00:08 +146 -4: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Pendiente antigua sin dueño ofrece descarte explícito
+00:08 +146 -5: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Pendiente antigua sin dueño ofrece descarte explícito
+00:08 +146 -5: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/sqlite_local_store_test.dart: los datos sobreviven al cerrar y volver a abrir la base [E]
+  PathAccessException: Deletion failed, path = 'C:\Users\user\AppData\Local\Temp\kb_sqlite_testb5fcef8a' (OS Error: El proceso no tiene acceso al archivo porque está siendo utilizado por otro proceso, errno = 32)
+  dart:io                                  FileSystemEntity.deleteSync
+  test\sqlite_local_store_test.dart 39:26  main.<fn>
+
+00:08 +146 -5: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Pendiente antigua sin dueño ofrece descarte explícito
+00:08 +147 -5: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/widget_test.dart: Con sesión guardada entra directo a la agenda, sin pedir la clave
+00:08 +148 -5: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Tras descartar foto ajena captura y sube solo la foto nueva
+00:08 +149 -5: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Conflicto al capturar informa pendiente, no permisos de cámara
+00:08 +150 -5: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Fallo de disco mantiene el envío visible y no simula fallo de cámara
+00:09 +151 -5: C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/field_review_widget_test.dart: Logout advierte: Volver conserva tokens y foto; confirmar descarta
+00:09 +152 -5: Some tests failed.
+
+Failing tests:
+  C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/sqlite_local_store_test.dart: guarda cambios con texto largo y caracteres especiales sin perderlos
+  C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/sqlite_local_store_test.dart: guarda y lee la cache por cuenta; reemplazar pisa el valor anterior
+  C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/sqlite_local_store_test.dart: la cola conserva el orden de creación y separa cuentas
+  C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/sqlite_local_store_test.dart: los datos sobreviven al cerrar y volver a abrir la base
+  C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/app-movil/test/sqlite_local_store_test.dart: quitar un cambio y registrar intentos fallidos
