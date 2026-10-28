@@ -138,6 +138,11 @@ class ClientUpdate(BaseModel):
     lat: float | None = Field(default=None, ge=-90, le=90)
     lng: float | None = Field(default=None, ge=-180, le=180)
 
+    @field_validator("direccion", mode="before")
+    @classmethod
+    def trim_address(cls, value):
+        return (value.strip() or None) if isinstance(value, str) else value
+
     @field_validator("nombre", "telefono_whatsapp", mode="before")
     @classmethod
     def nonempty_text(cls, value):
