@@ -14,12 +14,14 @@
 //   widgets/   piezas visuales reutilizables (badge de estado, botón salir)
 //   utils/     funciones de apoyo (formato de fechas)
 //   config/    interruptores de configuración
-//   db/        base de datos local para el modo offline (en preparación)
+//   db/        base de datos local (SQLite) del teléfono
+//   offline/   modo offline: copia guardada, cola de cambios y sincronización
 // =============================================================================
 
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
+import 'offline/sync_service.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'services/api_client.dart';
@@ -27,6 +29,7 @@ import 'services/session.dart';
 import 'services/pending_photo.dart';
 import 'theme/app_theme.dart';
 import 'widgets/company_brand.dart';
+import 'widgets/sync_banner.dart';
 
 /// Permite navegar desde fuera de una pantalla: lo usa el aviso de "sesión
 /// vencida" del ApiClient para volver al login desde donde esté el técnico.
@@ -49,6 +52,8 @@ Future<void> main() async {
         MaterialPageRoute(builder: (_) => const LoginScreen()),
         (route) => false,
       );
+  // Envío automático de los cambios hechos sin señal.
+  SyncService.shared.start();
   runApp(const KillBichosApp());
 }
 
@@ -71,6 +76,8 @@ class KillBichosApp extends StatelessWidget {
       // Oculta la cinta roja "DEBUG" de la esquina superior derecha.
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      // La franja de estado de la conexión va arriba de todas las pantallas.
+      builder: (context, child) => _ConBanner(child: child ?? const SizedBox.shrink()),
       // Navegación simple con Navigator estándar: el login abre la pantalla
       // principal (Hoy / Historial) con pushReplacement, y cerrar sesión
       // vuelve al login. No se usa go_router para mantener el ejemplo simple
@@ -116,6 +123,30 @@ class _InicioSesionState extends State<_InicioSesion> {
         }
         return snapshot.data == true ? const HomeScreen() : const LoginScreen();
       },
+    );
+  }
+}
+
+/// Pone la franja de conexión sobre la pantalla actual. Mientras la franja
+/// está visible ya cubre la barra de estado, así que a la pantalla se le quita
+/// ese margen superior para que su barra no quede con doble espacio.
+class _ConBanner extends StatelessWidget {
+  final Widget child;
+
+  const _ConBanner({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<SyncStatus>(
+      valueListenable: SyncService.shared.status,
+      builder: (context, status, _) => Column(
+        children: [
+          const SyncBanner(),
+          Expanded(
+            child: status.visible ? MediaQuery.removePadding(context: context, removeTop: true, child: child) : child,
+          ),
+        ],
+      ),
     );
   }
 }

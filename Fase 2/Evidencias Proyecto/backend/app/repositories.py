@@ -309,13 +309,27 @@ def create_croquis_for_visit(db: Connection, visit: dict[str, Any], operador_id:
     return croquis_id, True
 
 
-def add_device(db: Connection, croquis_id: UUID, tipo: str, lat: float, lng: float) -> UUID:
+def add_device(
+    db: Connection, croquis_id: UUID, tipo: str, lat: float, lng: float, device_id: UUID | None = None
+) -> UUID | None:
     """Agrega una trampa instalada por el operador y le asigna el siguiente
     código libre del croquis (T-01, T-02...). Queda confirmada, porque la
-    puso el propio técnico, y no sugerida por la IA."""
+    puso el propio técnico, y no sugerida por la IA.
+
+    Si viene `device_id` (la app lo genera sin señal) la operación es
+    idempotente: si esa trampa ya existe en este croquis se devuelve tal cual,
+    sin duplicarla. Si el id ya lo usa un dispositivo de otro croquis, devuelve
+    None y el endpoint responde 409."""
     # Bloquea el croquis para que dos trampas agregadas a la vez no reciban
     # el mismo código.
     db.execute(text("SELECT id FROM croquis WHERE id = :id FOR UPDATE"), {"id": str(croquis_id)})
+    if device_id is not None:
+        existing = db.execute(
+            text("SELECT croquis_id FROM dispositivos_trampa WHERE id = :id"), {"id": str(device_id)}
+        ).scalar_one_or_none()
+        if existing is not None:
+            db.commit()
+            return device_id if str(existing) == str(croquis_id) else None
     # Mayor número entre los códigos con forma "T-<número>" (ignora otros).
     last = db.execute(
         text(
@@ -326,19 +340,26 @@ def add_device(db: Connection, croquis_id: UUID, tipo: str, lat: float, lng: flo
         ),
         {"croquis_id": str(croquis_id)},
     ).scalar_one()
-    device_id = db.execute(
+    new_id = db.execute(
         text(
             """
-            INSERT INTO dispositivos_trampa (croquis_id, codigo, tipo, ubicacion, sugerido_por_ia, confirmado, estado)
-            VALUES (:croquis_id, :codigo, :tipo, ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography,
-                    FALSE, TRUE, 'activo')
+            INSERT INTO dispositivos_trampa (id, croquis_id, codigo, tipo, ubicacion, sugerido_por_ia, confirmado, estado)
+            VALUES (COALESCE(CAST(:id AS uuid), uuid_generate_v4()), :croquis_id, :codigo, :tipo,
+                    ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography, FALSE, TRUE, 'activo')
             RETURNING id
             """
         ),
-        {"croquis_id": str(croquis_id), "codigo": f"T-{last + 1:02d}", "tipo": tipo, "lat": lat, "lng": lng},
+        {
+            "id": str(device_id) if device_id is not None else None,
+            "croquis_id": str(croquis_id),
+            "codigo": f"T-{last + 1:02d}",
+            "tipo": tipo,
+            "lat": lat,
+            "lng": lng,
+        },
     ).scalar_one()
     db.commit()
-    return device_id
+    return new_id
 
 
 def set_device_photo(db: Connection, device_id: UUID, foto_path: str) -> None:

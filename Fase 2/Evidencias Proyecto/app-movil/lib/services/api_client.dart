@@ -192,9 +192,12 @@ class ApiClient {
   }
 
   /// POST /croquis/{visita_id}/dispositivos — agrega una trampa instalada en
-  /// terreno. El backend le asigna el código (T-01, T-02...).
+  /// terreno. El backend le asigna el código (T-01, T-02...). `id` es
+  /// opcional: el modo offline lo genera en el teléfono para que reintentar
+  /// el envío no cree la misma trampa dos veces.
   Future<DispositivoTrampa> addDispositivo(
     String visitaId, {
+    String? id,
     required String tipo,
     required double lat,
     required double lng,
@@ -202,7 +205,7 @@ class ApiClient {
     final body = await _authenticatedRequest(
       'POST',
       '/croquis/$visitaId/dispositivos',
-      body: {'tipo': tipo, 'lat': lat, 'lng': lng},
+      body: {'id': ?id, 'tipo': tipo, 'lat': lat, 'lng': lng},
     );
     return DispositivoTrampa.fromJson(jsonDecode(body) as Map<String, dynamic>);
   }
