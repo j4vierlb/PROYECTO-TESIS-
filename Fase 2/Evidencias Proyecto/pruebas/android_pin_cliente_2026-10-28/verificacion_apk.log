@@ -1,0 +1,17 @@
+
+Signer #1 certificate SHA-1 digest: 6fdb6f0a46b74935d77a68621f7ad544812a5025
+
+E: network-security-config (line=2)
+    E: base-config (line=3)
+      A: cleartextTrafficPermitted=false
+    E: domain-config (line=4)
+      A: cleartextTrafficPermitted=true
+        E: domain (line=5)
+            T: 'localhost'
+        E: domain (line=6)
+            T: '127.0.0.1'
+        E: domain (line=7)
+            T: '10.0.2.2'
+        E: domain (line=10)
+            T: '192.168.1.12'
+{"FileName":"kill-bichos-wifi-pin-rojo-debug.apk","Bytes":186238055,"SHA256":"4BC71FDB06963B27572A2EA0E09B4F83A24B4BB46210C56E63A5AAD55E5D2AA4","ClientMarkerPresentInApk":true,"WifiUrlPresentInApk":true}

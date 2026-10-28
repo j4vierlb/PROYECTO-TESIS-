@@ -7,6 +7,91 @@ registrar también el commit y los valores de `API_BASE_URL` y `MAPS_ENABLED`
 utilizados en ambos dispositivos: el número de versión por sí solo no garantiza
 que sean la misma compilación.
 
+## Pin rojo del cliente — 28/10/2026
+
+Nueva variante `kill-bichos-wifi-pin-rojo-debug.apk`, para instalar como
+actualización sobre el APK Wi-Fi anterior, sin desinstalar ni borrar datos.
+Mantiene `API_BASE_URL=http://192.168.1.12:8000` y `MAPS_ENABLED=true`.
+
+- El croquis agrega un pin rojo fijo en las coordenadas del cliente, separado
+  de las trampas. Al tocarlo muestra nombre y dirección cuando están disponibles.
+- El pin no se arrastra, confirma ni retira; no modifica la base ni la cantidad
+  de trampas. También se muestra en visitas completadas, en modo lectura.
+- Si faltan coordenadas o no son válidas, no se agrega un pin ficticio en el
+  centro de respaldo. No se convierte el GPS del teléfono en ubicación del cliente.
+- Se conservan los colores y controles de las trampas y el criterio previo de
+  centrado del mapa. Si existen trampas, el centro sigue siendo su promedio;
+  si no, la ubicación del cliente.
+- El código Flutter es compartido con iOS; aquí se genera y verifica solo el
+  APK Android. No se declara prueba en iPhone ni confirmación física del pin
+  en el Redmi hasta que Juan instale esta nueva compilación.
+- Registro y resultados de esta entrega:
+  [evidencias del pin del cliente](../pruebas/android_pin_cliente_2026-10-28/README.md).
+
+## Variante Wi-Fi para Redmi — 26/10/2026
+
+El APK Wi-Fi se compila con `API_BASE_URL=http://192.168.1.12:8000` y
+`MAPS_ENABLED=true`. Esa es la IP actual del computador, no una dirección
+pública ni permanente. No cambia el valor por defecto de Dart ni iOS.
+
+- Teléfono y computador deben estar en la misma red local, sin aislamiento
+  entre clientes. Mantener Docker/backend y el computador encendidos.
+- Antes de instalar, abrir **desde Chrome del teléfono**
+  `http://192.168.1.12:8000/docs`. Debe aparecer la documentación de la API.
+  Que responda desde el PC no prueba acceso desde el Redmi.
+  Juan confirmó el 26/10/2026 que en su Redmi aparece «KillBichos IA API» con
+  sus secciones: acceso HTTP desde el teléfono comprobado por el usuario,
+  todavía no login ni operaciones desde la app.
+- Se permite HTTP únicamente a esa IP adicional en el recurso **debug**.
+  Credenciales y datos viajan sin TLS: usar solo una Wi-Fi de confianza y
+  cuentas/datos de prueba. No publicar el APK ni usarlo en producción.
+- No se cambió el firewall, el perfil de red ni el router. Si el teléfono no
+  abre `/docs`, revisar esos puntos antes de diagnosticar la app. No abrir
+  puertos en el router ni desactivar el firewall completo.
+- Si cambia la IP del PC, actualizar el dominio de `network_security_config.xml`
+  de debug y recompilar con la misma IP en `API_BASE_URL`.
+- Maps requiere acceso a internet y la clave Android autorizada para el paquete
+  y SHA-1 de esta firma debug. Twilio no es necesario para agenda/croquis/fotos.
+- Se puede transferir el APK por Drive privado e instalarlo desde Archivos,
+  autorizando esa fuente solo durante la instalación. No requiere USB ni ADB.
+  Si Android solicita actualizar una instalación anterior con la misma firma,
+  aceptar la actualización; no desinstalar si hay fotos pendientes.
+- Instalación, login, mapa, GPS, foto y sincronización **pendientes de probar en
+  el Redmi físico**. La compilación y los tests no sustituyen esa prueba.
+
+Desde la carpeta `app-movil`:
+
+```powershell
+flutter build apk --debug --dart-define=API_BASE_URL=http://192.168.1.12:8000 --dart-define=MAPS_ENABLED=true
+```
+
+El resultado estándar es `build/app/outputs/flutter-apk/app-debug.apk` (ignorado
+por Git). La variante preparada para entregar se copia como
+`build/app/outputs/flutter-apk/kill-bichos-wifi-debug.apk`. Los cortes siguientes
+son históricos y pueden corresponder al APK por ADB anterior.
+
+### Verificación de esta compilación Wi-Fi
+
+- Base de código: `8689387`, más los cambios locales de red de esta sección,
+  en la rama `juan`. Sin commit ni push de esta preparación.
+- **105/105 pruebas Flutter aprobadas** ejecutadas con los mismos dart-defines
+  de Wi-Fi y Maps; son las 102 anteriores más 3 de configuración de red.
+  Estas tres comprueban archivos/configuración, no conectividad de Android.
+- `flutter analyze --no-pub`: sin incidencias. Compilación debug: correcta.
+- Se inspeccionó el recurso XML del APK con `aapt2`: HTTP global denegado,
+  permitido solo para los cuatro destinos explícitos de pruebas.
+- `apksigner verify`: correcto; SHA-1 de la firma igual a la documentada abajo.
+- Paquete `com.killbichosia.app_movil`, versión `1.0.0+1`; APK universal debug
+  con `arm64-v8a`, `armeabi-v7a` y `x86_64`. Tamaño: 186.235.984 bytes.
+- SHA-256 del APK Wi-Fi:
+  `824D3A8460DDF1F272CA0D7E701BEDAC7FC02BC99A57794D7BC30D5E867F5F75`.
+- Advertencias de compilación ya existentes: futura migración Kotlin de
+  `package_info_plus` y versión XML del SDK. No impidieron generar el APK.
+- No se modificó ni reconstruyó el backend en este paso. Su respuesta a `/docs`
+  no acredita que todos sus módulos correspondan al último código de Git.
+- No se publican el APK ni las claves en Git. La autorización efectiva de Maps,
+  cámara, GPS, login y sincronización siguen pendientes en el Redmi.
+
 ## Actualización visual — 26/10/2026
 
 Entrega posterior al corte funcional integrado en PR #21. Estos cambios
@@ -185,10 +270,11 @@ Mientras no exista una clave Android autorizada, usar `MAPS_ENABLED=false`.
 Permite revisar los flujos y la lista de trampas, pero **no valida el mapa**.
 
 Solo la variante **debug** incorpora una excepción HTTP para `localhost`,
-`127.0.0.1` y `10.0.2.2`. No se permite HTTP general ni se agregan certificados
-de confianza. Para conexión directa por WiFi o una distribución release,
-utilizar un backend HTTPS válido; no copiar la excepción debug al manifiesto
-principal. [Política de red Android](https://developer.android.com/privacy-and-security/security-config).
+`127.0.0.1`, `10.0.2.2` y la IP Wi-Fi explícita `192.168.1.12` de la variante
+de pruebas descrita arriba. No se permite HTTP general ni se agregan certificados
+de confianza. Para una distribución release, utilizar un backend HTTPS válido;
+no copiar la excepción debug al manifiesto principal.
+[Política de red Android](https://developer.android.com/privacy-and-security/security-config).
 
 ## 4. APK de prueba
 
