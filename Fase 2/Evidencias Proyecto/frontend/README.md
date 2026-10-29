@@ -4,10 +4,12 @@ Panel operativo para administrar clientes y agendar visitas por operador.
 
 ## Portada pública
 
-Sin sesión, el sitio muestra información de Kill Bichos, servicios, contacto,
-horarios y la guía de tres pasos del WhatsApp de prueba. **Ingresar** abre el
-login existente. Con sesión activa se entra directamente al panel; cerrar o
-vencer la sesión conserva el retorno al login y sus mensajes actuales.
+Al abrir o recargar el sistema siempre aparece la portada con información de
+Kill Bichos, servicios, contacto, horarios y la guía de tres pasos del WhatsApp
+de prueba, incluso si existe una sesión activa. **Ingresar** abre el login
+existente si no hay sesión; si la sesión sigue activa, abre el panel. La portada
+no borra la sesión ni consulta datos privados mientras no se pulse Ingresar.
+Cerrar o vencer la sesión conserva el retorno al login y sus mensajes actuales.
 
 El enlace `#restablecer=...` tiene prioridad sobre portada y panel. Su token se
 consume y retira de la barra como antes; la portada no lo envía a WhatsApp.
@@ -28,6 +30,9 @@ a la API. `jsqr` es una dependencia de pruebas para decodificar el SVG renderiza
 y comprobar el destino. No se modifican backend, base de datos ni archivos `.env`.
 La portada requiere recompilar el frontend para desplegar sus cambios.
 [Pruebas y capturas del 29/10](../pruebas/portada_publica_2026-10-29/README.md).
+La decisión posterior de mostrar siempre la portada y el despliegue local en
+Docker se registran en
+[portada como entrada inicial](../pruebas/docker_portada_primero_2026-10-29/README.md).
 
 ## Ejecución
 

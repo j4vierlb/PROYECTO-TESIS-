@@ -1,0 +1,18 @@
+{
+  "fecha_local": "2026-10-29",
+  "zona_horaria": "America/Santiago",
+  "rama": "juan",
+  "base_git": "0a03c30",
+  "cambio_local": "Portada primero, incluso con sesion activa",
+  "url": "http://localhost:8080/",
+  "backend_image": "sha256:dcd0bc5a168b8086f1e9062e504579b6cab5436e724b3fd621350f8c5a749400",
+  "web_image": "sha256:080c98566c867daece8c6776cc3b159d0ca91ee3d3cba93391072c0d9c335aca",
+  "contenedor_db_preservado": "594cde76c67fc7534dbc8afec79aa904854cb4a7b54ed626bec6ca57a6b5f4dc",
+  "volumen_db_preservado": "database_killbichos_data",
+  "volumen_fotos_preservado": "killbichos_uploads_data",
+  "conteos_antes_y_despues": {"clientes": 4, "visitas": 6, "croquis": 4, "trampas": 14, "usuarios": 2},
+  "tests_frontend": {"aprobados": 162, "fallidos": 0},
+  "build_produccion": "correcto",
+  "migraciones_aplicadas": false,
+  "apk_recompilado": false
+}

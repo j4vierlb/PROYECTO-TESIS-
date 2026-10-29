@@ -1,5 +1,10 @@
 # Portada pública y Sandbox configurado — 29/10/2026
 
+**Actualización posterior:** Juan solicitó mostrar la portada también con una
+sesión activa y reconstruir Docker. Este registro conserva la entrega inicial;
+la nueva regla, sus pruebas y el despliegue se documentan en
+[portada como entrada inicial](../docker_portada_primero_2026-10-29/README.md).
+
 Trabajo exclusivamente en `juan`. Las pruebas se ejecutaron sobre `0329ec2`
 más los cambios de la portada. Antes de publicar se incorporó por fast-forward
 `origin/main` en `1520c4b` (PR #27 fusionada), cuyo árbol de archivos es idéntico
