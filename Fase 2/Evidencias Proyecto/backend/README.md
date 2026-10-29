@@ -15,8 +15,10 @@ conserva coordenadas de una dirección anterior. Borrar la dirección también
 borra su punto. La edición se serializa por cliente con `FOR UPDATE`; la
 consulta externa conserva el timeout de 5 segundos del servicio existente.
 
-Se conservan la validación de Región Metropolitana, el descarte de coincidencias
-parciales, ambiguas o aproximadas y el aislamiento por empresa. El fallo de
+Se aceptan direcciones de todo Chile: el resultado debe pertenecer a Chile y
+la comuna o ciudad encontrada debe aparecer en la dirección escrita. Se conservan
+el descarte de coincidencias parciales, ambiguas o aproximadas y el aislamiento
+por empresa. El fallo de
 Google no impide guardar el cliente. El panel interpreta `lat/lng` nulos como
 ubicación pendiente y explica cómo reintentar. Una dirección sin cambios y con
 punto válido no genera una nueva consulta; editar solo nombre/teléfono tampoco.

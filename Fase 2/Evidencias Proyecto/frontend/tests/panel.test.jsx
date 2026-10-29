@@ -53,6 +53,33 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
     expect(screen.getByRole('status')).toHaveTextContent('Ubicación pendiente de confirmar')
   })
 
+  it.each([
+    ['Viña del Mar', 'Av. Libertad 1234, Viña del Mar', -33.0153, -71.55],
+    ['Concepción', 'O’Higgins 1234, Concepción', -36.827, -73.05],
+  ])('crea un cliente de %s por dirección y muestra el punto devuelto por la API', async (city, address, lat, lng) => {
+    const base = globalThis.fetch
+    vi.stubGlobal('fetch', vi.fn(async (url, options) => {
+      const response = await base(url, options)
+      if (new URL(url).pathname === '/clientes' && options?.method === 'POST') {
+        clients = clients.map(value => value.id === 'cliente-nuevo' ? { ...value, lat, lng } : value)
+        return new Response(JSON.stringify({ ...JSON.parse(options.body), id: 'cliente-nuevo', lat, lng }), { status: 201 })
+      }
+      return response
+    }))
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: /Clientes/ }))
+    await user.click(screen.getByRole('button', { name: /Nuevo cliente/ }))
+    expect(screen.getByText(/Ingresa calle, número y comuna o ciudad de Chile/)).toBeVisible()
+    await user.type(screen.getByLabelText('Nombre'), `Cliente ${city} QA`)
+    await user.type(screen.getByLabelText('Teléfono WhatsApp'), '+00000000040')
+    await user.type(screen.getByLabelText('Dirección'), address)
+    await user.click(screen.getByRole('button', { name: 'Guardar cliente' }))
+    expect(await screen.findByText(`${lat.toFixed(4)}, ${lng.toFixed(4)}`)).toBeVisible()
+    expect(writes[0].body).toEqual({ nombre: `Cliente ${city} QA`, telefono_whatsapp: '+00000000040', direccion: address })
+    expect(screen.getByRole('status')).toHaveTextContent('Ubicación disponible')
+  })
+
   it('el filtro Sin asignar oculta visitas con operador', async () => {
     visits = [existingVisit(), existingVisit({ id: 'otra-visita', cliente: { ...client, nombre: 'Cliente asignado' }, operador_id: operator.id, operador: operator })]
     const user = userEvent.setup()

@@ -280,7 +280,7 @@ function ClientModal({ client, onClose, onSaved }) {
   }
   return <Modal title={client ? 'Editar cliente' : 'Nuevo cliente'} busy={busy} onClose={onClose} onSubmit={save}>
     <fieldset disabled={busy}><label>Nombre<input required minLength="2" maxLength="150" autoComplete="name" {...field('nombre')} /></label><label>Teléfono WhatsApp<input required type="tel" minLength="5" maxLength="30" autoComplete="tel" {...field('telefono_whatsapp')} /></label><label>Dirección<input required={!client} autoComplete="street-address" {...field('direccion')} /></label>
-      <p className="field-help">Ingresa calle, número y comuna de la Región Metropolitana. Buscaremos la ubicación automáticamente con Google Maps al guardar. Si no se puede confirmar, el cliente se guardará con ubicación pendiente; corrige la dirección y vuelve a guardar para reintentar.</p>
+      <p className="field-help">Ingresa calle, número y comuna o ciudad de Chile. Buscaremos la ubicación automáticamente con Google Maps al guardar. La comuna o ciudad debe coincidir con la dirección encontrada. Si no se puede confirmar, el cliente se guardará con ubicación pendiente; corrige la dirección y vuelve a guardar para reintentar.</p>
     </fieldset><Feedback error={error} /><div className="modal-actions"><button type="button" className="secondary" disabled={busy} onClick={onClose}>Cancelar</button><button className="primary" disabled={busy}>{busy ? 'Guardando…' : 'Guardar cliente'}</button></div>
   </Modal>
 }
