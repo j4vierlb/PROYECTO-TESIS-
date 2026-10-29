@@ -3,6 +3,7 @@
 // -----------------------------------------------------------------------------
 // Claves de la cache (siempre dentro de la cuenta dueña):
 //   visitas_hoy       lista de la agenda del día
+//   visitas_proximas  visitas pendientes de los próximos días
 //   historial         primera página del historial
 //   visita:<id>       una visita
 //   croquis:<visitId> el croquis de una visita, con sus trampas
@@ -47,6 +48,18 @@ class OfflineCache {
         }
       });
 
+  Future<List<Visita>?> readProximas() => _guard((owner) async {
+        final text = await store.getCache(owner, 'visitas_proximas');
+        return text == null ? null : _visitas(text);
+      });
+
+  Future<void> writeProximas(List<Visita> visitas) => _guard<void>((owner) async {
+        await store.putCache(owner, 'visitas_proximas', jsonEncode([for (final v in visitas) v.toJson()]));
+        for (final visita in visitas) {
+          await store.putCache(owner, 'visita:${visita.id}', jsonEncode(visita.toJson()));
+        }
+      });
+
   Future<List<Visita>?> readHistorial() => _guard((owner) async {
         final text = await store.getCache(owner, 'historial');
         return text == null ? null : _visitas(text);
@@ -71,7 +84,7 @@ class OfflineCache {
   /// historial guardados, para que todas las pantallas coincidan.
   Future<void> writeVisita(Visita visita) => _guard<void>((owner) async {
         await store.putCache(owner, 'visita:${visita.id}', jsonEncode(visita.toJson()));
-        for (final key in const ['visitas_hoy', 'historial']) {
+        for (final key in const ['visitas_hoy', 'visitas_proximas', 'historial']) {
           final text = await store.getCache(owner, key);
           if (text == null) continue;
           final list = jsonDecode(text) as List<dynamic>;

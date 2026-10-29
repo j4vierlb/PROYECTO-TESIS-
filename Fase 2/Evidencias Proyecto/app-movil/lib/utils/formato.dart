@@ -23,3 +23,27 @@ String formatFecha(DateTime fechaHoraUtc) {
 
 /// Fecha y hora juntas, ej: "24/09/2026 · 07:00".
 String formatFechaHora(DateTime fechaHoraUtc) => '${formatFecha(fechaHoraUtc)} · ${formatHora(fechaHoraUtc)}';
+
+const _dias = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
+const _meses = [
+  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+];
+
+/// Día de una visita para agrupar la lista de próximas: "Mañana",
+/// "Pasado mañana" o, más adelante, "Lunes 2 de noviembre". Compara el día
+/// local de la visita con el de `hoy` (por defecto, ahora).
+String etiquetaDia(DateTime fechaHoraUtc, {DateTime? hoy}) {
+  final local = fechaHoraUtc.toLocal();
+  final ahora = hoy ?? DateTime.now();
+  // Se comparan días, no instantes: así la hora no cambia el resultado ni el
+  // cambio de horario de verano. DateTime.utc evita los saltos de ese cambio.
+  final dia = DateTime.utc(local.year, local.month, local.day);
+  final base = DateTime.utc(ahora.year, ahora.month, ahora.day);
+  final diferencia = dia.difference(base).inDays;
+  if (diferencia == 0) return 'Hoy';
+  if (diferencia == 1) return 'Mañana';
+  if (diferencia == 2) return 'Pasado mañana';
+  final nombre = _dias[local.weekday - 1];
+  return '${nombre[0].toUpperCase()}${nombre.substring(1)} ${local.day} de ${_meses[local.month - 1]}';
+}

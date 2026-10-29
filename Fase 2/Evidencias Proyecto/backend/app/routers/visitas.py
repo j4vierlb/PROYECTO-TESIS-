@@ -20,7 +20,13 @@ from sqlalchemy.engine import Connection
 
 from app.database import get_db
 from app.dependencies import ensure_visit_access, get_current_user, require_operator
-from app.repositories import fetch_visit, fetch_visit_history, fetch_visits_for_today, update_visit_fields
+from app.repositories import (
+    fetch_upcoming_visits,
+    fetch_visit,
+    fetch_visit_history,
+    fetch_visits_for_today,
+    update_visit_fields,
+)
 from app.schemas import ClientSummary, CurrentUser, VisitHistoryItem, VisitResponse, VisitUpdate
 from app.zona_horaria import hoy_chile
 
@@ -56,6 +62,20 @@ def visits_today(user: CurrentUser = Depends(require_operator), db: Connection =
     pedir la agenda de otro operador cambiando un id en la URL."""
     # "Hoy" es el día de Chile, no el de UTC (ver zona_horaria.py).
     rows = fetch_visits_for_today(db, user.id, hoy_chile())
+    return [_to_visit_response(row) for row in rows]
+
+
+@router.get("/operadores/me/visitas-proximas", response_model=list[VisitResponse])
+def visits_upcoming(
+    # ?dias=14: hasta cuántos días hacia adelante mirar (por defecto 14, máximo 60).
+    dias: int = Query(14, ge=1, le=60),
+    user: CurrentUser = Depends(require_operator),
+    db: Connection = Depends(get_db),
+) -> list[VisitResponse]:
+    """Visitas pendientes del operador logueado desde mañana hasta dentro de
+    `dias` días, de la más próxima a la más lejana. Hoy no se incluye: eso es
+    la agenda del día (/operadores/me/visitas-hoy)."""
+    rows = fetch_upcoming_visits(db, user.id, hoy_chile(), dias)
     return [_to_visit_response(row) for row in rows]
 
 
