@@ -123,6 +123,16 @@ La validación se limita al entorno local registrado; no acredita un despliegue
 remoto. Un `RefererNotAllowedMapError` en otro origen requiere revisar los
 referentes permitidos de la clave en Google Cloud.
 
+## Ubicación pendiente en Clientes — 28/10/2026
+
+Cuando faltan coordenadas válidas, la tabla muestra una etiqueta amarilla
+**Ubicación pendiente de confirmar**, incluso después de navegar o recargar.
+No depende del mensaje temporal al guardar. Corregir calle, número y comuna y
+guardar vuelve a intentar la ubicación; si se confirma, la etiqueta se reemplaza
+por las coordenadas. El cliente puede conservarse mientras se corrige la dirección.
+Validación: **130/130 pruebas frontend**, compilación y prueba manual local con
+un cliente sintético. [Evidencias](../pruebas/ubicacion_pendiente_2026-10-28/README.md).
+
 ## Pruebas
 
 Desde esta carpeta:

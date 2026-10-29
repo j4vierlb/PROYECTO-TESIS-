@@ -7,6 +7,22 @@ registrar también el commit y los valores de `API_BASE_URL` y `MAPS_ENABLED`
 utilizados en ambos dispositivos: el número de versión por sí solo no garantiza
 que sean la misma compilación.
 
+## Ubicación pendiente: revisión — 28/10/2026
+
+Este corte sustituye el centrado de respaldo descrito en las entregas históricas.
+Sin coordenadas válidas del cliente ni trampas ubicadas, el croquis muestra
+**Sin ubicación registrada** y no crea el mapa. Si existen trampas, muestra
+sus puntos con un aviso permanente: no representan la dirección del cliente.
+Se mantiene agregar por GPS; marcar sobre el mapa requiere un punto de referencia.
+Después de corregir la dirección en el panel, reabrir la visita con conexión.
+
+Resultado actual: **164/164 pruebas Flutter**, análisis sin incidencias y APK
+debug Wi-Fi `1.0.0+3`, `kill-bichos-PR25-ubicacion-pendiente.apk`.
+Juan confirmó el pin rojo en su Redmi con la compilación anterior. La pantalla
+nueva sin ubicación y el modo offline quedan pendientes de comprobar físicamente
+en esta compilación. Los registros anteriores conservan sus resultados originales.
+[Evidencias de este corte](../pruebas/ubicacion_pendiente_2026-10-28/README.md).
+
 ## Integración para publicación — 28/10/2026
 
 Se incorporó `origin/main` en `d870ddf`, conservando su modo offline junto al
