@@ -39,6 +39,7 @@ beforeEach(() => {
 
 async function inbox(user) {
   render(<App />)
+  await user.click(screen.getByRole('button', { name: 'Ingresar', exact: true }))
   await user.click(screen.getByRole('button', { name: /WhatsApp/ }))
   await screen.findByText('Aviso QA')
 }

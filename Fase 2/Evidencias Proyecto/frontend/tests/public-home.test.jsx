@@ -54,10 +54,16 @@ it('Ingresar se puede activar con teclado', async () => {
   expect(screen.getByLabelText('Correo')).toBeVisible()
 })
 
-it('con sesión entra directamente al panel y mantiene su navegación', async () => {
+it('con sesión muestra primero la portada y solo entra al panel al pulsar Ingresar', async () => {
+  const user = userEvent.setup()
   localStorage.token = 'synthetic-public-home-session'
   render(<App />)
+  expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Kill Bichos')
+  expect(screen.queryByRole('heading', { name: 'Agenda' })).not.toBeInTheDocument()
+  expect(fetch).not.toHaveBeenCalled()
+  await user.click(screen.getByRole('button', { name: 'Ingresar', exact: true }))
   expect(await screen.findByRole('heading', { name: 'Agenda' })).toBeVisible()
+  expect(screen.queryByLabelText('Contraseña')).not.toBeInTheDocument()
   expect(within(screen.getByRole('navigation', { name: 'Navegación principal' })).getAllByRole('button')).toHaveLength(3)
   expect(screen.queryByRole('button', { name: 'Ingresar', exact: true })).not.toBeInTheDocument()
   await waitFor(() => expect(screen.getByRole('button', { name: /Nueva visita/ })).toBeEnabled())
@@ -85,8 +91,10 @@ it('un enlace de recuperación recibido con la portada abierta también se consu
 })
 
 it('cerrar sesión en otra pestaña conserva el aviso y vuelve al login', async () => {
+  const user = userEvent.setup()
   localStorage.token = 'synthetic-tab-session'
   render(<App />)
+  await user.click(screen.getByRole('button', { name: 'Ingresar', exact: true }))
   await screen.findByRole('heading', { name: 'Agenda' })
   act(() => {
     localStorage.removeItem('token')
@@ -97,8 +105,10 @@ it('cerrar sesión en otra pestaña conserva el aviso y vuelve al login', async 
 })
 
 it('una sesión vencida no desvía el aviso hacia la portada', async () => {
+  const user = userEvent.setup()
   localStorage.token = 'synthetic-expired-session'
   render(<App />)
+  await user.click(screen.getByRole('button', { name: 'Ingresar', exact: true }))
   await screen.findByRole('heading', { name: 'Agenda' })
   act(() => {
     localStorage.removeItem('token')
@@ -106,6 +116,22 @@ it('una sesión vencida no desvía el aviso hacia la portada', async () => {
   })
   expect(screen.getByRole('status')).toHaveTextContent('Tu sesión venció')
   expect(screen.getByLabelText('Correo')).toBeVisible()
+})
+
+it('volver a abrir el sistema muestra la portada y conserva la sesión sin validarla en segundo plano', async () => {
+  const user = userEvent.setup()
+  localStorage.token = 'synthetic-retained-session'
+  const first = render(<App />)
+  await user.click(screen.getByRole('button', { name: 'Ingresar', exact: true }))
+  await screen.findByRole('heading', { name: 'Agenda' })
+  await waitFor(() => expect(screen.getByRole('button', { name: /Nueva visita/ })).toBeEnabled())
+  first.unmount()
+  fetch.mockClear()
+  render(<App />)
+  expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Kill Bichos')
+  expect(localStorage.token).toBe('synthetic-retained-session')
+  expect(screen.queryByRole('heading', { name: 'Agenda' })).not.toBeInTheDocument()
+  expect(fetch).not.toHaveBeenCalled()
 })
 
 it('la guía tiene tres pasos y explica que el usuario debe enviar el mensaje', () => {

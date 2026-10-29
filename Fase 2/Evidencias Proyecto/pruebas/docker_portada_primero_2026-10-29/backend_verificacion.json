@@ -1,0 +1,34 @@
+[
+  {
+    "check": "health",
+    "status": 200
+  },
+  {
+    "check": "ruta_proximas_en_openapi",
+    "ok": true
+  },
+  {
+    "check": "proximas_sin_sesion_rechazada",
+    "status": 401
+  },
+  {
+    "check": "/panel/stats",
+    "status": 200,
+    "count": null
+  },
+  {
+    "check": "/clientes",
+    "status": 200,
+    "count": 4
+  },
+  {
+    "check": "/operadores/me/visitas-hoy",
+    "status": 200,
+    "count": 1
+  },
+  {
+    "check": "/operadores/me/visitas-proximas?dias=14",
+    "status": 200,
+    "count": 0
+  }
+]
