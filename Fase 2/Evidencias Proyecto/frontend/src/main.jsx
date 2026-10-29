@@ -1,12 +1,24 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import './styles.css'
+import './panel.css'
 import { request, SESSION_EXPIRED } from './api.js'
 import { CroquisViewer } from './CroquisViewer.jsx'
 import { PasswordRecovery } from './PasswordRecovery.jsx'
 import { BrandLogo } from './BrandLogo.jsx'
 import { PublicHome } from './PublicHome.jsx'
 import { addDays, chileDate, chileDateTime, chileTime, chileDateTimeInput, clientLocation, hasClientLocation, visitPayload } from './panel-utils.js'
+
+// Íconos de línea para el menú y los contadores (decorativos: el texto de al lado ya dice qué son).
+const ICONS = {
+  agenda: <><rect x="3.5" y="5" width="17" height="15.5" rx="3" /><path d="M8 3v4M16 3v4M3.5 10h17" /></>,
+  clientes: <><circle cx="9" cy="8.5" r="3.5" /><path d="M2.5 20c.6-3.6 3.3-5.5 6.5-5.5s5.9 1.9 6.5 5.5" /><path d="M16 5.2a3.4 3.4 0 0 1 0 6.6M18 14.8c2 .6 3.3 2.3 3.6 5.2" /></>,
+  whatsapp: <><path d="M21 11.5a9 9 0 0 1-9 9 10 10 0 0 1-4-.9L3 21l1.4-4.7a9 9 0 1 1 16.6-4.8Z" /><path d="M8 10h8M8 14h5" /></>,
+  hoy: <><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></>,
+  pendientes: <><path d="M5 12.5 9.5 17 19 7.5" /></>,
+  salir: <><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4M15 8l4 4-4 4M19 12H9" /></>,
+}
+function Icon({ name }) { return <svg className="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{ICONS[name]}</svg> }
 
 const statuses = {
   agendada: ['Agendada', 'gray'], en_curso: ['En curso', 'yellow'], completada: ['Completada', 'green'],
@@ -120,13 +132,13 @@ export function App() {
   if (!entered) return <PublicHome onEnter={() => setEntered(true)} />
   if (!logged) return <Login notice={notice} onForgot={() => setRecovering(true)} onLogin={() => { setNotice(''); setLogged(true) }} />
   return <div className="app-shell"><aside><div className="logo"><BrandLogo /><div><strong>Kill Bichos</strong><small>Panel operativo</small></div></div>
-    <nav aria-label="Navegación principal"><button className={view === 'agenda' ? 'active' : ''} aria-current={view === 'agenda' ? 'page' : undefined} onClick={() => setView('agenda')}>▦ <span>Agenda</span></button><button className={view === 'clientes' ? 'active' : ''} aria-current={view === 'clientes' ? 'page' : undefined} onClick={() => setView('clientes')}>♧ <span>Clientes</span></button><button className={view === 'whatsapp' ? 'active' : ''} aria-current={view === 'whatsapp' ? 'page' : undefined} onClick={() => setView('whatsapp')}>✉ <span>WhatsApp</span></button></nav>
+    <nav aria-label="Navegación principal"><button className={view === 'agenda' ? 'active' : ''} aria-current={view === 'agenda' ? 'page' : undefined} onClick={() => setView('agenda')}><Icon name="agenda" /><span>Agenda</span></button><button className={view === 'clientes' ? 'active' : ''} aria-current={view === 'clientes' ? 'page' : undefined} onClick={() => setView('clientes')}><Icon name="clientes" /><span>Clientes</span></button><button className={view === 'whatsapp' ? 'active' : ''} aria-current={view === 'whatsapp' ? 'page' : undefined} onClick={() => setView('whatsapp')}><Icon name="whatsapp" /><span>WhatsApp</span></button></nav>
     <div className="sidebar-bottom"><div className="user-chip"><div className="avatar">KB</div><div><strong>Cuenta del panel</strong><small>Gestión administrativa</small></div></div></div>
-    <button className="logout" onClick={() => { localStorage.removeItem('token'); setNotice(''); setLogged(false); setEntered(true) }}>Cerrar sesión</button>
+    <button className="logout" onClick={() => { localStorage.removeItem('token'); setNotice(''); setLogged(false); setEntered(true) }}><Icon name="salir" /><span>Cerrar sesión</span></button>
   </aside><main className="content">{{ agenda: <Agenda />, clientes: <Clientes />, whatsapp: <Bandeja /> }[view]}</main></div>
 }
 
-function Stat({ label, value, tone }) { return <div className="stat"><span aria-hidden="true" className={`stat-icon ${tone}`}>●</span><div><small>{label}</small><strong>{value}</strong></div></div> }
+function Stat({ label, value, tone, icon }) { return <div className="stat"><span aria-hidden="true" className={`stat-icon ${tone}`}><Icon name={icon} /></span><div><small>{label}</small><strong>{value}</strong></div></div> }
 
 function Agenda() {
   const [croquisVisit, setCroquisVisit] = useState(null)
@@ -156,17 +168,38 @@ function Agenda() {
   }
   return <><header className="topbar"><div><p className="eyebrow">OPERACIÓN DIARIA</p><h1>Agenda</h1><p className="muted">Coordina las visitas y mantén a tu equipo en movimiento.</p></div><button className="primary" disabled={resource.loading || Boolean(resource.error)} onClick={() => { setSuccess(''); setModal({}) }}>＋ Nueva visita</button></header>
     <Feedback error={error || resource.error} success={success} />
-    <section className="stats"><Stat label="Clientes registrados" value={stats.clientes ?? '—'} tone="green" /><Stat label="Visitas para hoy" value={stats.visitas_hoy ?? '—'} tone="blue" /><Stat label="Visitas pendientes" value={stats.pendientes ?? '—'} tone="orange" /></section>
+    <section className="stats"><Stat label="Clientes registrados" value={stats.clientes ?? '—'} tone="green" icon="clientes" /><Stat label="Visitas para hoy" value={stats.visitas_hoy ?? '—'} tone="blue" icon="hoy" /><Stat label="Visitas pendientes" value={stats.pendientes ?? '—'} tone="orange" icon="pendientes" /></section>
     <section className="toolbar"><div className="date-picker"><button aria-label="Día anterior" onClick={() => setDate(addDays(date, -1))}>‹</button><input aria-label="Fecha de la agenda" type="date" required value={date} onChange={e => { if (e.target.value) setDate(e.target.value) }} /><button aria-label="Día siguiente" onClick={() => setDate(addDays(date, 1))}>›</button></div>
       <button className="secondary" onClick={() => setDate(chileDate())}>Hoy</button><select aria-label="Filtrar por operador" value={operator} onChange={e => setOperator(e.target.value)}><option value="">Todos los operadores</option><option value="unassigned">Sin asignar</option>{operators.map(o => <option key={o.id} value={o.id}>{o.nombre}</option>)}</select>
       <button className="secondary" disabled={resource.loading} onClick={resource.reload}>{resource.error ? 'Reintentar' : 'Actualizar'}</button>
     </section>
+    <div className="agenda-layout">
     <section className="schedule" aria-label="Visitas del día" aria-busy={resource.loading}><div className="schedule-head"><span>Hora de Chile</span><span>Visitas agendadas</span></div>
       {resource.loading ? <div className="empty" role="status">Cargando agenda…</div> : resource.error ? <div className="empty">No se pudo cargar la agenda. Usa Reintentar.</div> : Object.keys(grouped).length === 0 ? <div className="empty">No hay visitas para este día y filtro.</div> : Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b)).map(([hour, items]) => <div className="time-row" key={hour}><div className="time">{hour}<small>Hora de Chile</small></div><div className="cards">{items.map(v => <VisitCard key={v.id} visit={v} busy={pending !== null} onStatus={update} onCroquis={() => setCroquisVisit(v)} onEdit={() => { setSuccess(''); setModal({ visit: v }) }} />)}</div></div>)}
     </section>
+    <DaySummary date={date} visits={visits} operators={operators} loading={resource.loading} />
+    </div>
     {modal && <VisitModal date={date} visit={modal.visit} clients={clients} operators={operators} onClose={() => setModal(null)} onSaved={saved} />}
     {croquisVisit && <Modal title="Croquis de la visita" wide onClose={() => setCroquisVisit(null)}><CroquisViewer visit={croquisVisit} /></Modal>}
   </>
+}
+
+// Resumen lateral del día elegido: cuántas visitas hay y cómo se reparten entre los técnicos.
+function DaySummary({ date, visits, operators, loading }) {
+  const label = new Date(`${date}T12:00:00`).toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' })
+  const loads = operators.map(o => ({ id: o.id, nombre: o.nombre, total: visits.filter(v => v.operador_id === o.id).length }))
+  const unassigned = visits.filter(v => !v.operador_id).length
+  const max = Math.max(1, ...loads.map(l => l.total), unassigned)
+  return <section className="day-summary" aria-label="Resumen del día" aria-busy={loading}>
+    <p className="eyebrow">RESUMEN DEL DÍA</p>
+    <h2>{label}</h2>
+    <p className="day-total"><strong>{loading ? '—' : visits.length}</strong><span>{visits.length === 1 ? 'visita en la fecha' : 'visitas en la fecha'}</span></p>
+    <ul className="load-list">
+      {loads.map(l => <li key={l.id}><div><span>{l.nombre}</span><strong>{loading ? '—' : l.total}</strong></div><i style={{ '--w': `${(l.total / max) * 100}%` }} aria-hidden="true" /></li>)}
+      {unassigned > 0 && <li className="load-warn"><div><span>Por asignar</span><strong>{unassigned}</strong></div><i style={{ '--w': `${(unassigned / max) * 100}%` }} aria-hidden="true" /></li>}
+    </ul>
+    {!loading && operators.length === 0 && <p className="muted">Aún no hay técnicos registrados.</p>}
+  </section>
 }
 
 function VisitCard({ visit, busy, onStatus, onEdit, onCroquis }) {
@@ -256,7 +289,7 @@ function Clientes() {
     <Feedback error={deleting ? resource.error : error || resource.error} success={success} />
     <div className="list-toolbar"><input className="search" aria-label="Buscar clientes" placeholder="Buscar por nombre, dirección o teléfono" value={query} onChange={e => setQuery(e.target.value)} /><button className="secondary" disabled={resource.loading} onClick={resource.reload}>{resource.error ? 'Reintentar' : 'Actualizar'}</button></div>
     <section className="client-table" aria-label="Clientes registrados" aria-busy={resource.loading}><div className="table-head"><span>Cliente</span><span>Contacto</span><span>Ubicación</span><span>Acciones</span></div>
-      {resource.loading ? <div className="empty" role="status">Cargando clientes…</div> : resource.error ? <div className="empty">No se pudo cargar el listado. Usa Reintentar.</div> : <>{filtered.map(c => <div className="client-row" key={c.id}><div><strong>{c.nombre}</strong><small>{c.direccion || 'Sin dirección registrada'}</small></div><span>{c.telefono_whatsapp}</span><span className={hasClientLocation(c) ? undefined : 'location-pending'}>{clientLocation(c)}</span><div className="row-actions"><button className="link-button" onClick={() => { setSuccess(''); setModal({ client: c }) }}>Editar</button><button className="link-button danger-text" onClick={() => { setError(''); setSuccess(''); setDeleting(c) }}>Eliminar</button></div></div>)}{!filtered.length && <div className="empty">{clients.length ? 'No hay clientes que coincidan con la búsqueda.' : 'Aún no hay clientes registrados.'}</div>}</>}
+      {resource.loading ? <div className="empty" role="status">Cargando clientes…</div> : resource.error ? <div className="empty">No se pudo cargar el listado. Usa Reintentar.</div> : <>{filtered.map(c => <div className="client-row" key={c.id}><div className="client-name"><span className="client-initial" aria-hidden="true">{c.nombre.trim().charAt(0).toUpperCase()}</span><div><strong>{c.nombre}</strong><small>{c.direccion || 'Sin dirección registrada'}</small></div></div><span>{c.telefono_whatsapp}</span><span className={hasClientLocation(c) ? undefined : 'location-pending'}>{clientLocation(c)}</span><div className="row-actions"><button className="link-button" onClick={() => { setSuccess(''); setModal({ client: c }) }}>Editar</button><button className="link-button danger-text" onClick={() => { setError(''); setSuccess(''); setDeleting(c) }}>Eliminar</button></div></div>)}{!filtered.length && <div className="empty">{clients.length ? 'No hay clientes que coincidan con la búsqueda.' : 'Aún no hay clientes registrados.'}</div>}</>}
     </section>
     {modal && <ClientModal client={modal.client} onClose={() => setModal(null)} onSaved={saved => { setModal(null); setError(''); setSuccess(hasClientLocation(saved) ? 'Cliente guardado correctamente. Ubicación disponible para el croquis.' : 'Cliente guardado correctamente. Ubicación pendiente de confirmar: revisa calle, número y comuna, y vuelve a guardar para reintentar.'); resource.reload() }} />}
     {deleting && <Modal title="Eliminar cliente" busy={busy} onClose={() => { setDeleting(null); setError('') }} onSubmit={remove}><p>¿Eliminar a <strong>{deleting.nombre}</strong>? Esta acción no se puede deshacer.</p><p className="field-help">Si tiene visitas asociadas, el sistema impedirá su eliminación para conservar el historial.</p><Feedback error={error} /><div className="modal-actions"><button type="button" className="secondary" disabled={busy} onClick={() => { setDeleting(null); setError('') }}>Cancelar</button><button className="danger" disabled={busy}>{busy ? 'Eliminando…' : 'Confirmar eliminación'}</button></div></Modal>}
