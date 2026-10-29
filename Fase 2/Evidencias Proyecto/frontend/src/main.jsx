@@ -5,6 +5,7 @@ import { request, SESSION_EXPIRED } from './api.js'
 import { CroquisViewer } from './CroquisViewer.jsx'
 import { PasswordRecovery } from './PasswordRecovery.jsx'
 import { BrandLogo } from './BrandLogo.jsx'
+import { PublicHome } from './PublicHome.jsx'
 import { addDays, chileDate, chileDateTime, chileTime, chileDateTimeInput, clientLocation, hasClientLocation, visitPayload } from './panel-utils.js'
 
 const statuses = {
@@ -90,6 +91,7 @@ function Login({ onLogin, notice, onForgot }) {
 export function App() {
   const [resetToken, setResetToken] = useState(() => new URLSearchParams(window.location.hash.slice(1)).get('restablecer') || '')
   const [recovering, setRecovering] = useState(false)
+  const [showLogin, setShowLogin] = useState(false)
   useEffect(() => {
     function consumeLink() {
       const token = new URLSearchParams(window.location.hash.slice(1)).get('restablecer')
@@ -104,22 +106,23 @@ export function App() {
   }, [])
   const [logged, setLogged] = useState(Boolean(localStorage.token)), [view, setView] = useState('agenda'), [notice, setNotice] = useState('')
   useEffect(() => {
-    const expired = () => { setLogged(false); setNotice('Tu sesión venció. Inicia sesión nuevamente para continuar.') }
-    const changed = event => { if (event.key === 'token' && !event.newValue) { setLogged(false); setNotice('La sesión se cerró en otra pestaña.') } }
+    const expired = () => { setLogged(false); setShowLogin(true); setNotice('Tu sesión venció. Inicia sesión nuevamente para continuar.') }
+    const changed = event => { if (event.key === 'token' && !event.newValue) { setLogged(false); setShowLogin(true); setNotice('La sesión se cerró en otra pestaña.') } }
     window.addEventListener(SESSION_EXPIRED, expired)
     window.addEventListener('storage', changed)
     return () => { window.removeEventListener(SESSION_EXPIRED, expired); window.removeEventListener('storage', changed) }
   }, [])
   if (resetToken || recovering) return <PasswordRecovery token={resetToken} onCancel={() => {
-    setResetToken(''); setRecovering(false); setLogged(false); localStorage.removeItem('token')
+    setResetToken(''); setRecovering(false); setLogged(false); setShowLogin(true); localStorage.removeItem('token')
   }} onReset={message => {
-    setResetToken(''); setRecovering(false); setLogged(false); localStorage.removeItem('token'); setNotice(message)
+    setResetToken(''); setRecovering(false); setLogged(false); setShowLogin(true); localStorage.removeItem('token'); setNotice(message)
   }} />
+  if (!logged && !showLogin) return <PublicHome onEnter={() => setShowLogin(true)} />
   if (!logged) return <Login notice={notice} onForgot={() => setRecovering(true)} onLogin={() => { setNotice(''); setLogged(true) }} />
   return <div className="app-shell"><aside><div className="logo"><BrandLogo /><div><strong>Kill Bichos</strong><small>Panel operativo</small></div></div>
     <nav aria-label="Navegación principal"><button className={view === 'agenda' ? 'active' : ''} aria-current={view === 'agenda' ? 'page' : undefined} onClick={() => setView('agenda')}>▦ <span>Agenda</span></button><button className={view === 'clientes' ? 'active' : ''} aria-current={view === 'clientes' ? 'page' : undefined} onClick={() => setView('clientes')}>♧ <span>Clientes</span></button><button className={view === 'whatsapp' ? 'active' : ''} aria-current={view === 'whatsapp' ? 'page' : undefined} onClick={() => setView('whatsapp')}>✉ <span>WhatsApp</span></button></nav>
     <div className="sidebar-bottom"><div className="user-chip"><div className="avatar">KB</div><div><strong>Cuenta del panel</strong><small>Gestión administrativa</small></div></div></div>
-    <button className="logout" onClick={() => { localStorage.removeItem('token'); setNotice(''); setLogged(false) }}>Cerrar sesión</button>
+    <button className="logout" onClick={() => { localStorage.removeItem('token'); setNotice(''); setLogged(false); setShowLogin(true) }}>Cerrar sesión</button>
   </aside><main className="content">{{ agenda: <Agenda />, clientes: <Clientes />, whatsapp: <Bandeja /> }[view]}</main></div>
 }
 

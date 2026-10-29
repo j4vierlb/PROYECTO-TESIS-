@@ -1,0 +1,11 @@
+{
+  "fecha_confirmacion": "2026-10-29",
+  "archivo_origen": "WhatsApp Image 2026-10-28 at 23.47.02.jpeg",
+  "sha256_jpeg": "1D8A173A1993BA4F0DFA0919196206B663BB892362386BB2487FD182D1312977",
+  "dimensiones_px": [574, 574],
+  "url_decodificada": "https://wa.me/14155238886?text=join%20example-primitive",
+  "telefono": "+14155238886",
+  "mensaje_union": "join example-primitive",
+  "metodo": "Decodificacion local de RGBA con Pillow y jsQR; sin servicio externo",
+  "confirmacion_telefono": "Juan informo que escaneo el QR original y pudo conversar con el agente. No es una prueba fisica del QR regenerado en la portada."
+}

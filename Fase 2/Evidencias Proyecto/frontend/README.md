@@ -2,6 +2,33 @@
 
 Panel operativo para administrar clientes y agendar visitas por operador.
 
+## Portada pública
+
+Sin sesión, el sitio muestra información de Kill Bichos, servicios, contacto,
+horarios y la guía de tres pasos del WhatsApp de prueba. **Ingresar** abre el
+login existente. Con sesión activa se entra directamente al panel; cerrar o
+vencer la sesión conserva el retorno al login y sus mensajes actuales.
+
+El enlace `#restablecer=...` tiene prioridad sobre portada y panel. Su token se
+consume y retira de la barra como antes; la portada no lo envía a WhatsApp.
+
+Los textos y datos públicos se mantienen en `src/public-site-config.js`.
+Los horarios y datos del Sandbox fueron confirmados por Juan el 29/10/2026:
+lunes a sábado, 08:00–18:00; número `+14155238886`; unión
+`join example-primitive`, leído del QR proporcionado por Javier. Son datos
+públicos; este archivo no debe contener credenciales de Twilio ni otras claves.
+
+Botón y QR usan el mismo enlace `wa.me` y solo preparan el mensaje: el usuario
+debe enviarlo desde WhatsApp. Se advierte que es un **Sandbox de Twilio**, no
+un servicio abierto al público. Si la configuración es inválida, el botón se
+deshabilita y no se genera un QR ficticio.
+
+El QR SVG se genera localmente con `qrcode`, sin servicios externos ni peticiones
+a la API. `jsqr` es una dependencia de pruebas para decodificar el SVG renderizado
+y comprobar el destino. No se modifican backend, base de datos ni archivos `.env`.
+La portada requiere recompilar el frontend para desplegar sus cambios.
+[Pruebas y capturas del 29/10](../pruebas/portada_publica_2026-10-29/README.md).
+
 ## Ejecución
 
 Con el backend corriendo en `http://localhost:8000`:

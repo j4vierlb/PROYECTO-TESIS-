@@ -17,6 +17,7 @@ beforeEach(() => {
 it('permite pedir recuperación desde el login sin enviar contraseña ni sesión', async () => {
   const user = userEvent.setup()
   render(<App />)
+  await user.click(screen.getByRole('button', { name: 'Ingresar', exact: true }))
   await user.click(screen.getByRole('button', { name: 'Olvidé mi contraseña' }))
   await user.type(screen.getByLabelText('Correo'), 'admin@example.test')
   await user.click(screen.getByRole('button', { name: 'Enviar enlace' }))
