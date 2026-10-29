@@ -1,125 +1,154 @@
-.public-home{color:var(--text-primary);background:var(--background);min-height:100dvh;font-family:inherit}
+.public-home{--ease-out:cubic-bezier(.23,1,.32,1);--ink:#1A1A1A;--sun:#F5C518;color:var(--ink);background:#FBFAF4;min-height:100dvh;font-family:inherit}
 .public-home *{box-sizing:border-box}
 .public-home a{color:inherit;text-decoration:none}
-.public-home a:hover{text-decoration:underline;text-underline-offset:4px}
-.public-home a:focus-visible,.public-home button:focus-visible{outline:3px solid #806600;outline-offset:5px}
+.public-home a:focus-visible,.public-home button:focus-visible,.public-home summary:focus-visible{outline:3px solid currentColor;outline-offset:5px}
 .public-home .public-skip{position:absolute;left:16px;top:-100px;background:#fff;padding:12px;z-index:10}
 .public-home .public-skip:focus{top:12px}
-.public-home .public-header{max-width:1240px;margin:auto;display:flex;align-items:center;gap:32px;padding:24px 40px;border-bottom:1px solid var(--border)}
+
+/* Portada amarilla a todo el ancho */
+.public-home .public-stage{background:var(--sun);color:var(--ink)}
+.public-home .public-header{max-width:1280px;margin:auto;display:flex;align-items:center;gap:32px;padding:24px 48px}
 .public-home .public-brand{display:flex;gap:12px;align-items:center;margin-right:auto}
-.public-home .public-brand img{width:48px;height:58px;object-fit:contain}
-.public-home .public-brand strong{font-size:20px;letter-spacing:-.6px;display:block}
-.public-home .public-brand small{display:block;font-size:12px;color:var(--text-secondary);margin-top:3px}
-.public-home nav{display:flex;gap:28px}
-.public-home nav a{font-size:14px;font-weight:600}
-.public-home .public-enter{background:var(--brand-black);color:#fff;display:flex;gap:24px;align-items:center;padding:13px 20px;border-radius:8px;font-size:14px}
-.public-home main{max-width:1240px;margin:0 auto;padding:0 40px;outline:none}
-.public-home .public-hero{display:grid;grid-template-columns:1.15fr 1fr;gap:80px;align-items:start;padding:64px 0 72px}
-.public-home .public-intro{padding-top:12px}
-.public-home .public-kicker{font-size:11px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;display:flex;align-items:center;gap:9px;margin:0 0 22px}
-.public-home .public-kicker>span{height:8px;width:8px;background:var(--brand-yellow);border:1px solid #806600;border-radius:50%}
-.public-home h1{font-size:clamp(40px,5.2vw,66px);line-height:1.06;letter-spacing:-3px;font-weight:800;margin:0}
-.public-home h1>span{display:block;font-size:.75em;line-height:1.12;margin-top:10px;letter-spacing:-2px}
-.public-home .public-lead{color:var(--text-secondary);font-size:18px;line-height:1.7;max-width:390px;margin:24px 0}
-.public-home .public-text-link{font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:32px;border-bottom:2px solid var(--brand-yellow);padding-bottom:8px}
-.public-home .public-about{margin-top:48px;border-top:1px solid var(--border);padding-top:24px;max-width:430px}
-.public-home .public-about h2{font-size:16px;margin:0 0 10px}
-.public-home .public-about p{font-size:14px;line-height:1.8;color:var(--text-secondary);margin:0}
-.public-home .public-chat{padding:28px 30px;background:#fff;border:1px solid var(--border);border-top:5px solid var(--brand-yellow);border-radius:12px;box-shadow:0 12px 32px #1a1a1a07;text-align:center;min-width:0}
-.public-home .public-chat-heading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#655000;font-size:10px;font-weight:700;letter-spacing:1.4px;margin-bottom:16px}
-.public-home .public-chat h2{font-size:26px;letter-spacing:-.9px;margin:0 0 14px}
-.public-home .public-sandbox-note{font-size:12px;line-height:1.7;background:var(--brand-soft);padding:10px 12px;border-radius:6px;color:#5c4800;margin:0 0 20px}
-.public-home .public-qr-link{display:inline-block;border-radius:8px;border:1px solid var(--border);padding:8px;line-height:0}
+.public-home .public-brand img{width:44px;height:54px;object-fit:contain}
+.public-home .public-brand strong{font-size:19px;letter-spacing:-.5px;display:block}
+.public-home .public-brand small{display:block;font-size:12px;margin-top:2px}
+.public-home nav{display:flex;gap:32px}
+.public-home nav a{font-size:14px;font-weight:700;padding:6px 0;border-bottom:2px solid transparent}
+.public-home .public-enter{background:var(--ink);color:#fff;display:flex;gap:20px;align-items:center;padding:14px 22px;border-radius:999px;font-size:14px;font-weight:700;border:0;cursor:pointer}
+.public-home .public-hero{max-width:1280px;margin:auto;padding:72px 48px 96px}
+.public-home .public-kicker{font-size:12px;font-weight:800;letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;gap:10px;margin:0 0 28px}
+.public-home .public-kicker>span{height:10px;width:10px;background:var(--ink);border-radius:50%}
+.public-home h1{font-size:clamp(56px,10.5vw,168px);line-height:.92;letter-spacing:-.055em;font-weight:900;margin:0}
+.public-home h1>span{display:block;white-space:nowrap;font-size:.5em;line-height:1;margin-top:.14em;letter-spacing:-.045em;font-weight:800}
+.public-home .public-spider-frame{display:inline-block;height:.78em;width:auto;aspect-ratio:120/70;vertical-align:-.12em;margin:0 .08em}
+.public-home .public-lead{font-size:clamp(20px,2.2vw,28px);line-height:1.35;font-weight:600;max-width:560px;margin:44px 0 32px}
+.public-home .public-text-link{font-size:15px;font-weight:800;display:inline-flex;align-items:center;gap:24px;border-bottom:3px solid var(--ink);padding-bottom:6px}
+
+/* Banda negra de WhatsApp */
+.public-home main{outline:none}
+.public-home .public-chat{background:var(--ink);color:#fff;display:grid;grid-template-columns:1.2fr 1fr;gap:80px;align-items:center;padding:96px max(48px,calc((100vw - 1184px)/2))}
+.public-home .public-chat-heading{display:flex;align-items:center;gap:16px;color:var(--sun);font-size:12px;font-weight:800;letter-spacing:2px;margin-bottom:28px}
+.public-home .public-chat h2{font-size:clamp(40px,6vw,88px);line-height:.98;letter-spacing:-.045em;font-weight:900;margin:0 0 28px;color:#fff}
+.public-home .public-sandbox-note{font-size:17px;line-height:1.6;color:#fff;max-width:520px;margin:0 0 14px}
+.public-home .public-send-note{font-size:15px;line-height:1.6;color:#C9C9C0;max-width:520px;margin:0}
+.public-home .public-chat-card{background:#fff;color:var(--ink);border-radius:24px;padding:32px;text-align:center;min-width:0}
+.public-home .public-qr-link{display:inline-block;border-radius:12px;border:2px solid var(--ink);padding:10px;line-height:0}
 .public-home .public-qr{max-width:100%;height:auto;display:block}
-.public-home .public-qr-caption{font-size:12px;color:var(--text-secondary);margin:12px 0 18px;line-height:1.5}
-.public-home .public-whatsapp{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--brand-yellow);color:var(--brand-black);border-radius:8px;padding:14px 12px;font-size:14px;font-weight:700;width:100%;min-height:48px;border:0}
+.public-home .public-qr-caption{font-size:14px;margin:14px 0 20px;line-height:1.5;color:#4A4A45}
+.public-home .public-whatsapp{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--sun);color:var(--ink);border-radius:999px;padding:16px 14px;font-size:15px;font-weight:800;width:100%;min-height:52px;border:0}
 .public-home .public-whatsapp:disabled{background:#e7e7e2;color:#64645e;opacity:1}
-.public-home .public-send-note{font-size:11px;line-height:1.7;color:var(--text-secondary);margin:14px 0 0}
-.public-home .public-chat-unavailable{min-height:195px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;margin-bottom:20px;border:1px dashed #c6c6ba;border-radius:8px;background:#fafaf7}
-.public-home .public-chat-unavailable>svg{width:40px;height:40px;color:#88887c}
-.public-home .public-chat-unavailable p{font-size:13px;line-height:1.6;margin:0;max-width:260px;color:var(--text-secondary)}
-.public-home .public-section{padding:44px 0 52px;border-top:1px solid var(--border);scroll-margin-top:24px}
-.public-home .public-section-heading{margin-bottom:28px}
-.public-home .public-section-heading .public-kicker{color:var(--text-secondary);margin-bottom:12px}
-.public-home .public-section-heading h2{font-size:30px;letter-spacing:-1px;margin:0}
-.public-home .public-service-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-.public-home .public-service-grid article{border:1px solid var(--border);border-radius:10px;background:#fff;padding:24px;min-width:0}
-.public-home .public-service-number{display:inline-block;background:var(--brand-soft);padding:8px 10px;color:#6b5400;font-size:12px;font-weight:700;border-radius:6px;margin-bottom:22px}
-.public-home .public-service-grid h3{font-size:19px;letter-spacing:-.5px;margin:0 0 12px}
-.public-home .public-service-grid p{font-size:14px;line-height:1.75;color:var(--text-secondary);margin:0}
-.public-home .public-guide ol{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;list-style:none;margin:0;padding:0}
-.public-home .public-guide li{display:flex;gap:14px;align-items:flex-start}
-.public-home .public-guide li>span{flex-shrink:0;background:var(--brand-black);color:var(--brand-yellow);border-radius:50%;width:32px;height:32px;display:grid;place-items:center;font-size:13px;font-weight:700}
-.public-home .public-guide h3{font-size:15px;margin:5px 0 10px}
-.public-home .public-guide li p{font-size:13px;line-height:1.75;color:var(--text-secondary);margin:0}
-.public-home .public-contact{display:grid;grid-template-columns:1fr 1.5fr;gap:40px}
-.public-home .public-contact .public-section-heading>p:last-child{font-size:14px;color:var(--text-secondary);line-height:1.7;margin-top:16px}
-.public-home .public-contact dl{display:grid;grid-template-columns:1.2fr 1fr;gap:24px;margin:0}
-.public-home .public-contact dt{font-size:11px;text-transform:uppercase;letter-spacing:1px;font-weight:700;color:var(--text-secondary);margin:0 0 10px}
-.public-home .public-contact dd{font-size:14px;line-height:1.7;margin:0;overflow-wrap:anywhere}
-.public-home .public-contact dd a{border-bottom:1px solid #c5bd88}
-.public-home .public-footer{display:flex;align-items:center;gap:24px;padding:26px 40px;max-width:1240px;margin:auto;border-top:1px solid var(--border);font-size:12px;color:var(--text-secondary)}
-.public-home .public-footer strong{font-size:14px;color:var(--text-primary)}
-.public-home .public-footer a{margin-left:auto}
-@media(max-width:900px){.public-home .public-header{padding:20px 24px;gap:20px}.public-home main{padding:0 24px}.public-home .public-hero{gap:32px}.public-home .public-chat{padding:24px 20px}.public-home .public-contact{grid-template-columns:1fr;gap:12px}.public-home .public-footer{padding:24px}}
-@media(max-width:650px){.public-home .public-header{padding:16px 20px;gap:12px}.public-home .public-brand img{width:34px;height:44px}.public-home .public-brand strong{font-size:17px}.public-home .public-brand small{font-size:10px}.public-home nav{display:none}.public-home .public-enter{padding:12px 14px;gap:12px}.public-home main{padding:0 20px}.public-home .public-hero{grid-template-columns:1fr;padding:36px 0 40px;gap:32px}.public-home h1{font-size:48px;letter-spacing:-2px}.public-home h1>span{font-size:36px;letter-spacing:-1.5px}.public-home .public-lead{font-size:16px}.public-home .public-about{margin-top:30px}.public-home .public-service-grid,.public-home .public-guide ol{grid-template-columns:1fr}.public-home .public-section{padding:32px 0 36px}.public-home .public-service-grid article{padding:20px}.public-home .public-service-number{margin-bottom:14px}.public-home .public-contact dl{grid-template-columns:1fr}.public-home .public-footer{flex-wrap:wrap;gap:12px;padding:22px 20px}.public-home .public-footer span{flex-basis:100%;order:3}.public-home .public-chat{padding:24px 18px}}
+.public-home .public-chat-unavailable{min-height:195px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;margin-bottom:20px;border:1px dashed #9a9a8c;border-radius:12px}
+.public-home .public-chat-unavailable>svg{width:40px;height:40px;color:#6b6b60}
+.public-home .public-chat-unavailable p{font-size:14px;line-height:1.6;margin:0;max-width:260px}
+
+/* Quiénes somos con grabado */
+.public-home .public-about{max-width:1280px;margin:auto;padding:112px 48px;display:grid;grid-template-columns:1.1fr .8fr;gap:80px;align-items:center}
+.public-home .public-about h2{font-size:clamp(36px,5vw,72px);letter-spacing:-.045em;line-height:1;font-weight:900;margin:0 0 28px}
+.public-home .public-about p{font-size:clamp(18px,1.6vw,22px);line-height:1.6;margin:0;max-width:620px}
+.public-home .public-about img{width:100%;max-height:560px;object-fit:cover;object-position:center 40%;border-radius:20px;display:block;background:#EFE9D2}
+
+/* Secciones */
+.public-home .public-section{max-width:1280px;margin:auto;padding:88px 48px;scroll-margin-top:24px}
+.public-home .public-section-heading{margin-bottom:48px}
+.public-home .public-section-heading .public-kicker{margin-bottom:16px}
+.public-home .public-section-heading h2{font-size:clamp(36px,5vw,72px);letter-spacing:-.045em;line-height:1;font-weight:900;margin:0}
+.public-home .public-service-grid{display:grid;gap:0;border-top:2px solid var(--ink)}
+.public-home .public-service-grid article{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;padding:40px 0;border-bottom:2px solid var(--ink)}
+.public-home .public-service-grid article:nth-child(even) .public-service-text{order:2}
+.public-home .public-service-grid h3{font-size:clamp(32px,4vw,56px);letter-spacing:-.04em;line-height:1;font-weight:900;margin:0 0 20px}
+.public-home .public-service-grid p{font-size:18px;line-height:1.6;margin:0;max-width:460px}
+.public-home .public-service-grid img{width:100%;height:320px;object-fit:cover;border-radius:16px;display:block;background:#EFE9D2}
+.public-home .public-guide{background:var(--sun);max-width:none;padding-left:max(48px,calc((100vw - 1184px)/2));padding-right:max(48px,calc((100vw - 1184px)/2))}
+.public-home .public-guide ol{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;list-style:none;margin:0;padding:0}
+.public-home .public-guide li{display:block}
+.public-home .public-guide li>span{display:block;font-size:clamp(72px,9vw,128px);line-height:.9;font-weight:900;letter-spacing:-.06em;margin-bottom:20px}
+.public-home .public-guide h3{font-size:22px;letter-spacing:-.02em;margin:0 0 10px;font-weight:800}
+.public-home .public-guide li p{font-size:16px;line-height:1.6;margin:0}
+.public-home .public-contact{display:grid;grid-template-columns:1fr 1.4fr;gap:64px}
+.public-home .public-contact .public-section-heading{margin:0}
+.public-home .public-contact .public-section-heading>p:last-child{font-size:18px;line-height:1.6;margin:20px 0 0}
+.public-home .public-contact dl{display:grid;grid-template-columns:1fr 1fr;gap:36px 32px;margin:0}
+.public-home .public-contact dt{font-size:12px;text-transform:uppercase;letter-spacing:1.6px;font-weight:800;color:#4A4A45;margin:0 0 10px}
+.public-home .public-contact dd{font-size:20px;line-height:1.45;font-weight:600;margin:0;overflow-wrap:anywhere}
+.public-home .public-contact dd a{border-bottom:3px solid var(--sun)}
+
+/* Pie negro */
+.public-home .public-footer{background:var(--ink);color:#fff;padding:56px max(48px,calc((100vw - 1184px)/2)) 40px;font-size:14px}
+.public-home .public-footer-main{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.public-home .public-footer-main strong{font-size:28px;letter-spacing:-.04em;color:var(--sun)}
+.public-home .public-footer-main a{margin-left:auto;border-bottom:2px solid var(--sun)}
+.public-home .public-credits{margin-top:40px;color:#C9C9C0}
+.public-home .public-credits summary{cursor:pointer;font-weight:700;color:#fff}
+.public-home .public-credits p{font-size:13px;line-height:1.6;margin:10px 0 0}
+.public-home .public-credits a{text-decoration:underline;text-underline-offset:3px}
+
+@media(max-width:900px){
+  .public-home .public-header{padding:20px 24px}.public-home .public-hero{padding:48px 24px 64px}
+  .public-home .public-chat{grid-template-columns:1fr;gap:40px;padding:64px 24px}
+  .public-home .public-about{grid-template-columns:1fr;gap:40px;padding:72px 24px}
+  .public-home .public-section{padding:64px 24px}.public-home .public-guide{padding-left:24px;padding-right:24px}
+  .public-home .public-service-grid article{grid-template-columns:1fr;gap:24px}.public-home .public-service-grid article:nth-child(even) .public-service-text{order:0}
+  .public-home .public-guide ol{grid-template-columns:1fr;gap:32px}.public-home .public-contact{grid-template-columns:1fr;gap:40px}
+  .public-home .public-footer{padding:48px 24px 32px}
+}
+@media(max-width:650px){
+  .public-home .public-header{padding:16px 20px;gap:12px}.public-home .public-brand img{width:34px;height:42px}.public-home .public-brand strong{font-size:17px}.public-home .public-brand small{font-size:10px}
+  .public-home nav{display:none}.public-home .public-enter{padding:12px 16px;gap:10px}
+  .public-home .public-hero{padding:40px 20px 56px}.public-home h1{font-size:19vw}.public-home h1>span{font-size:.42em;white-space:normal}
+  .public-home .public-lead{margin:32px 0 24px}
+  .public-home .public-chat,.public-home .public-section,.public-home .public-about,.public-home .public-footer{padding-left:20px;padding-right:20px}
+  .public-home .public-chat-card{padding:24px 18px}.public-home .public-service-grid img{height:220px}
+  .public-home .public-contact dl{grid-template-columns:1fr}.public-home .public-footer-main a{margin-left:0}
+}
 
 /* ---------------------------------------------------------------------------
-   Movimiento de la portada. Solo se animan transform y opacity (no se traban),
-   con curvas de salida rápidas, y nada pasa de ~500 ms. Los efectos de mouse
-   van solo en dispositivos con mouse, y todo se apaga con "movimiento reducido".
+   Movimiento. Solo transform y opacity, curvas de salida rápidas, nada pasa de
+   ~900 ms. El mouse solo en dispositivos con mouse; todo se apaga con
+   "movimiento reducido".
    --------------------------------------------------------------------------- */
-.public-home{--ease-out:cubic-bezier(.23,1,.32,1)}
-
-/* Insignia de WhatsApp: anillo suave detrás y tres puntos que "escriben". */
 .public-home .public-chat-badge{position:relative;display:grid;place-items:center;width:52px;height:52px}
 .public-home .public-chat-badge svg{position:relative;z-index:1;display:block}
-.public-home .public-chat-badge::before{content:"";position:absolute;inset:0;border-radius:15px;background:var(--brand-yellow);opacity:0;animation:pub-ring 2.8s var(--ease-out) infinite}
+.public-home .public-chat-badge::before{content:"";position:absolute;inset:0;border-radius:15px;background:var(--sun);opacity:0;animation:pub-ring 2.8s var(--ease-out) infinite}
 .public-home .public-typing{transform-box:fill-box;transform-origin:center;animation:pub-typing 1.3s ease-in-out infinite}
 .public-home .public-typing-2{animation-delay:.16s}
 .public-home .public-typing-3{animation-delay:.32s}
 @keyframes pub-ring{0%{transform:scale(1);opacity:.5}65%,100%{transform:scale(1.6);opacity:0}}
 @keyframes pub-typing{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-3px);opacity:1}}
 
-/* Entrada al abrir: el texto sube en cascada y la tarjeta del QR llega después. */
-@keyframes pub-rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-.public-home .public-intro>*{animation:pub-rise 380ms var(--ease-out) both}
-.public-home .public-intro>*:nth-child(2){animation-delay:50ms}
-.public-home .public-intro>*:nth-child(3){animation-delay:100ms}
-.public-home .public-intro>*:nth-child(4){animation-delay:150ms}
-.public-home .public-intro>*:nth-child(5){animation-delay:200ms}
-.public-home .public-chat{animation:pub-rise 460ms var(--ease-out) 120ms both}
+/* La araña baja por su hilo una vez al abrir. */
+@keyframes pub-drop{from{transform:translateY(-34px)}to{transform:none}}
+.public-home .public-spider{animation:pub-drop 900ms var(--ease-out) 350ms both}
 
-/* Aparición al hacer scroll. Solo se oculta si el script ya está listo para
-   mostrarlo (reveal-ready), así que sin JavaScript todo se ve. */
-.public-home [data-reveal]{transition:opacity 420ms var(--ease-out),transform 420ms var(--ease-out);transition-delay:calc(var(--i,0) * 70ms)}
-.public-home.reveal-ready [data-reveal]:not(.is-visible){opacity:0;transform:translateY(16px)}
+/* Entrada al abrir: el texto sube en cascada. */
+@keyframes pub-rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.public-home .public-intro>*{animation:pub-rise 480ms var(--ease-out) both}
+.public-home .public-intro>*:nth-child(2){animation-delay:60ms}
+.public-home .public-intro>*:nth-child(3){animation-delay:140ms}
+.public-home .public-intro>*:nth-child(4){animation-delay:200ms}
 
-/* Respuesta al presionar (todos los dispositivos). */
-.public-home .public-enter,.public-home .public-whatsapp,.public-home .public-qr-link{transition:transform 160ms var(--ease-out),box-shadow 200ms var(--ease-out),border-color 200ms ease,background-color 200ms ease}
+/* Aparición al hacer scroll; sin JavaScript todo se ve. */
+.public-home [data-reveal]{transition:opacity 480ms var(--ease-out),transform 480ms var(--ease-out);transition-delay:calc(var(--i,0) * 80ms)}
+.public-home.reveal-ready [data-reveal]:not(.is-visible){opacity:0;transform:translateY(20px)}
+
+.public-home .public-enter,.public-home .public-whatsapp,.public-home .public-qr-link{transition:transform 160ms var(--ease-out),box-shadow 200ms var(--ease-out),background-color 200ms ease}
 .public-home .public-enter:active,.public-home .public-whatsapp:not(:disabled):active{transform:scale(.97)}
 .public-home .public-qr-link:active{transform:scale(.98)}
 .public-home .public-enter span,.public-home .public-whatsapp span,.public-home .public-text-link span{display:inline-block;transition:transform 180ms var(--ease-out)}
+.public-home .public-service-grid img,.public-home .public-about img{transition:transform 600ms var(--ease-out)}
+.public-home .public-service-grid article,.public-home .public-about{overflow:hidden}
 
-/* Efectos con el mouse: solo en dispositivos que lo tienen (en el celular el
-   "hover" se queda pegado después de tocar). */
 @media (hover:hover) and (pointer:fine){
-  .public-home .public-enter:hover{background:#000;transform:translateY(-1px);text-decoration:none}
+  .public-home .public-enter:hover{background:#000;transform:translateY(-1px)}
   .public-home .public-enter:hover span{transform:translate(2px,-2px)}
-  .public-home .public-whatsapp:not(:disabled):hover{transform:translateY(-2px);box-shadow:0 10px 22px #f5c51866;text-decoration:none}
+  .public-home .public-whatsapp:not(:disabled):hover{transform:translateY(-2px);box-shadow:0 12px 24px #f5c51855}
   .public-home .public-whatsapp:not(:disabled):hover span{transform:translate(2px,-2px)}
-  .public-home .public-qr-link:hover{transform:translateY(-3px);border-color:var(--brand-yellow);box-shadow:0 12px 24px #1a1a1a14}
+  .public-home .public-qr-link:hover{transform:translateY(-3px)}
   .public-home .public-text-link:hover span{transform:translateY(3px)}
-  .public-home .public-service-grid article{transition:transform 220ms var(--ease-out),box-shadow 220ms var(--ease-out),border-color 220ms ease,opacity 420ms var(--ease-out)}
-  .public-home .public-service-grid article:hover{transform:translateY(-4px);border-color:var(--brand-yellow);box-shadow:0 14px 28px #1a1a1a10}
-  .public-home .public-service-grid article:hover .public-service-number{background:var(--brand-yellow);color:var(--brand-black)}
-  .public-home .public-guide li:hover>span{transform:scale(1.1)}
+  .public-home nav a:hover{border-bottom-color:var(--ink)}
+  .public-home .public-service-grid article:hover img{transform:scale(1.03)}
+  .public-home .public-footer-main a:hover{border-bottom-color:#fff}
 }
-.public-home .public-service-number{transition:background-color 220ms ease,color 220ms ease}
-.public-home .public-guide li>span{transition:transform 200ms var(--ease-out)}
 
-/* Movimiento reducido: sin animaciones ni desplazamientos. Se conservan los
-   cambios de color, que ayudan a entender sin marear. */
 @media (prefers-reduced-motion:reduce){
   .public-home *,.public-home *::before{animation:none !important;transition-property:color,background-color,border-color,box-shadow !important}
   .public-home.reveal-ready [data-reveal]:not(.is-visible){opacity:1;transform:none}
