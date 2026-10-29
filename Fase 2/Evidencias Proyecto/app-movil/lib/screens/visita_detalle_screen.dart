@@ -16,6 +16,7 @@ import '../offline/offline_api_client.dart';
 import '../services/api_client.dart';
 import '../services/pending_photo.dart';
 import '../theme/app_theme.dart';
+import '../utils/enlaces.dart';
 import '../utils/formato.dart';
 import '../widgets/estado_badge.dart';
 import '../widgets/company_brand.dart';
@@ -25,11 +26,14 @@ class VisitaDetalleScreen extends StatefulWidget {
   // Id de la visita a mostrar; la pantalla la pide al backend al abrirse.
   final String visitaId;
   final ApiClient? apiClient;
+  // Cómo se abre un enlace (mapas, llamada, WhatsApp). Las pruebas lo reemplazan.
+  final AbrirEnlace abrirEnlace;
 
   const VisitaDetalleScreen({
     super.key,
     required this.visitaId,
     this.apiClient,
+    this.abrirEnlace = abrirEnlaceExterno,
   });
 
   @override
@@ -118,6 +122,17 @@ class _VisitaDetalleScreenState extends State<VisitaDetalleScreen> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(texto)));
+  }
+
+  /// Abre un enlace en otra app. Si faltan datos para armarlo, o el teléfono
+  /// no puede abrirlo, se lo dice al técnico en vez de no hacer nada.
+  Future<void> _abrir(Uri? enlace, {required String sinDatos, required String error}) async {
+    if (enlace == null) {
+      _mostrarMensaje(sinDatos);
+      return;
+    }
+    final abierto = await widget.abrirEnlace(enlace);
+    if (!abierto) _mostrarMensaje(error);
   }
 
   Future<void> _iniciarVisita() => _guardar(estado: 'en_curso', mensajeOk: 'Visita iniciada');
@@ -218,11 +233,61 @@ class _VisitaDetalleScreenState extends State<VisitaDetalleScreen> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  _InfoRow(icon: Icons.location_on_outlined, text: visita.cliente.direccionTexto),
+                  _InfoRow(
+                    icon: Icons.location_on_outlined,
+                    text: visita.cliente.direccionTexto,
+                    onTap: () => _abrir(
+                      urlNavegacion(
+                        lat: visita.cliente.lat,
+                        lng: visita.cliente.lng,
+                        direccion: visita.cliente.direccion,
+                      ),
+                      sinDatos: 'Este cliente no tiene dirección ni ubicación registrada',
+                      error: 'No se pudo abrir la app de mapas',
+                    ),
+                    acciones: [
+                      _AccionIcono(
+                        icono: Icons.directions_outlined,
+                        tooltip: 'Cómo llegar',
+                        onPressed: () => _abrir(
+                          urlNavegacion(
+                            lat: visita.cliente.lat,
+                            lng: visita.cliente.lng,
+                            direccion: visita.cliente.direccion,
+                          ),
+                          sinDatos: 'Este cliente no tiene dirección ni ubicación registrada',
+                          error: 'No se pudo abrir la app de mapas',
+                        ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 8),
                   _InfoRow(icon: Icons.schedule_outlined, text: formatFechaHora(visita.fechaHora)),
                   const SizedBox(height: 8),
-                  _InfoRow(icon: Icons.phone_outlined, text: visita.cliente.telefonoWhatsapp),
+                  _InfoRow(
+                    icon: Icons.phone_outlined,
+                    text: visita.cliente.telefonoWhatsapp,
+                    acciones: [
+                      _AccionIcono(
+                        icono: Icons.call_outlined,
+                        tooltip: 'Llamar',
+                        onPressed: () => _abrir(
+                          urlLlamada(visita.cliente.telefonoWhatsapp),
+                          sinDatos: 'El teléfono del cliente no es válido',
+                          error: 'No se pudo abrir el teléfono',
+                        ),
+                      ),
+                      _AccionIcono(
+                        icono: Icons.chat_outlined,
+                        tooltip: 'Escribir por WhatsApp',
+                        onPressed: () => _abrir(
+                          urlWhatsapp(visita.cliente.telefonoWhatsapp),
+                          sinDatos: 'El teléfono del cliente no es válido',
+                          error: 'No se pudo abrir WhatsApp',
+                        ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 16),
                   const Divider(),
                   const SizedBox(height: 12),
@@ -304,22 +369,51 @@ class _VisitaDetalleScreenState extends State<VisitaDetalleScreen> {
   }
 }
 
-/// Fila con un ícono gris y un texto (dirección, hora, teléfono).
+/// Fila con un ícono gris y un texto (dirección, hora, teléfono). Puede ser
+/// tocable (`onTap`) y llevar botones a la derecha (`acciones`).
 class _InfoRow extends StatelessWidget {
   final IconData icon;
   final String text;
+  final VoidCallback? onTap;
+  final List<Widget> acciones;
 
-  const _InfoRow({required this.icon, required this.text});
+  const _InfoRow({required this.icon, required this.text, this.onTap, this.acciones = const []});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final contenido = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(icon, size: 20, color: AppColors.textSecondary),
         const SizedBox(width: 10),
         Expanded(child: Text(text, style: Theme.of(context).textTheme.bodyLarge)),
       ],
+    );
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(child: onTap == null ? contenido : InkWell(onTap: onTap, child: contenido)),
+        ...acciones,
+      ],
+    );
+  }
+}
+
+/// Botón de ícono pequeño para las acciones de una fila (llamar, navegar...).
+class _AccionIcono extends StatelessWidget {
+  final IconData icono;
+  final String tooltip;
+  final VoidCallback onPressed;
+
+  const _AccionIcono({required this.icono, required this.tooltip, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(icono, color: AppColors.black),
+      tooltip: tooltip,
+      visualDensity: VisualDensity.compact,
+      onPressed: onPressed,
     );
   }
 }
