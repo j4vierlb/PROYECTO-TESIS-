@@ -21,9 +21,9 @@ Lo que ya existe y se reutiliza:
 | Croquis anterior del cliente | Última versión en `croquis` + sus `dispositivos_trampa` con `estado` (`activo`, `revisar`, `retirado`) | No (solo si hay) |
 | Notas del operador | Texto libre ("hay un desagüe en el patio trasero") | No |
 
-### 1.1 Coordenadas: geocodificación de la dirección (falta hoy)
+### 1.1 Coordenadas: geocodificación de la dirección (implementado)
 
-Los clientes que llegan por WhatsApp solo tienen `direccion` (texto); `clientes.ubicacion` queda en `null`, y hoy **nada en el sistema convierte la dirección en coordenadas**. Sin coordenadas no hay foto satelital ni croquis, así que esto es un requisito previo de la IA.
+Los clientes que llegan por WhatsApp solo tienen `direccion` (texto); `clientes.ubicacion` queda en `null` hasta que el sistema convierte la dirección en coordenadas (`app/geocoding.py`). Sin coordenadas no hay foto satelital ni croquis, así que esto es un requisito previo de la IA.
 
 **Cómo:** Google Geocoding API, con la cuenta de Google Maps que ya usa la app.
 
@@ -34,7 +34,7 @@ Los clientes que llegan por WhatsApp solo tienen `direccion` (texto); `clientes.
 **Módulo** `app/geocoding.py` → `geocodificar(direccion) -> (lat, lng, precision) | None`:
 
 - Llama a `https://maps.googleapis.com/maps/api/geocode/json` con `address`, `components=country:CL`, `region=cl` y `language=es`.
-- Si la dirección no trae comuna, se agrega ", Región Metropolitana" para no caer en otra ciudad con la misma calle.
+- La dirección se envía tal como la escribió el cliente. Kill Bichos agenda visitas en **cualquier lugar de Chile**, así que no se asume ninguna región; la IA de WhatsApp pide siempre calle, número y comuna o ciudad.
 - Timeout corto (5 s). Si falla, devuelve `None` y no rompe nada: el cliente queda sin coordenadas como hoy.
 
 **Validaciones antes de guardar en `clientes.ubicacion`:**
@@ -42,7 +42,8 @@ Los clientes que llegan por WhatsApp solo tienen `direccion` (texto); `clientes.
 1. `status == "OK"` y un solo resultado (o el primero si todos están a < 100 m).
 2. `geometry.location_type` = `ROOFTOP` o `RANGE_INTERPOLATED`. Si es `GEOMETRIC_CENTER` o `APPROXIMATE` (solo encontró la calle o la comuna), **no se guarda**: una foto centrada en el lugar equivocado produce un croquis inútil.
 3. Si `partial_match = true`, tampoco se guarda (Google adivinó parte de la dirección).
-4. El punto debe caer dentro del rectángulo de la Región Metropolitana (lat −34,3 a −32,9; lng −71,8 a −69,8) **y** Google debe informar la Región Metropolitana como `administrative_area_level_1`. El rectángulo solo no basta: Valparaíso y Viña del Mar también caen dentro.
+4. El resultado debe estar en Chile (`country` = `CL`).
+5. **La comuna o ciudad que informa Google (`locality` o `administrative_area_level_3`) debe aparecer en la dirección que escribió el cliente**, sin importar tildes ni mayúsculas. Sin esto Google elige una ciudad por su cuenta (una misma calle existe en muchas) y el pin podría quedar en otro lugar sin que nadie lo note. Si el cliente nombra una comuna que no coincide con la que ubica Google (por ejemplo, una dirección que está en La Florida y se escribió como Macul), no se guarda: ante la duda, el cliente queda sin coordenadas y el operador las fija.
 
 **Cuándo se geocodifica:**
 
