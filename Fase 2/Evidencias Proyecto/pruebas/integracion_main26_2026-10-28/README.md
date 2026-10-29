@@ -5,9 +5,16 @@ Trabajo exclusivamente en `juan`. Se incorporó `origin/main` en `c4ce814`
 de historial. La búsqueda de direcciones para todo Chile y la presentación
 del agente son cambios de Javier integrados desde main.
 
+Durante esta revisión se fusionó también la PR #25 en main (`f26fd7e`). Se
+incorporó ese avance mediante `547e8c8`; no cambió ningún archivo respecto al
+código que ya había pasado las pruebas (`8c6ad0d`). Los ajustes de interfaz,
+documentación y estas evidencias se publican en una PR de seguimiento, porque
+la #25 quedó cerrada con su cabeza anterior `2b16065`.
+
 La portada pública en preparación se guardó temporalmente con Git stash,
 incluidos sus archivos nuevos. Se restaura localmente después de publicar
-esta integración; no forma parte de la PR #25 ni de los contadores de este corte.
+esta integración; no forma parte de la PR de seguimiento ni de los contadores
+de este corte.
 
 ## Ajustes de compatibilidad
 
