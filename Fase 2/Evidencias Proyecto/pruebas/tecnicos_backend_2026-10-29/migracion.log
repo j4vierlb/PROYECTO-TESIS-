@@ -1,0 +1,16 @@
+== Base con el schema.sql anterior (origin/main) ==
+ tiene_session_version 
+-----------------------
+                     0
+(1 row)
+
+== Primera aplicación ==
+ALTER TABLE
+== Segunda aplicación (idempotente) ==
+NOTICE:  column "session_version" of relation "operadores" already exists, skipping
+ALTER TABLE
+     nombre     |         email         |    password_hash     | session_version | activo 
+----------------+-----------------------+----------------------+-----------------+--------
+ Tecnico previo | previo@migracion.test | $2b$12$hashsintetico |               0 | t
+(1 row)
+

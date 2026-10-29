@@ -1,0 +1,14 @@
+test_cambiar_clave_cierra_sesiones_abiertas (test_operadores_panel.OperadoresPanelTest.test_cambiar_clave_cierra_sesiones_abiertas) ... ok
+test_correo_repetido_en_operadores_o_usuarios_responde_409 (test_operadores_panel.OperadoresPanelTest.test_correo_repetido_en_operadores_o_usuarios_responde_409) ... ok
+test_crear_tecnico_guarda_clave_cifrada_y_puede_iniciar_sesion (test_operadores_panel.OperadoresPanelTest.test_crear_tecnico_guarda_clave_cifrada_y_puede_iniciar_sesion) ... ok
+test_desactivar_bloquea_login_y_token_y_reactivar_lo_devuelve (test_operadores_panel.OperadoresPanelTest.test_desactivar_bloquea_login_y_token_y_reactivar_lo_devuelve) ... ok
+test_editar_nombre_y_borrar_telefono_sin_tocar_la_clave (test_operadores_panel.OperadoresPanelTest.test_editar_nombre_y_borrar_telefono_sin_tocar_la_clave) ... ok
+test_otra_empresa_no_se_lista_ni_se_puede_editar (test_operadores_panel.OperadoresPanelTest.test_otra_empresa_no_se_lista_ni_se_puede_editar) ... ok
+test_tecnico_y_coordinador_no_gestionan_tecnicos (test_operadores_panel.OperadoresPanelTest.test_tecnico_y_coordinador_no_gestionan_tecnicos) ... ok
+test_telefono_es_opcional_y_vacio_se_guarda_como_nulo (test_operadores_panel.OperadoresPanelTest.test_telefono_es_opcional_y_vacio_se_guarda_como_nulo) ... ok
+test_validaciones_de_clave_y_datos (test_operadores_panel.OperadoresPanelTest.test_validaciones_de_clave_y_datos) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 5.852s
+
+OK
