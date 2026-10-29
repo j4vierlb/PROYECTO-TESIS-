@@ -41,6 +41,9 @@ class OfflineApiClient extends ApiClient {
   Future<List<Visita>> fetchVisitasHoy() => sync.refreshAgenda();
 
   @override
+  Future<List<Visita>> fetchVisitasProximas({int dias = 14}) => sync.readProximas(dias);
+
+  @override
   Future<List<Visita>> fetchHistorial({int limit = 20, int offset = 0}) =>
       sync.readHistorial(limit, offset);
 

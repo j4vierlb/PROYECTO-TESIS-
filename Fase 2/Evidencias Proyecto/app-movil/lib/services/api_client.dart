@@ -127,6 +127,15 @@ class ApiClient {
     return data.map((item) => Visita.fromJson(item as Map<String, dynamic>)).toList();
   }
 
+  /// GET /operadores/me/visitas-proximas — visitas pendientes desde mañana
+  /// hasta dentro de `dias` días (el backend acepta de 1 a 60), de la más
+  /// cercana a la más lejana. Hoy no se incluye: eso es la agenda del día.
+  Future<List<Visita>> fetchVisitasProximas({int dias = 14}) async {
+    final body = await _authenticatedGet('/operadores/me/visitas-proximas?dias=$dias');
+    final data = jsonDecode(body) as List<dynamic>;
+    return data.map((item) => Visita.fromJson(item as Map<String, dynamic>)).toList();
+  }
+
   /// Visitas completadas del operador, de la más reciente a la más antigua.
   /// `limit`/`offset` permiten pedirlas por páginas.
   Future<List<Visita>> fetchHistorial({int limit = 20, int offset = 0}) async {

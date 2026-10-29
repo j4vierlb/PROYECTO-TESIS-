@@ -62,6 +62,7 @@ class FakeRemote extends ApiClient {
   int? failWithStatus; // si se define, toda petición responde ese error HTTP
   bool cutAfterUpdate = false; // se desconecta justo después de un updateVisita
   final Map<String, Visita> visitas = {};
+  final List<Visita> proximas = [];
   final Map<String, Croquis> croquisPorVisita = {};
   final List<String> calls = [];
   int proximoCodigo = 2;
@@ -77,6 +78,13 @@ class FakeRemote extends ApiClient {
     _check();
     calls.add('fetchVisitasHoy');
     return visitas.values.toList();
+  }
+
+  @override
+  Future<List<Visita>> fetchVisitasProximas({int dias = 14}) async {
+    _check();
+    calls.add('fetchVisitasProximas:$dias');
+    return List.of(proximas);
   }
 
   @override

@@ -327,6 +327,14 @@ class SyncService with WidgetsBindingObserver {
     return visitas;
   }
 
+  /// Visitas de los próximos días: servidor primero y, sin señal, la última
+  /// copia guardada. Se guarda siempre la última lista pedida, sin importar `dias`.
+  Future<List<Visita>> readProximas(int dias) => _read<List<Visita>>(
+        fromServer: () => remote.fetchVisitasProximas(dias: dias),
+        fromCache: cache.readProximas,
+        save: cache.writeProximas,
+      );
+
   Future<List<Visita>> readHistorial(int limit, int offset) => _read<List<Visita>>(
         fromServer: () => remote.fetchHistorial(limit: limit, offset: offset),
         // Solo la primera página se guarda; las siguientes exigen conexión.
