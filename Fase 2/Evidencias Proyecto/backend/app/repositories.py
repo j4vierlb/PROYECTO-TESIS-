@@ -77,6 +77,26 @@ def fetch_visits_for_today(db: Connection, operador_id: UUID, dia: date) -> list
     return [dict(row) for row in rows]
 
 
+def fetch_upcoming_visits(db: Connection, operador_id: UUID, hoy: date, dias: int) -> list[dict[str, Any]]:
+    """Visitas pendientes del operador desde mañana hasta dentro de `dias` días
+    (días de Chile, igual que la agenda de hoy). Solo las que siguen por hacerse
+    ('agendada' o 'reagendada'): las canceladas y las ya hechas no aparecen."""
+    rows = db.execute(
+        text(
+            _VISIT_SELECT
+            + f"""
+            WHERE v.operador_id = :operador_id
+              AND v.estado IN {_ACTIVE_VISIT_STATES}
+              AND (v.fecha_hora AT TIME ZONE 'America/Santiago')::date > :hoy
+              AND (v.fecha_hora AT TIME ZONE 'America/Santiago')::date <= :hasta
+            ORDER BY v.fecha_hora
+            """
+        ),
+        {"operador_id": str(operador_id), "hoy": hoy, "hasta": hoy + timedelta(days=dias)},
+    ).mappings().all()
+    return [dict(row) for row in rows]
+
+
 def fetch_visit_history(db: Connection, operador_id: UUID, limit: int, offset: int) -> list[dict[str, Any]]:
     """Visitas completadas del operador, de la más reciente a la más antigua,
     con la cantidad de trampas que siguen instaladas en su croquis."""
