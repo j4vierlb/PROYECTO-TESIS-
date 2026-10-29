@@ -90,9 +90,11 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
     expect(screen.getByText('Cliente WhatsApp')).toBeVisible()
   })
 
-  it('el login no trae credenciales de demostración precargadas', () => {
+  it('el login no trae credenciales de demostración precargadas', async () => {
     localStorage.clear()
+    const user = userEvent.setup()
     render(<App />)
+    await user.click(screen.getByRole('button', { name: 'Ingresar', exact: true }))
     expect(screen.getByLabelText('Correo')).toHaveValue('')
     expect(screen.getByLabelText('Contraseña')).toHaveValue('')
   })
@@ -103,6 +105,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
     vi.stubGlobal('fetch', vi.fn((url, options) => new URL(url).pathname === '/auth/login' ? Promise.resolve(new Response(JSON.stringify({ access_token: 'token-admin' }), { status: 200 })) : base(url, options)))
     const user = userEvent.setup()
     render(<App />)
+    await user.click(screen.getByRole('button', { name: 'Ingresar', exact: true }))
     await user.type(screen.getByLabelText('Correo'), 'admin@panel.test')
     await user.type(screen.getByLabelText('Contraseña'), 'ClaveQA123')
     await user.click(screen.getByRole('button', { name: 'Ingresar al panel' }))
@@ -117,6 +120,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
       : new Response(JSON.stringify({ detail: 'Se requiere un usuario del panel' }), { status: 403 })))
     const user = userEvent.setup()
     render(<App />)
+    await user.click(screen.getByRole('button', { name: 'Ingresar', exact: true }))
     await user.type(screen.getByLabelText('Correo'), 'operador@panel.test')
     await user.type(screen.getByLabelText('Contraseña'), 'ClaveQA123')
     await user.click(screen.getByRole('button', { name: 'Ingresar al panel' }))

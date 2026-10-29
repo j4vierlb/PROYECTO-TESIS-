@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, expect, it, vi } from 'vitest'
 import { App } from '../src/main.jsx'
 import { PasswordRecovery } from '../src/PasswordRecovery.jsx'
+import userEvent from '@testing-library/user-event'
 
 const label = 'Kill Bichos, control de plagas'
 beforeEach(() => {
@@ -10,8 +11,10 @@ beforeEach(() => {
   window.history.replaceState(null, '', '/')
 })
 
-it('muestra el logo original con texto accesible en el login', () => {
+it('muestra el logo original con texto accesible en el login', async () => {
+  const user = userEvent.setup()
   render(<App />)
+  await user.click(screen.getByRole('button', { name: 'Ingresar', exact: true }))
   expect(screen.getByRole('img', { name: label })).toHaveAttribute('src', '/brand/kill-bichos.png')
   expect(screen.getByRole('img', { name: label })).toHaveClass('login-logo')
   expect(screen.getByRole('button', { name: 'Olvidé mi contraseña' })).toHaveClass('secondary')
