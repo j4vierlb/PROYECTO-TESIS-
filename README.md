@@ -67,6 +67,24 @@ flutter run --release --dart-define=API_BASE_URL=http://$(ipconfig getifaddr en0
 
 El backend de Docker ya escucha en la red (puerto 8000), así que el teléfono lo alcanza sin configurar nada más. Detalles en el README de `app-movil`.
 
+## Limitaciones conocidas y pasos a producción
+
+El WhatsApp del proyecto se demuestra con el Sandbox de Twilio, que es un entorno de prueba. Con él se ve el flujo completo: el cliente escribe, el agente de IA responde, agenda la visita y esta aparece en el panel. Tiene estos límites:
+
+- Cada teléfono debe unirse primero enviando el mensaje `join ...` al número del Sandbox (o escaneando el QR de la portada). Esa unión vence a las 72 horas.
+- Los avisos que el sistema envía solos (agendamiento, reagendamiento, cancelación y recordatorios) solo salen si el cliente escribió en las últimas 24 horas. Si no, quedan como "no enviado", porque escribirle primero a un cliente exige una plantilla aprobada por Meta.
+- No es un servicio abierto al público: solo lo usan quienes se unieron al Sandbox.
+
+La puesta en marcha real es un paso de la empresa, no del equipo de desarrollo, y necesita:
+
+1. Un número de WhatsApp propio, registrado en Twilio con Meta.
+2. Una cuenta de Meta Business.
+3. Plantillas de mensaje aprobadas por Meta para los avisos y recordatorios.
+4. Un servidor siempre encendido, con dirección fija y HTTPS, en lugar del túnel de ngrok.
+5. Asumir el costo de uso de Twilio, Meta y OpenAI.
+
+El código ya está preparado para ese paso: solo cambian variables del `.env` (`TWILIO_WHATSAPP_NUMBER`, las claves, `TWILIO_CONTENT_SID_AVISO`, `TWILIO_CONTENT_SID_RECORDATORIO` y `TWILIO_WEBHOOK_URL`), sin modificar el programa.
+
 ## Más información
 
 - `Fase 2/Evidencias Proyecto/database/README.md` — scripts de la base y tareas frecuentes
