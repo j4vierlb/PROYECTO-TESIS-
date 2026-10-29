@@ -1,0 +1,173 @@
+
+> kill-bichos-panel@0.1.0 test
+> vitest run --reporter=verbose
+
+
+ RUN  v5.0.3 C:/Users/user/Documents/Kill Bichos/PROYECTO-TESIS-/Fase 2/Evidencias Proyecto/frontend
+
+ ✓ tests/brand-assets.test.js > el logo web es una copia exacta del original compartido con iOS 4ms
+ ✓ tests/brand-assets.test.js > la paleta web coincide con los colores del tema móvil 2ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM01 descarta coordenadas inválidas {"lat":null,"lng":null} 2ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM01 descarta coordenadas inválidas {"lat":91,"lng":0} 0ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM01 descarta coordenadas inválidas {"lat":0,"lng":-181} 0ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM01 descarta coordenadas inválidas {"lat":null,"lng":0} 0ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM01 descarta coordenadas inválidas {"lat":"0","lng":0} 0ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM02 acepta coordenadas cero 1ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM03 apariencia { estado: 'retirado', …(1) } 1ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM03 apariencia { sugerido_por_ia: true, …(1) } 0ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM03 apariencia { estado: 'revisar', confirmado: true } 0ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM03 apariencia { confirmado: true } 0ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM03 apariencia {} 0ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM04 falta de clave no solicita el SDK 3ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM05 dibuja puntos inmutables, selecciona y elimina listeners al cerrar 5ms
+ ✓ tests/croquis-map.test.js > CRM modelo y adaptador de mapa > CRM06 no crea mapas sin posición válida 1ms
+ ✓ tests/api.test.js > HTTP del panel > envía el token y acepta respuestas sin contenido 6ms
+ ✓ tests/api.test.js > HTTP del panel > traduce los errores de validación sin mostrar objetos 6ms
+ ✓ tests/api.test.js > HTTP del panel > conserva el mensaje de un conflicto y la sesión 1ms
+ ✓ tests/api.test.js > HTTP del panel > cierra una sesión vencida y avisa a la aplicación 3ms
+ ✓ tests/api.test.js > HTTP del panel > un login rechazado no expira otra sesión ni envía su token 2ms
+ ✓ tests/api.test.js > HTTP del panel > un 401 antiguo no cierra una sesión nueva 1ms
+ ✓ tests/api.test.js > HTTP del panel > da un mensaje útil si no hay conexión 1ms
+ ✓ tests/api.test.js > HTTP del panel > no muestra detalles internos del servidor 1ms
+ ✓ tests/api.test.js > HTTP del panel > cancela una petición que tarda más de quince segundos 4ms
+ ✓ tests/api.test.js > CRP descarga privada de fotos > CRP01 rechaza dirección no permitida https://evil.test/foto 1ms
+ ✓ tests/api.test.js > CRP descarga privada de fotos > CRP01 rechaza dirección no permitida //evil.test/foto 1ms
+ ✓ tests/api.test.js > CRP descarga privada de fotos > CRP01 rechaza dirección no permitida /clientes 0ms
+ ✓ tests/api.test.js > CRP descarga privada de fotos > CRP01 rechaza dirección no permitida /dispositivos-trampa/11111111-1111-1111-1111-111111111111/foto?v=abc123&token=abc 1ms
+ ✓ tests/api.test.js > CRP descarga privada de fotos > CRP01 rechaza dirección no permitida /dispositivos-trampa/../foto 1ms
+ ✓ tests/api.test.js > CRP descarga privada de fotos > CRP02 no permite SVG u otro contenido ejecutable 3ms
+ ✓ tests/api.test.js > CRP descarga privada de fotos > CRP03 rechaza foto con tamaño 0 3ms
+ ✓ tests/api.test.js > CRP descarga privada de fotos > CRP03 rechaza foto con tamaño 5242881 9ms
+ ✓ tests/api.test.js > CRP descarga privada de fotos > CRP04 devuelve PNG sin persistencia ni redirecciones 1ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > precarga una visita existente en hora chilena: 2026-09-30T02:30:00Z 64ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > precarga una visita existente en hora chilena: 2026-07-15T14:00:00Z 1ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > muestra 2026-09-30T01:30:00Z en hora de Chile 1ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > muestra 2026-07-16T01:30:00Z en hora de Chile 1ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > muestra 2026-09-30T03:00:00Z en hora de Chile 1ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > muestra 2026-09-29T10:00:00-03:00 en hora de Chile 1ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > guarda 2026-09-29T10:00 como UTC y conserva su hora local 2ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > guarda 2026-07-15T10:00 como UTC y conserva su hora local 1ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > guarda 2026-09-29T23:30 como UTC y conserva su hora local 1ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > guarda 2026-09-06T01:00 como UTC y conserva su hora local 1ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > rechaza una hora inexistente al adelantar el reloj 1ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > rechaza un formato inválido 0ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > navega días sin saltos: 2026-12-31 %+i 1ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > navega días sin saltos: 2026-03-01 %+i 0ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > navega días sin saltos: 2026-09-06 %+i 0ms
+ ✓ tests/panel-utils.test.js > PANEL-HORA: fecha y hora de Chile, independiente del navegador > navega días sin saltos: 2026-04-04 %+i 0ms
+ ✓ tests/panel-utils.test.js > PANEL-CLIENTES: ubicación opcional > muestra marcador sin coordenadas: {"lat":null,"lng":null} 0ms
+ ✓ tests/panel-utils.test.js > PANEL-CLIENTES: ubicación opcional > muestra marcador sin coordenadas: {} 0ms
+ ✓ tests/panel-utils.test.js > PANEL-CLIENTES: ubicación opcional > muestra marcador sin coordenadas: {"lat":-33.4,"lng":null} 0ms
+ ✓ tests/panel-utils.test.js > PANEL-CLIENTES: ubicación opcional > una ubicación inválida se muestra pendiente: {"lat":null,"lng":-70} 0ms
+ ✓ tests/panel-utils.test.js > PANEL-CLIENTES: ubicación opcional > una ubicación inválida se muestra pendiente: {"lat":-33,"lng":null} 0ms
+ ✓ tests/panel-utils.test.js > PANEL-CLIENTES: ubicación opcional > una ubicación inválida se muestra pendiente: {"lat":91,"lng":0} 0ms
+ ✓ tests/panel-utils.test.js > PANEL-CLIENTES: ubicación opcional > una ubicación inválida se muestra pendiente: {"lat":0,"lng":-181} 0ms
+ ✓ tests/panel-utils.test.js > PANEL-CLIENTES: ubicación opcional > cero es una coordenada válida 0ms
+ ✓ tests/panel-utils.test.js > PANEL-CLIENTES: ubicación opcional > conserva null al editar un cliente sin ubicación ni dirección 1ms
+ ✓ tests/panel-utils.test.js > PANEL-CLIENTES: ubicación opcional > convierte coordenadas del formulario sin perder cero 0ms
+ ✓ tests/panel-utils.test.js > PANEL-CLIENTES: ubicación opcional > rechaza una coordenada incompleta 0ms
+ ✓ tests/panel-utils.test.js > PANEL-CLIENTES: ubicación opcional > rechaza valores no numéricos 0ms
+ ✓ tests/panel-utils.test.js > PANEL-ASIGNACION: contrato UUID o null > Sin asignar envía null, no cadena vacía 0ms
+ ✓ tests/panel-utils.test.js > PANEL-ASIGNACION: contrato UUID o null > conserva un operador elegido 0ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW01 carga únicamente con GET y no ofrece acciones de modificación 187ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW02 conserva retiradas y distingue propuestas IA 49ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW03 croquis inexistente no se crea automáticamente 27ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW04 informa permisos insuficientes sin mostrar trampas 30ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW05 maneja un croquis vacío 16ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW06 mantiene el listado y fotos si Google Maps falla 31ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW07 no inventa ubicaciones ni carga Maps sin coordenadas 21ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW08 muestra una foto autenticada como blob y la libera al cerrar 20ms
+ ✓ tests/brand.test.jsx > muestra el logo original con texto accesible en el login 293ms
+ ✓ tests/brand.test.jsx > recuperación conserva logo y botón secundario (token undefined) 17ms
+ ✓ tests/brand.test.jsx > recuperación conserva logo y botón secundario (token AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA) 16ms
+ ✓ tests/brand.test.jsx > muestra el logo en la navegación y conserva los colores por estado compartidos con la app 55ms
+ ✓ tests/merge-integration.test.jsx > mantiene logo, las tres vistas y la bandeja con fechas de Chile 352ms
+ ✓ tests/public-home.test.jsx > sin sesión muestra la portada, sus servicios y contacto, sin consultar la API 362ms
+ ✓ tests/public-home.test.jsx > Ingresar abre el mismo login vacío, sin solicitudes ni sesión creada 93ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW09 foto responde 403 16ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW09 foto responde 404 13ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW10 sincroniza selección en listado y mapa 74ms
+ ✓ tests/public-home.test.jsx > Ingresar se puede activar con teclado 44ms
+ ✓ tests/public-home.test.jsx > con sesión entra directamente al panel y mantiene su navegación 62ms
+ ✓ tests/public-home.test.jsx > el enlace restablecer tiene prioridad sobre portada y panel: sesión=false 16ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW11 actualizar vuelve a leer sin escribir 51ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW12 aborta cargas antiguas al cambiar de visita 4ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW13 rechaza respuestas de otra visita 8ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW14 sesión vencida en una foto expira la sesión del panel 10ms
+ ✓ tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW15 abre croquis desde una visita completada y cierra con Escape 147ms
+ ✓ tests/public-home.test.jsx > el enlace restablecer tiene prioridad sobre portada y panel: sesión=true 16ms
+ ✓ tests/public-home.test.jsx > un enlace de recuperación recibido con la portada abierta también se consume 19ms
+ ✓ tests/public-home.test.jsx > cerrar sesión en otra pestaña conserva el aviso y vuelve al login 17ms
+ ✓ tests/public-home.test.jsx > una sesión vencida no desvía el aviso hacia la portada 15ms
+ ✓ tests/public-home.test.jsx > la guía tiene tres pasos y explica que el usuario debe enviar el mensaje 38ms
+ ✓ tests/password-recovery.test.jsx > permite pedir recuperación desde el login sin enviar contraseña ni sesión 709ms
+ ✓ tests/password-recovery.test.jsx > borra el enlace de la barra y abre nueva contraseña aunque había una sesión 15ms
+ ✓ tests/public-home.test.jsx > el botón y el QR usan el mismo destino con el mensaje de unión codificado 42ms
+ ✓ tests/public-home.test.jsx > decodifica el QR SVG y recupera el destino exacto del botón: datos sintéticos 46ms
+ ✓ tests/public-home.test.jsx > decodifica el QR SVG y recupera el destino exacto del botón: QR proporcionado por Juan 30ms
+ ✓ tests/public-home.test.jsx > sin configuración válida no inventa QR ni enlaces: {"phone":"","joinMessage":""} 20ms
+ ✓ tests/public-home.test.jsx > sin configuración válida no inventa QR ni enlaces: {"phone":"+15555550123","joinMessage":""} 23ms
+ ✓ tests/public-home.test.jsx > sin configuración válida no inventa QR ni enlaces: {"phone":"javascript:alert(1)","joinMessage":"join prueba-local"} 21ms
+ ✓ tests/public-home.test.jsx > muestra el horario confirmado por Juan y conserva la fuente corporativa 26ms
+ ✓ tests/public-home.test.jsx > usa anclas internas para servicios y contacto sin interferir con restablecer 35ms
+ ✓ tests/merge-integration.test.jsx > permite responder en la bandeja y conserva los estados de entrega 515ms
+ ✓ tests/public-home.test.jsx > la portada conserva el logo y restaura el título al ingresar al panel 67ms
+ ✓ tests/public-home.test.jsx > el botón Ingresar ejecuta solo la navegación solicitada 8ms
+ ✓ tests/public-home.test.jsx > normaliza el número pero conserva el mensaje exacto de unión 0ms
+ ✓ tests/public-home.test.jsx > rechaza datos inválidos sin enlaces externos arbitrarios: undefined 0ms
+ ✓ tests/public-home.test.jsx > rechaza datos inválidos sin enlaces externos arbitrarios: {} 0ms
+ ✓ tests/public-home.test.jsx > rechaza datos inválidos sin enlaces externos arbitrarios: {"phone":15555550123,"joinMessage":"join prueba-local"} 0ms
+ ✓ tests/public-home.test.jsx > rechaza datos inválidos sin enlaces externos arbitrarios: {"phone":"+05555550123","joinMessage":"join prueba-local"} 0ms
+ ✓ tests/public-home.test.jsx > rechaza datos inválidos sin enlaces externos arbitrarios: {"phone":"+15555550123?text=otro","joinMessage":"join prueba-local"} 0ms
+ ✓ tests/public-home.test.jsx > rechaza datos inválidos sin enlaces externos arbitrarios: {"phone":"+15555550123","joinMessage":"hola"} 0ms
+ ✓ tests/public-home.test.jsx > rechaza datos inválidos sin enlaces externos arbitrarios: {"phone":"+15555550123","joinMessage":"join prueba\notro"} 0ms
+ ✓ tests/public-home.test.jsx > rechaza datos inválidos sin enlaces externos arbitrarios: {"phone":"+15555550123","joinMessage":"join aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"} 0ms
+ ✓ tests/merge-integration.test.jsx > conserva tomar/devolver conversación y el envío manual de recordatorios 228ms
+ ✓ tests/merge-integration.test.jsx > conserva recuperación después de cerrar sesión desde WhatsApp 140ms
+ ✓ tests/merge-integration.test.jsx > los estilos combinados incluyen marca, bandeja y composición de mensajes 1ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > crea clientes manuales sin exigir coordenadas 1214ms
+ ✓ tests/password-recovery.test.jsx > no permite guardar si la confirmación no coincide 706ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > crea un cliente de Viña del Mar por dirección y muestra el punto devuelto por la API 1211ms
+ ✓ tests/password-recovery.test.jsx > valida máximo de bytes UTF8 antes de enviar 1083ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > crea un cliente de Concepción por dirección y muestra el punto devuelto por la API 1151ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > el filtro Sin asignar oculta visitas con operador 99ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > el login no trae credenciales de demostración precargadas 63ms
+ ✓ tests/password-recovery.test.jsx > guarda por POST sin Authorization ni token en URL, vuelve al login sin sesión 748ms
+ ✓ tests/password-recovery.test.jsx > muestra enlace vencido sin cerrar sesión por un error público y permite volver 801ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > comprueba permisos del panel antes de aceptar un login 566ms
+ ✓ tests/password-recovery.test.jsx > muestra error de límite de intentos sin confirmar envío 331ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > una cuenta sin permiso administrativo permanece en el login 590ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > el cierre de sesión sigue disponible en la navegación 47ms
+ ✓ tests/password-recovery.test.jsx > deshabilita controles durante el envío y evita solicitudes duplicadas 399ms
+ ✓ tests/password-recovery.test.jsx > avisa cuando el envío de correo no está habilitado sin simular éxito 336ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > reprograma una visita y asigna operador con UTC correcto 500ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > permite quitar el operador sin cambiar la fecha 198ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > Reagendada abre la edición en lugar de cambiar solo el estado 99ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > un conflicto al guardar conserva los datos del formulario 440ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > muestra el rechazo de un cambio de estado sin fallar la pantalla 79ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > una sesión vencida vuelve al login con una explicación 31ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > Clientes informa errores de carga y permite reintentar 102ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > no cambia fecha ni operador de una visita finalizada al editar notas 378ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > confirma el borrado y muestra el 409 si el cliente tiene visitas 152ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > un doble envío mientras guarda crea una sola visita 79ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > una respuesta antigua no reemplaza el nuevo día seleccionado 55ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > no permite agendar sin clientes registrados 75ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > Clientes se abre y permite guardar clientes sin ubicación ni dirección 447ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > el estado pendiente permanece al volver al listado, sin depender del aviso de guardado 132ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > una ubicación completa sigue mostrando sus coordenadas 34ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > editar una dirección no reenvía el punto viejo al backend 598ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > muestra la ubicación devuelta por el servidor sin pedir números al usuario 1035ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > si falla el guardado conserva la dirección y permite reintentar 1021ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > agenda una visita Sin asignar con hora chilena, y la vuelve a mostrar 179ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > también agenda cuando la API no entrega ningún operador 132ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > agrupa UTC en hora chilena y ordena los horarios 19ms
+ ✓ tests/panel.test.jsx > Regresión del panel: interacción con el formulario y respuestas API > la nueva visita usa la fecha seleccionada en la agenda 75ms
+ ✓ tests/panel.test.jsx > Bandeja de WhatsApp y reagendamiento > muestra la conversación con quién escribió y el estado de entrega 43ms
+ ✓ tests/panel.test.jsx > Bandeja de WhatsApp y reagendamiento > el operador responde y la conversación pasa a estar atendida por un humano 444ms
+ ✓ tests/panel.test.jsx > Bandeja de WhatsApp y reagendamiento > fuera de la ventana de 24 h no deja escribir 35ms
+ ✓ tests/panel.test.jsx > Bandeja de WhatsApp y reagendamiento > al editar una visita avisa que el cambio de fecha se le informa al cliente 71ms
+
+ Test Files  10 passed (10)
+      Tests  161 passed (161)
+   Start at  00:01:50
+   Duration  14.24s (tests 44%, environment 37%, setup 12%, transform 4%, import 3%)
