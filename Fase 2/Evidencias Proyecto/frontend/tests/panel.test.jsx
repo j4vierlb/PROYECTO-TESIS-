@@ -1,8 +1,8 @@
 import React from 'react'
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { App } from '../src/main.jsx'
+import { renderAccess } from './support/render-access.jsx'
 
 const client = { id: '33333333-3333-3333-3333-333333333333', nombre: 'Cliente WhatsApp', telefono_whatsapp: '+56912345678', direccion: null, lat: null, lng: null }
 const operator = { id: '44444444-4444-4444-4444-444444444444', nombre: 'Operador de prueba' }
@@ -39,7 +39,7 @@ beforeEach(() => {
 describe('Regresión del panel: interacción con el formulario y respuestas API', () => {
   it('crea clientes manuales sin exigir coordenadas', async () => {
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await user.click(screen.getByRole('button', { name: /Clientes/ }))
     await user.click(screen.getByRole('button', { name: /Nuevo cliente/ }))
     await user.type(screen.getByLabelText('Nombre'), 'Nuevo sin GPS')
@@ -67,7 +67,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
       return response
     }))
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await user.click(screen.getByRole('button', { name: /Clientes/ }))
     await user.click(screen.getByRole('button', { name: /Nuevo cliente/ }))
     expect(screen.getByText(/Ingresa calle, número y comuna o ciudad de Chile/)).toBeVisible()
@@ -83,7 +83,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
   it('el filtro Sin asignar oculta visitas con operador', async () => {
     visits = [existingVisit(), existingVisit({ id: 'otra-visita', cliente: { ...client, nombre: 'Cliente asignado' }, operador_id: operator.id, operador: operator })]
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await screen.findByText('Cliente asignado')
     await user.selectOptions(screen.getByLabelText('Filtrar por operador'), 'unassigned')
     await waitFor(() => expect(screen.queryByText('Cliente asignado')).not.toBeInTheDocument())
@@ -93,8 +93,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
   it('el login no trae credenciales de demostración precargadas', async () => {
     localStorage.clear()
     const user = userEvent.setup()
-    render(<App />)
-    await user.click(screen.getByRole('button', { name: 'Ingresar', exact: true }))
+    renderAccess()
     expect(screen.getByLabelText('Correo')).toHaveValue('')
     expect(screen.getByLabelText('Contraseña')).toHaveValue('')
   })
@@ -104,8 +103,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
     const base = globalThis.fetch
     vi.stubGlobal('fetch', vi.fn((url, options) => new URL(url).pathname === '/auth/login' ? Promise.resolve(new Response(JSON.stringify({ access_token: 'token-admin' }), { status: 200 })) : base(url, options)))
     const user = userEvent.setup()
-    render(<App />)
-    await user.click(screen.getByRole('button', { name: 'Ingresar', exact: true }))
+    renderAccess()
     await user.type(screen.getByLabelText('Correo'), 'admin@panel.test')
     await user.type(screen.getByLabelText('Contraseña'), 'ClaveQA123')
     await user.click(screen.getByRole('button', { name: 'Ingresar al panel' }))
@@ -119,8 +117,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
       ? new Response(JSON.stringify({ access_token: 'token-operador' }), { status: 200 })
       : new Response(JSON.stringify({ detail: 'Se requiere un usuario del panel' }), { status: 403 })))
     const user = userEvent.setup()
-    render(<App />)
-    await user.click(screen.getByRole('button', { name: 'Ingresar', exact: true }))
+    renderAccess()
     await user.type(screen.getByLabelText('Correo'), 'operador@panel.test')
     await user.type(screen.getByLabelText('Contraseña'), 'ClaveQA123')
     await user.click(screen.getByRole('button', { name: 'Ingresar al panel' }))
@@ -131,7 +128,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
 
   it('el cierre de sesión sigue disponible en la navegación', async () => {
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await user.click(screen.getByRole('button', { name: 'Cerrar sesión' }))
     expect(screen.getByRole('button', { name: 'Ingresar al panel' })).toBeVisible()
     expect(localStorage.token).toBeUndefined()
@@ -139,7 +136,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
   it('reprograma una visita y asigna operador con UTC correcto', async () => {
     visits = [existingVisit()]
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await user.click(await screen.findByRole('button', { name: 'Editar visita' }))
     expect(screen.getByLabelText('Fecha y hora (Chile)')).toHaveValue('2026-09-29T10:00')
     await user.selectOptions(screen.getByLabelText('Operador'), operator.id)
@@ -155,7 +152,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
   it('permite quitar el operador sin cambiar la fecha', async () => {
     visits = [existingVisit({ operador_id: operator.id, operador: operator })]
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await user.click(await screen.findByRole('button', { name: 'Editar visita' }))
     await user.selectOptions(screen.getByLabelText('Operador'), '')
     await user.click(screen.getByRole('button', { name: 'Guardar cambios' }))
@@ -166,7 +163,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
   it('Reagendada abre la edición en lugar de cambiar solo el estado', async () => {
     visits = [existingVisit()]
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await user.selectOptions(await screen.findByLabelText('Estado de visita de Cliente WhatsApp'), 'reagendada')
     expect(screen.getByRole('dialog', { name: 'Editar visita' })).toBeVisible()
     expect(writes).toHaveLength(0)
@@ -179,7 +176,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
     const base = globalThis.fetch
     vi.stubGlobal('fetch', vi.fn((url, options) => options?.method === 'PATCH' ? Promise.resolve(new Response(JSON.stringify({ detail: 'El operador tiene otra visita' }), { status: 409 })) : base(url, options)))
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await user.click(await screen.findByRole('button', { name: 'Editar visita' }))
     await user.type(screen.getByLabelText('Notas'), 'No perder esta nota')
     await user.click(screen.getByRole('button', { name: 'Guardar cambios' }))
@@ -193,7 +190,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
     const base = globalThis.fetch
     vi.stubGlobal('fetch', vi.fn((url, options) => options?.method === 'PATCH' ? Promise.resolve(new Response(JSON.stringify({ detail: 'Horario ocupado' }), { status: 409 })) : base(url, options)))
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await user.selectOptions(await screen.findByLabelText('Estado de visita de Cliente WhatsApp'), 'en_curso')
     expect(await screen.findByRole('alert')).toHaveTextContent('Horario ocupado')
     expect(screen.getByLabelText('Estado de visita de Cliente WhatsApp')).toHaveValue('agendada')
@@ -201,7 +198,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
 
   it('una sesión vencida vuelve al login con una explicación', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ detail: 'Token expirado' }), { status: 401 })))
-    render(<App />)
+    renderAccess()
     expect(await screen.findByRole('button', { name: 'Ingresar al panel' })).toBeVisible()
     expect(screen.getByRole('status')).toHaveTextContent('Tu sesión venció')
     expect(localStorage.token).toBeUndefined()
@@ -212,7 +209,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
     let fail = true
     vi.stubGlobal('fetch', vi.fn((url, options) => new URL(url).pathname === '/clientes' && fail ? Promise.reject(new TypeError('Failed to fetch')) : base(url, options)))
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await user.click(screen.getByRole('button', { name: /Clientes/ }))
     expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo conectar')
     fail = false
@@ -223,7 +220,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
   it('no cambia fecha ni operador de una visita finalizada al editar notas', async () => {
     visits = [existingVisit({ estado: 'completada' })]
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await user.click(await screen.findByRole('button', { name: 'Editar visita' }))
     expect(screen.getByLabelText('Fecha y hora (Chile)')).toBeDisabled()
     expect(screen.getByLabelText('Operador')).toBeDisabled()
@@ -236,7 +233,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
     const base = globalThis.fetch
     vi.stubGlobal('fetch', vi.fn((url, options) => options?.method === 'DELETE' ? Promise.resolve(new Response(JSON.stringify({ detail: 'No se puede eliminar un cliente con visitas asociadas' }), { status: 409 })) : base(url, options)))
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await user.click(screen.getByRole('button', { name: /Clientes/ }))
     await user.click(await screen.findByRole('button', { name: 'Eliminar' }))
     expect(screen.getByRole('dialog', { name: 'Eliminar cliente' })).toBeVisible()
@@ -250,7 +247,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
     let resolve
     vi.stubGlobal('fetch', vi.fn((url, options) => options?.method === 'POST' ? new Promise(done => { resolve = done }) : base(url, options)))
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await waitFor(() => expect(screen.getByRole('button', { name: /Nueva visita/ })).toBeEnabled())
     await user.click(screen.getByRole('button', { name: /Nueva visita/ }))
     const dialog = screen.getByRole('dialog')
@@ -268,7 +265,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
       if (reads++ === 0) return new Promise(resolve => { resolveFirst = resolve })
       return Promise.resolve(new Response(JSON.stringify([existingVisit({ cliente: { ...client, nombre: 'Día nuevo' } })]), { status: 200 }))
     }))
-    render(<App />)
+    renderAccess()
     await waitFor(() => expect(resolveFirst).toBeDefined())
     fireEvent.change(screen.getByLabelText('Fecha de la agenda'), { target: { value: '2026-11-03' } })
     expect(await screen.findByText('Día nuevo')).toBeVisible()
@@ -280,14 +277,14 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
   it('no permite agendar sin clientes registrados', async () => {
     clients = []
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await waitFor(() => expect(screen.getByRole('button', { name: /Nueva visita/ })).toBeEnabled())
     await user.click(screen.getByRole('button', { name: /Nueva visita/ }))
     expect(screen.getByRole('button', { name: 'Agendar visita' })).toBeDisabled()
   })
   it('Clientes se abre y permite guardar clientes sin ubicación ni dirección', async () => {
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await user.click(screen.getByRole('button', { name: /Clientes/ }))
     expect(await screen.findByText('Ubicación pendiente de confirmar')).toBeVisible()
     await user.click(screen.getByRole('button', { name: 'Editar' }))
@@ -303,7 +300,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
 
   it('el estado pendiente permanece al volver al listado, sin depender del aviso de guardado', async () => {
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await user.click(screen.getByRole('button', { name: /Clientes/ }))
     expect(await screen.findByText('Ubicación pendiente de confirmar')).toHaveClass('location-pending')
     await user.click(screen.getByRole('button', { name: /Agenda/ }))
@@ -314,7 +311,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
   it('una ubicación completa sigue mostrando sus coordenadas', async () => {
     clients = [{ ...client, lat: -33.4869, lng: -70.5989 }]
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await user.click(screen.getByRole('button', { name: /Clientes/ }))
     expect(await screen.findByText('-33.4869, -70.5989')).toBeVisible()
   })
@@ -322,7 +319,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
   it('editar una dirección no reenvía el punto viejo al backend', async () => {
     clients = [{ ...client, direccion: 'Macul 1234, Macul', lat: -33.4, lng: -70.6 }]
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await user.click(screen.getByRole('button', { name: /Clientes/ }))
     await user.click(await screen.findByRole('button', { name: 'Editar' }))
     expect(screen.getByText(/Buscaremos la ubicación automáticamente/)).toBeVisible()
@@ -345,7 +342,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
       return response
     }))
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await user.click(screen.getByRole('button', { name: /Clientes/ }))
     await user.click(screen.getByRole('button', { name: /Nuevo cliente/ }))
     await user.type(screen.getByLabelText('Nombre'), 'Cliente ubicado')
@@ -362,7 +359,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
       ? Promise.resolve(new Response(JSON.stringify({ detail: 'Servicio temporalmente no disponible' }), { status: 503 }))
       : base(url, options)))
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await user.click(screen.getByRole('button', { name: /Clientes/ }))
     await user.click(screen.getByRole('button', { name: /Nuevo cliente/ }))
     await user.type(screen.getByLabelText('Nombre'), 'Cliente QA')
@@ -376,7 +373,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
 
   it('agenda una visita Sin asignar con hora chilena, y la vuelve a mostrar', async () => {
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await waitFor(() => expect(screen.getByText('Clientes registrados').parentElement).toHaveTextContent('1'))
     await user.click(screen.getByRole('button', { name: /Nueva visita/ }))
     await user.selectOptions(screen.getByLabelText('Operador'), '')
@@ -394,7 +391,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
   it('también agenda cuando la API no entrega ningún operador', async () => {
     operators = []
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await waitFor(() => expect(screen.getByText('Clientes registrados').parentElement).toHaveTextContent('1'))
     await user.click(screen.getByRole('button', { name: /Nueva visita/ }))
     await user.click(screen.getByRole('button', { name: 'Agendar visita' }))
@@ -407,7 +404,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
       { id: 'v1', fecha_hora: '2026-09-30T02:30:00Z', cliente: client, operador: null, estado: 'agendada' },
       { id: 'v2', fecha_hora: '2026-09-29T13:00:00Z', cliente: client, operador: operator, estado: 'agendada' },
     ]
-    const { container } = render(<App />)
+    const { container } = renderAccess()
     await screen.findByText('23:30')
     expect([...container.querySelectorAll('.time')].map(el => el.firstChild.textContent)).toEqual(['10:00', '23:30'])
     expect(within(screen.getByRole('region', { name: 'Visitas del día' })).getByText('Sin asignar')).toBeVisible()
@@ -415,7 +412,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
 
   it('la nueva visita usa la fecha seleccionada en la agenda', async () => {
     const user = userEvent.setup()
-    const { container } = render(<App />)
+    const { container } = renderAccess()
     await waitFor(() => expect(screen.getByText('Clientes registrados').parentElement).toHaveTextContent('1'))
     const { fireEvent } = await import('@testing-library/react')
     fireEvent.change(container.querySelector('input[type="date"]'), { target: { value: '2026-07-15' } })
@@ -458,7 +455,7 @@ describe('Bandeja de WhatsApp y reagendamiento', () => {
 
   it('muestra la conversación con quién escribió y el estado de entrega', async () => {
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await user.click(screen.getByRole('button', { name: /WhatsApp/ }))
     expect(await screen.findByText('Hola, ¿atienden hoy?')).toBeVisible()
     expect(screen.getByText(/✓✓ Leído/)).toBeVisible()
@@ -468,7 +465,7 @@ describe('Bandeja de WhatsApp y reagendamiento', () => {
 
   it('el operador responde y la conversación pasa a estar atendida por un humano', async () => {
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await user.click(screen.getByRole('button', { name: /WhatsApp/ }))
     await user.type(await screen.findByLabelText('Mensaje para el cliente'), 'Hola, soy Juan')
     await user.click(screen.getByRole('button', { name: 'Enviar' }))
@@ -484,7 +481,7 @@ describe('Bandeja de WhatsApp y reagendamiento', () => {
   it('fuera de la ventana de 24 h no deja escribir', async () => {
     detail.ventana_abierta = false
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await user.click(screen.getByRole('button', { name: /WhatsApp/ }))
     expect(await screen.findByText(/no escribe hace más de 24 h/)).toBeVisible()
     expect(screen.queryByLabelText('Mensaje para el cliente')).not.toBeInTheDocument()
@@ -493,7 +490,7 @@ describe('Bandeja de WhatsApp y reagendamiento', () => {
   it('al editar una visita avisa que el cambio de fecha se le informa al cliente', async () => {
     visits = [existingVisit()]
     const user = userEvent.setup()
-    render(<App />)
+    renderAccess()
     await user.click(await screen.findByRole('button', { name: 'Editar visita' }))
     expect(screen.getByText(/se le avisará al cliente por WhatsApp/)).toBeVisible()
   })

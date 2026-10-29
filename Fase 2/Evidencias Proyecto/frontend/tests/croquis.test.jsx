@@ -145,6 +145,7 @@ describe('CRW visor de croquis de solo lectura', () => {
     }))
     const user = userEvent.setup()
     render(<App />)
+    await user.click(screen.getByRole('button', { name: 'Ingresar', exact: true }))
     const trigger = await screen.findByRole('button', { name: /Ver croquis de Cliente QA/ })
     await user.click(trigger)
     expect(await screen.findByRole('dialog', { name: 'Croquis de la visita' })).toBeVisible()

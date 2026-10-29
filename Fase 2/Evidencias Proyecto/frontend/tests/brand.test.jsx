@@ -38,6 +38,7 @@ it('muestra el logo en la navegación y conserva los colores por estado comparti
     return new Response(JSON.stringify(value), { status: 200 })
   }))
   const { container } = render(<App />)
+  await userEvent.setup().click(screen.getByRole('button', { name: 'Ingresar', exact: true }))
   await waitFor(() => expect(container.querySelectorAll('.pill')).toHaveLength(5))
   expect(container.querySelector('aside img')).toHaveAttribute('alt', label)
   for (const [name, color] of [['Agendada', 'gray'], ['En curso', 'yellow'], ['Completada', 'green'], ['Cancelada', 'red'], ['Reagendada', 'blue']]) {
