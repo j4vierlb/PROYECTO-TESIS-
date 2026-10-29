@@ -26,14 +26,18 @@ class VisitaDetalleScreen extends StatefulWidget {
   // Id de la visita a mostrar; la pantalla la pide al backend al abrirse.
   final String visitaId;
   final ApiClient? apiClient;
-  // Cómo se abre un enlace (mapas, llamada, WhatsApp). Las pruebas lo reemplazan.
+  // Cómo se abren los enlaces. Las pruebas los reemplazan: `abrirEnlace` para la
+  // llamada y WhatsApp (salen de la app) y `abrirMapa` para el mapa (se ve dentro
+  // de la app, con un botón para volver).
   final AbrirEnlace abrirEnlace;
+  final AbrirEnlace abrirMapa;
 
   const VisitaDetalleScreen({
     super.key,
     required this.visitaId,
     this.apiClient,
     this.abrirEnlace = abrirEnlaceExterno,
+    this.abrirMapa = abrirEnlaceEnApp,
   });
 
   @override
@@ -126,12 +130,17 @@ class _VisitaDetalleScreenState extends State<VisitaDetalleScreen> {
 
   /// Abre un enlace en otra app. Si faltan datos para armarlo, o el teléfono
   /// no puede abrirlo, se lo dice al técnico en vez de no hacer nada.
-  Future<void> _abrir(Uri? enlace, {required String sinDatos, required String error}) async {
+  Future<void> _abrir(
+    Uri? enlace, {
+    required String sinDatos,
+    required String error,
+    bool enLaApp = false,
+  }) async {
     if (enlace == null) {
       _mostrarMensaje(sinDatos);
       return;
     }
-    final abierto = await widget.abrirEnlace(enlace);
+    final abierto = await (enLaApp ? widget.abrirMapa : widget.abrirEnlace)(enlace);
     if (!abierto) _mostrarMensaje(error);
   }
 
@@ -243,7 +252,8 @@ class _VisitaDetalleScreenState extends State<VisitaDetalleScreen> {
                         direccion: visita.cliente.direccion,
                       ),
                       sinDatos: 'Este cliente no tiene dirección ni ubicación registrada',
-                      error: 'No se pudo abrir la app de mapas',
+                      error: 'No se pudo abrir el mapa',
+                      enLaApp: true,
                     ),
                     acciones: [
                       _AccionIcono(
@@ -256,7 +266,8 @@ class _VisitaDetalleScreenState extends State<VisitaDetalleScreen> {
                             direccion: visita.cliente.direccion,
                           ),
                           sinDatos: 'Este cliente no tiene dirección ni ubicación registrada',
-                          error: 'No se pudo abrir la app de mapas',
+                          error: 'No se pudo abrir el mapa',
+                      enLaApp: true,
                         ),
                       ),
                     ],

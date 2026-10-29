@@ -18,10 +18,17 @@ class Abridor {
   }
 }
 
-Future<void> abrirDetalle(WidgetTester tester, Entorno e, Abridor abridor) async {
+/// `mapa` es quien abre el mapa (dentro de la app); si no se indica, el mismo
+/// `abridor` anota también lo del mapa.
+Future<void> abrirDetalle(WidgetTester tester, Entorno e, Abridor abridor, {Abridor? mapa}) async {
   await tester.runAsync(e.prepararDia);
   await tester.pumpWidget(MaterialApp(
-    home: VisitaDetalleScreen(visitaId: visitaId, apiClient: e.client, abrirEnlace: abridor.call),
+    home: VisitaDetalleScreen(
+      visitaId: visitaId,
+      apiClient: e.client,
+      abrirEnlace: abridor.call,
+      abrirMapa: (mapa ?? abridor).call,
+    ),
   ));
   await tester.pump();
   await tester.pump();
@@ -126,11 +133,33 @@ void main() {
 
     await tester.tap(find.byTooltip('Cómo llegar'));
     await tester.pump();
-    expect(find.text('No se pudo abrir la app de mapas'), findsOneWidget);
+    expect(find.text('No se pudo abrir el mapa'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Escribir por WhatsApp'));
     await tester.pump();
     expect(find.text('No se pudo abrir WhatsApp'), findsOneWidget);
+  });
+
+  testWidgets('el mapa se abre dentro de la app y la llamada y WhatsApp fuera de ella', (tester) async {
+    final e = Entorno();
+    final fuera = Abridor();
+    final dentro = Abridor();
+    await abrirDetalle(tester, e, fuera, mapa: dentro);
+
+    await tester.tap(find.byTooltip('Cómo llegar'));
+    await tester.pump();
+    await tester.tap(find.text('Av. Macul 123'));
+    await tester.pump();
+    await tester.tap(find.byTooltip('Llamar'));
+    await tester.pump();
+    await tester.tap(find.byTooltip('Escribir por WhatsApp'));
+    await tester.pump();
+
+    // Las dos formas de pedir el mapa lo abren dentro de la app...
+    expect(dentro.abiertos.length, 2);
+    expect(dentro.abiertos.every((uri) => uri.host == 'www.google.com'), isTrue);
+    // ...y solo la llamada y WhatsApp salen de ella.
+    expect(fuera.abiertos.map((uri) => uri.scheme == 'tel' || uri.host == 'wa.me'), [true, true]);
   });
 
   testWidgets('en una visita completada los botones también funcionan', (tester) async {

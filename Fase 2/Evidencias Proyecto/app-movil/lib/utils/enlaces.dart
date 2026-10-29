@@ -66,12 +66,26 @@ Uri? urlWhatsapp(String telefono) {
 /// parámetro para poder probarlas sin abrir nada de verdad.
 typedef AbrirEnlace = Future<bool> Function(Uri uri);
 
-/// Abre el enlace en la app correspondiente (mapas, teléfono, WhatsApp o
-/// navegador). Devuelve false si el teléfono no puede abrirlo.
+/// Abre el enlace en la app correspondiente (teléfono, WhatsApp o navegador).
+/// Devuelve false si el teléfono no puede abrirlo.
 Future<bool> abrirEnlaceExterno(Uri uri) async {
   try {
     return await launchUrl(uri, mode: LaunchMode.externalApplication);
   } catch (_) {
     return false;
   }
+}
+
+/// Abre la página DENTRO de la app, en una vista con un botón para cerrar
+/// ("Listo" en iPhone, la X en Android) que devuelve al técnico a la visita.
+/// Se usa para el mapa: abrir la app de Google Maps lo sacaba de Kill Bichos y
+/// no había un botón para volver. Si el teléfono no puede mostrarla así, se
+/// abre fuera de la app como último recurso.
+Future<bool> abrirEnlaceEnApp(Uri uri) async {
+  try {
+    if (await launchUrl(uri, mode: LaunchMode.inAppBrowserView)) return true;
+  } catch (_) {
+    // Sigue con el plan B.
+  }
+  return abrirEnlaceExterno(uri);
 }
