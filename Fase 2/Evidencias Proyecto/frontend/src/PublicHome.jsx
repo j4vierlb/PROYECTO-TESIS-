@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
 import QRCode from 'qrcode'
 import { BrandLogo } from './BrandLogo.jsx'
 import { companyInfo, whatsappSandbox } from './public-site-config.js'
@@ -19,18 +19,61 @@ export function SandboxQr({ href }) {
   </svg>
 }
 
+// Insignia de WhatsApp con la marca: cuadro negro, burbuja amarilla y tres puntos
+// que "escriben". Es decorativa (el texto de al lado ya dice qué es).
+function ChatBadge() {
+  return <span className="public-chat-badge" aria-hidden="true">
+    <svg viewBox="0 0 48 48" width="52" height="52" focusable="false">
+      <rect width="48" height="48" rx="14" fill="#1A1A1A" />
+      <path d="M24 10.5c-7.9 0-14.3 5.3-14.3 11.9 0 3.5 1.9 6.7 4.8 8.8L13.3 38l6.6-3.4c1.3.3 2.7.5 4.1.5 7.9 0 14.3-5.3 14.3-11.9S31.9 10.5 24 10.5Z" fill="#F5C518" />
+      <circle className="public-typing public-typing-1" cx="17.8" cy="22.6" r="2" fill="#1A1A1A" />
+      <circle className="public-typing public-typing-2" cx="24" cy="22.6" r="2" fill="#1A1A1A" />
+      <circle className="public-typing public-typing-3" cx="30.2" cy="22.6" r="2" fill="#1A1A1A" />
+    </svg>
+  </span>
+}
+
+// Hace aparecer los bloques marcados con data-reveal cuando entran en pantalla
+// al hacer scroll (una sola vez). Sin IntersectionObserver, o con movimiento
+// reducido, todo se muestra de inmediato: nunca queda contenido oculto.
+function useReveal() {
+  const ref = useRef(null)
+  useEffect(() => {
+    const root = ref.current
+    if (!root) return undefined
+    const items = [...root.querySelectorAll('[data-reveal]')]
+    const reducido = typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (typeof IntersectionObserver === 'undefined' || reducido) {
+      items.forEach(el => el.classList.add('is-visible'))
+      return undefined
+    }
+    root.classList.add('reveal-ready')
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return
+        entry.target.classList.add('is-visible')
+        observer.unobserve(entry.target)
+      })
+    }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' })
+    items.forEach(el => observer.observe(el))
+    return () => observer.disconnect()
+  }, [])
+  return ref
+}
+
 function ChatIcon() {
   return <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M21 11.5a9 9 0 0 1-9 9 10 10 0 0 1-4-.9L3 21l1.4-4.7a9 9 0 1 1 16.6-4.8Z" /><path d="M8 9h8M8 13h5" /></svg>
 }
 
 export function PublicHome({ onEnter, sandbox = whatsappSandbox }) {
   const href = sandboxLink(sandbox)
+  const rootRef = useReveal()
   useEffect(() => {
     const previous = document.title
     document.title = 'Kill Bichos | Control de plagas'
     return () => { document.title = previous }
   }, [])
-  return <div className="public-home">
+  return <div className="public-home" ref={rootRef}>
     <a className="public-skip" href="#contenido-publico">Saltar al contenido</a>
     <header className="public-header">
       <a className="public-brand" href="#contenido-publico" aria-label="Kill Bichos, inicio"><BrandLogo /><span><strong>Kill Bichos</strong><small>Control de plagas</small></span></a>
@@ -47,7 +90,7 @@ export function PublicHome({ onEnter, sandbox = whatsappSandbox }) {
           <div className="public-about"><h2>Quiénes somos</h2><p>{companyInfo.about}</p></div>
         </div>
         <section className="public-chat" aria-labelledby="public-chat-title">
-          <div className="public-chat-heading"><ChatIcon /><span>WHATSAPP · DEMOSTRACIÓN</span></div>
+          <div className="public-chat-heading"><ChatBadge /><span>WHATSAPP · DEMOSTRACIÓN</span></div>
           <h2 id="public-chat-title">Hablemos por WhatsApp</h2>
           <p className="public-sandbox-note">Este WhatsApp es de prueba (Sandbox de Twilio). No es un servicio abierto al público.</p>
           {href ? <>
@@ -62,18 +105,18 @@ export function PublicHome({ onEnter, sandbox = whatsappSandbox }) {
         </section>
       </section>
       <section className="public-services public-section" id="servicios" aria-labelledby="public-services-title">
-        <div className="public-section-heading"><p className="public-kicker">SERVICIOS</p><h2 id="public-services-title">Control de plagas</h2></div>
-        <div className="public-service-grid">{companyInfo.services.map((service, index) => <article key={service.name}>
+        <div className="public-section-heading" data-reveal><p className="public-kicker">SERVICIOS</p><h2 id="public-services-title">Control de plagas</h2></div>
+        <div className="public-service-grid">{companyInfo.services.map((service, index) => <article key={service.name} data-reveal style={{ '--i': index }}>
           <span className="public-service-number" aria-hidden="true">0{index + 1}</span><h3>{service.name}</h3><p>{service.description}</p>
         </article>)}</div>
       </section>
       <section className="public-guide public-section" aria-labelledby="public-guide-title">
-        <div className="public-section-heading"><p className="public-kicker">GUÍA DE PRUEBA</p><h2 id="public-guide-title">Tres pasos para conversar</h2></div>
-        <ol><li><span aria-hidden="true">1</span><div><h3>Escanea o toca el botón</h3><p>Abre el chat del Sandbox de Twilio desde el QR o «Hablemos por WhatsApp».</p></div></li><li><span aria-hidden="true">2</span><div><h3>Envía el mensaje de unión</h3><p>Envía el mensaje que aparecerá escrito en WhatsApp. Espera la confirmación de unión.</p></div></li><li><span aria-hidden="true">3</span><div><h3>Escribe qué necesitas</h3><p>Por ejemplo: «quiero agendar una visita».</p></div></li></ol>
+        <div className="public-section-heading" data-reveal><p className="public-kicker">GUÍA DE PRUEBA</p><h2 id="public-guide-title">Tres pasos para conversar</h2></div>
+        <ol><li data-reveal style={{ '--i': 0 }}><span aria-hidden="true">1</span><div><h3>Escanea o toca el botón</h3><p>Abre el chat del Sandbox de Twilio desde el QR o «Hablemos por WhatsApp».</p></div></li><li data-reveal style={{ '--i': 1 }}><span aria-hidden="true">2</span><div><h3>Envía el mensaje de unión</h3><p>Envía el mensaje que aparecerá escrito en WhatsApp. Espera la confirmación de unión.</p></div></li><li data-reveal style={{ '--i': 2 }}><span aria-hidden="true">3</span><div><h3>Escribe qué necesitas</h3><p>Por ejemplo: «quiero agendar una visita».</p></div></li></ol>
       </section>
       <section className="public-contact public-section" id="contacto" aria-labelledby="public-contact-title">
-        <div className="public-section-heading"><p className="public-kicker">CONTACTO DE LA EMPRESA</p><h2 id="public-contact-title">Conversemos</h2><p>Para contactar a Kill Bichos, utiliza estos datos.</p></div>
-        <dl><div><dt>Dirección · {companyInfo.district}</dt><dd>{companyInfo.address}</dd></div><div><dt>Teléfono</dt><dd><a href={companyInfo.phoneHref}>{companyInfo.phone}</a></dd></div><div><dt>Correo</dt><dd><a href={`mailto:${companyInfo.email}`}>{companyInfo.email}</a></dd></div><div><dt>Horarios</dt><dd>{companyInfo.hours || 'Consulta los horarios por teléfono o correo.'}</dd></div></dl>
+        <div className="public-section-heading" data-reveal><p className="public-kicker">CONTACTO DE LA EMPRESA</p><h2 id="public-contact-title">Conversemos</h2><p>Para contactar a Kill Bichos, utiliza estos datos.</p></div>
+        <dl data-reveal style={{ '--i': 1 }}><div><dt>Dirección · {companyInfo.district}</dt><dd>{companyInfo.address}</dd></div><div><dt>Teléfono</dt><dd><a href={companyInfo.phoneHref}>{companyInfo.phone}</a></dd></div><div><dt>Correo</dt><dd><a href={`mailto:${companyInfo.email}`}>{companyInfo.email}</a></dd></div><div><dt>Horarios</dt><dd>{companyInfo.hours || 'Consulta los horarios por teléfono o correo.'}</dd></div></dl>
       </section>
     </main>
     <footer className="public-footer"><strong>Kill Bichos</strong><span>Control de plagas · {companyInfo.district}</span><a href={companyInfo.website} target="_blank" rel="noopener noreferrer">Sitio de la empresa <span aria-hidden="true">↗</span></a></footer>

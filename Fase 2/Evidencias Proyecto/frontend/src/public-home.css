@@ -26,7 +26,7 @@
 .public-home .public-about h2{font-size:16px;margin:0 0 10px}
 .public-home .public-about p{font-size:14px;line-height:1.8;color:var(--text-secondary);margin:0}
 .public-home .public-chat{padding:28px 30px;background:#fff;border:1px solid var(--border);border-top:5px solid var(--brand-yellow);border-radius:12px;box-shadow:0 12px 32px #1a1a1a07;text-align:center;min-width:0}
-.public-home .public-chat-heading{display:flex;align-items:center;justify-content:center;gap:8px;color:#655000;font-size:10px;font-weight:700;letter-spacing:1.4px;margin-bottom:16px}
+.public-home .public-chat-heading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#655000;font-size:10px;font-weight:700;letter-spacing:1.4px;margin-bottom:16px}
 .public-home .public-chat h2{font-size:26px;letter-spacing:-.9px;margin:0 0 14px}
 .public-home .public-sandbox-note{font-size:12px;line-height:1.7;background:var(--brand-soft);padding:10px 12px;border-radius:6px;color:#5c4800;margin:0 0 20px}
 .public-home .public-qr-link{display:inline-block;border-radius:8px;border:1px solid var(--border);padding:8px;line-height:0}
@@ -63,3 +63,65 @@
 .public-home .public-footer a{margin-left:auto}
 @media(max-width:900px){.public-home .public-header{padding:20px 24px;gap:20px}.public-home main{padding:0 24px}.public-home .public-hero{gap:32px}.public-home .public-chat{padding:24px 20px}.public-home .public-contact{grid-template-columns:1fr;gap:12px}.public-home .public-footer{padding:24px}}
 @media(max-width:650px){.public-home .public-header{padding:16px 20px;gap:12px}.public-home .public-brand img{width:34px;height:44px}.public-home .public-brand strong{font-size:17px}.public-home .public-brand small{font-size:10px}.public-home nav{display:none}.public-home .public-enter{padding:12px 14px;gap:12px}.public-home main{padding:0 20px}.public-home .public-hero{grid-template-columns:1fr;padding:36px 0 40px;gap:32px}.public-home h1{font-size:48px;letter-spacing:-2px}.public-home h1>span{font-size:36px;letter-spacing:-1.5px}.public-home .public-lead{font-size:16px}.public-home .public-about{margin-top:30px}.public-home .public-service-grid,.public-home .public-guide ol{grid-template-columns:1fr}.public-home .public-section{padding:32px 0 36px}.public-home .public-service-grid article{padding:20px}.public-home .public-service-number{margin-bottom:14px}.public-home .public-contact dl{grid-template-columns:1fr}.public-home .public-footer{flex-wrap:wrap;gap:12px;padding:22px 20px}.public-home .public-footer span{flex-basis:100%;order:3}.public-home .public-chat{padding:24px 18px}}
+
+/* ---------------------------------------------------------------------------
+   Movimiento de la portada. Solo se animan transform y opacity (no se traban),
+   con curvas de salida rápidas, y nada pasa de ~500 ms. Los efectos de mouse
+   van solo en dispositivos con mouse, y todo se apaga con "movimiento reducido".
+   --------------------------------------------------------------------------- */
+.public-home{--ease-out:cubic-bezier(.23,1,.32,1)}
+
+/* Insignia de WhatsApp: anillo suave detrás y tres puntos que "escriben". */
+.public-home .public-chat-badge{position:relative;display:grid;place-items:center;width:52px;height:52px}
+.public-home .public-chat-badge svg{position:relative;z-index:1;display:block}
+.public-home .public-chat-badge::before{content:"";position:absolute;inset:0;border-radius:15px;background:var(--brand-yellow);opacity:0;animation:pub-ring 2.8s var(--ease-out) infinite}
+.public-home .public-typing{transform-box:fill-box;transform-origin:center;animation:pub-typing 1.3s ease-in-out infinite}
+.public-home .public-typing-2{animation-delay:.16s}
+.public-home .public-typing-3{animation-delay:.32s}
+@keyframes pub-ring{0%{transform:scale(1);opacity:.5}65%,100%{transform:scale(1.6);opacity:0}}
+@keyframes pub-typing{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-3px);opacity:1}}
+
+/* Entrada al abrir: el texto sube en cascada y la tarjeta del QR llega después. */
+@keyframes pub-rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.public-home .public-intro>*{animation:pub-rise 380ms var(--ease-out) both}
+.public-home .public-intro>*:nth-child(2){animation-delay:50ms}
+.public-home .public-intro>*:nth-child(3){animation-delay:100ms}
+.public-home .public-intro>*:nth-child(4){animation-delay:150ms}
+.public-home .public-intro>*:nth-child(5){animation-delay:200ms}
+.public-home .public-chat{animation:pub-rise 460ms var(--ease-out) 120ms both}
+
+/* Aparición al hacer scroll. Solo se oculta si el script ya está listo para
+   mostrarlo (reveal-ready), así que sin JavaScript todo se ve. */
+.public-home [data-reveal]{transition:opacity 420ms var(--ease-out),transform 420ms var(--ease-out);transition-delay:calc(var(--i,0) * 70ms)}
+.public-home.reveal-ready [data-reveal]:not(.is-visible){opacity:0;transform:translateY(16px)}
+
+/* Respuesta al presionar (todos los dispositivos). */
+.public-home .public-enter,.public-home .public-whatsapp,.public-home .public-qr-link{transition:transform 160ms var(--ease-out),box-shadow 200ms var(--ease-out),border-color 200ms ease,background-color 200ms ease}
+.public-home .public-enter:active,.public-home .public-whatsapp:not(:disabled):active{transform:scale(.97)}
+.public-home .public-qr-link:active{transform:scale(.98)}
+.public-home .public-enter span,.public-home .public-whatsapp span,.public-home .public-text-link span{display:inline-block;transition:transform 180ms var(--ease-out)}
+
+/* Efectos con el mouse: solo en dispositivos que lo tienen (en el celular el
+   "hover" se queda pegado después de tocar). */
+@media (hover:hover) and (pointer:fine){
+  .public-home .public-enter:hover{background:#000;transform:translateY(-1px);text-decoration:none}
+  .public-home .public-enter:hover span{transform:translate(2px,-2px)}
+  .public-home .public-whatsapp:not(:disabled):hover{transform:translateY(-2px);box-shadow:0 10px 22px #f5c51866;text-decoration:none}
+  .public-home .public-whatsapp:not(:disabled):hover span{transform:translate(2px,-2px)}
+  .public-home .public-qr-link:hover{transform:translateY(-3px);border-color:var(--brand-yellow);box-shadow:0 12px 24px #1a1a1a14}
+  .public-home .public-text-link:hover span{transform:translateY(3px)}
+  .public-home .public-service-grid article{transition:transform 220ms var(--ease-out),box-shadow 220ms var(--ease-out),border-color 220ms ease,opacity 420ms var(--ease-out)}
+  .public-home .public-service-grid article:hover{transform:translateY(-4px);border-color:var(--brand-yellow);box-shadow:0 14px 28px #1a1a1a10}
+  .public-home .public-service-grid article:hover .public-service-number{background:var(--brand-yellow);color:var(--brand-black)}
+  .public-home .public-guide li:hover>span{transform:scale(1.1)}
+}
+.public-home .public-service-number{transition:background-color 220ms ease,color 220ms ease}
+.public-home .public-guide li>span{transition:transform 200ms var(--ease-out)}
+
+/* Movimiento reducido: sin animaciones ni desplazamientos. Se conservan los
+   cambios de color, que ayudan a entender sin marear. */
+@media (prefers-reduced-motion:reduce){
+  .public-home *,.public-home *::before{animation:none !important;transition-property:color,background-color,border-color,box-shadow !important}
+  .public-home.reveal-ready [data-reveal]:not(.is-visible){opacity:1;transform:none}
+  .public-home .public-chat-badge::before{display:none}
+}
