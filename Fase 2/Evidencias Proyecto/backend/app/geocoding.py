@@ -30,43 +30,21 @@ TIMEOUT_SECONDS = 5.0
 # significan que Google solo encontró la calle o la comuna.
 PRECISE_LOCATION_TYPES = {"ROOFTOP", "RANGE_INTERPOLATED"}
 
-# Rectángulo de la Región Metropolitana (Kill Bichos solo atiende ahí). Por sí
-# solo no basta: Valparaíso y Viña del Mar también caen dentro, por eso además
-# se revisa la región que informa Google (_in_rm_region).
-RM_LAT = (-34.3, -32.9)
-RM_LNG = (-71.8, -69.8)
-
 # Si hay varios resultados pero todos a menos de esta distancia, se usa el primero.
 MAX_SPREAD_METERS = 100
 
-# Comunas de la RM: si la dirección no nombra ninguna, se agrega la región para
-# que Google no elija una calle con el mismo nombre en otra ciudad.
-COMUNAS_RM = {
-    "alhue", "buin", "calera de tango", "cerrillos", "cerro navia", "colina", "conchali",
-    "curacavi", "el bosque", "el monte", "estacion central", "huechuraba", "independencia",
-    "isla de maipo", "la cisterna", "la florida", "la granja", "la pintana", "la reina",
-    "lampa", "las condes", "lo barnechea", "lo espejo", "lo prado", "macul", "maipu",
-    "maria pinto", "melipilla", "nunoa", "padre hurtado", "paine", "pedro aguirre cerda",
-    "penaflor", "penalolen", "pirque", "providencia", "pudahuel", "puente alto", "quilicura",
-    "quinta normal", "recoleta", "renca", "san bernardo", "san joaquin", "san jose de maipo",
-    "san miguel", "san pedro", "san ramon", "santiago", "talagante", "tiltil", "vitacura",
-}
+# Kill Bichos agenda visitas en cualquier lugar de Chile (antes solo la Región
+# Metropolitana). Lo que se exige es que el país sea Chile y que la comuna o
+# ciudad que ubica Google aparezca en lo que escribió el cliente: sin eso,
+# Google elige una ciudad por su cuenta (una misma calle existe en muchas) y el
+# pin podría quedar en otro lugar sin que nadie lo note.
+PLACE_TYPES = {"locality", "administrative_area_level_3"}
 
 _ACCENTS = str.maketrans("áéíóúüñ", "aeiouun")
 
 
 def _normalize(value: str) -> str:
     return re.sub(r"\s+", " ", value.lower().translate(_ACCENTS))
-
-
-def _with_region(address: str) -> str:
-    """Agrega ", Región Metropolitana" si la dirección no trae comuna."""
-    normalized = _normalize(address)
-    if any(re.search(rf"\b{comuna}\b", normalized) for comuna in COMUNAS_RM):
-        return address
-    if "metropolitana" in normalized:
-        return address
-    return f"{address}, Región Metropolitana"
 
 
 def distance_meters(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
@@ -92,11 +70,23 @@ def _location(result: dict) -> tuple[float, float]:
     return float(loc["lat"]), float(loc["lng"])
 
 
-def _in_rm_region(result: dict) -> bool:
-    """True si Google ubica el resultado en la Región Metropolitana."""
+def _in_chile(result: dict) -> bool:
+    """True si Google ubica el resultado en Chile."""
     for component in result.get("address_components") or []:
-        if "administrative_area_level_1" in component.get("types", []):
-            return "metropolitana" in _normalize(component.get("long_name", ""))
+        if "country" in component.get("types", []):
+            return component.get("short_name") == "CL"
+    return False
+
+
+def _comuna_en_direccion(result: dict, address: str) -> bool:
+    """True si la comuna o ciudad que informa Google aparece en la dirección
+    que escribió el cliente (sin importar tildes ni mayúsculas)."""
+    text = _normalize(address)
+    for component in result.get("address_components") or []:
+        if PLACE_TYPES & set(component.get("types", [])):
+            name = _normalize(component.get("long_name", ""))
+            if name and re.search(rf"\b{re.escape(name)}\b", text):
+                return True
     return False
 
 
@@ -129,9 +119,12 @@ def _pick_result(data: dict, address: str) -> tuple[float, float, str] | None:
         logger.info("Ubicación imprecisa (%s), no se guarda: %r", precision, address)
         return None
 
-    in_box = RM_LAT[0] <= lat <= RM_LAT[1] and RM_LNG[0] <= lng <= RM_LNG[1]
-    if not (in_box and _in_rm_region(first)):
-        logger.info("Punto fuera de la Región Metropolitana (%s, %s), no se guarda: %r", lat, lng, address)
+    if not _in_chile(first):
+        logger.info("Punto fuera de Chile (%s, %s), no se guarda: %r", lat, lng, address)
+        return None
+
+    if not _comuna_en_direccion(first, address):
+        logger.info("La dirección no nombra la comuna o ciudad ubicada por Google, no se guarda: %r", address)
         return None
 
     return lat, lng, precision
@@ -148,7 +141,7 @@ def geocodificar(direccion: str | None, http: httpx.Client | None = None) -> tup
         return None
 
     params = {
-        "address": _with_region(address),
+        "address": address,
         "components": "country:CL",
         "region": "cl",
         "language": "es",
