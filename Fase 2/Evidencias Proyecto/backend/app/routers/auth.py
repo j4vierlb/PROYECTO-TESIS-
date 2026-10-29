@@ -40,6 +40,7 @@ def login(credentials: LoginRequest, db: Connection = Depends(get_db)) -> TokenR
     operator = fetch_operator_by_email(db, email)
     if operator is not None:
         user_id, rol, password_hash = operator["id"], "operador", operator["password_hash"]
+        session_version = operator.get("session_version", 0)
     else:
         # 2) Si no, ¿es un usuario del panel web?
         web_user = fetch_web_user_by_email(db, email)
@@ -88,9 +89,8 @@ def refresh(payload: RefreshRequest, db: Connection = Depends(get_db)) -> TokenR
     user = fetch_operator_by_id(db, user_id) if rol == "operador" else fetch_web_user_by_id(db, user_id)
     if user is None:
         raise invalid
-    if rol != "operador" and (
-        data.get("sv", 0) != user.get("session_version", 0)
-        or rol != user.get("rol", rol)
+    if data.get("sv", 0) != user.get("session_version", 0) or (
+        rol != "operador" and rol != user.get("rol", rol)
     ):
         raise invalid
     return _tokens_for(user_id, rol, user.get("session_version", 0))
