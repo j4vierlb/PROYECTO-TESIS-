@@ -50,13 +50,13 @@ Los clientes que llegan por WhatsApp solo tienen `direccion` (texto); `clientes.
 | Momento | Qué pasa |
 |---|---|
 | El agente de WhatsApp guarda o cambia la dirección del cliente | Se geocodifica **después** de responder al cliente (tarea en segundo plano), para no demorar el WhatsApp. |
-| El panel crea o edita un cliente con dirección y sin coordenadas | Igual; el panel sigue permitiendo ingresar lat/lng a mano. |
+| El panel crea o edita un cliente con dirección y sin coordenadas | El formulario pide nombre, teléfono y dirección. La API geocodifica al guardar; mantiene las coordenadas opcionales para integraciones previas. |
 | `POST /croquis/{visita_id}/sugerencia` y el cliente sigue sin coordenadas | Se intenta una vez más; si falla, responde `422 "El cliente no tiene coordenadas: corrígelas en el panel o desde la app"`. |
 | Se cambia la dirección | Se vuelve a geocodificar (la ubicación anterior ya no sirve). Si no cambia, nunca se repite: el resultado queda guardado. |
 
 **Corrección en terreno:** la geocodificación puede quedar a unos metros del predio real. Endpoint nuevo `PATCH /clientes/{id}/ubicacion` (solo operador o coordinador) para que el operador, al llegar, fije la ubicación con el GPS del teléfono o moviendo el pin en el mapa de la pantalla de croquis. Si la ubicación cambia más de 30 m, la sugerencia de la IA se vuelve a generar.
 
-**Pruebas:** con la API simulada (sin red): dirección exacta → guarda; `APPROXIMATE` → no guarda; `partial_match` → no guarda; fuera de la RM → no guarda; timeout → `None` y el WhatsApp responde igual. Más una prueba manual con 5 direcciones reales de Macul comparando con Google Maps.
+**Pruebas:** con la API simulada (sin red): dirección exacta de Chile → guarda; `APPROXIMATE` → no guarda; `partial_match` → no guarda; fuera de Chile o comuna/ciudad ausente o distinta → no guarda; timeout → `None` y el WhatsApp responde igual. La comparación manual con direcciones reales y Google Maps requiere registrarse por separado; estos casos simulados no acreditan esa comprobación.
 
 ## 2. Qué propone
 

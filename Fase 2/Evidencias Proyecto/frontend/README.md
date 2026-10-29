@@ -37,12 +37,14 @@ con sufijo `Z`, como exige el contrato de la API. Una hora inexistente por el
 cambio de horario se rechaza con un mensaje antes de enviar la solicitud.
 
 `Sin asignar` envía `operador_id: null`. Los clientes que llegan desde WhatsApp
-sin ubicación se muestran como `Sin coordenadas` y se pueden editar sin inventar
+sin ubicación se muestran como `Ubicación pendiente de confirmar` y se pueden editar sin inventar
 una ubicación. El formulario solo solicita nombre, teléfono y dirección; no pide
 latitud ni longitud. Al guardar, el backend intenta geocodificar la dirección
 con `GOOGLE_MAPS_API_KEY` (clave del backend, no la variable `VITE_`).
 
-Ingresar calle, número y comuna de la Región Metropolitana. Si Google no confirma
+Ingresar calle, número y comuna o ciudad de cualquier lugar de Chile. El país
+debe ser Chile y la comuna o ciudad encontrada por Google debe aparecer en la
+dirección ingresada; ya no se asume la Región Metropolitana. Si Google no confirma
 un punto confiable, el cliente se guarda y el panel indica «Ubicación pendiente
 de confirmar». Corregir la dirección y volver a guardar permite reintentar.
 Cambiar la dirección recalcula el punto; si falla, se quita el punto anterior
