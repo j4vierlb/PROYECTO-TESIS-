@@ -30,7 +30,9 @@ import '../services/field_location.dart';
 import '../services/pending_photo.dart';
 import '../services/pending_photo_files.dart';
 import '../theme/app_theme.dart';
+import '../utils/client_map_marker.dart';
 import '../widgets/company_brand.dart';
+import '../widgets/location_aware_map.dart';
 
 class CroquisScreen extends StatefulWidget {
   final String visitaId;
@@ -38,6 +40,8 @@ class CroquisScreen extends StatefulWidget {
   // todavía no tiene dispositivos ubicados.
   final double? clienteLat;
   final double? clienteLng;
+  final String? clienteNombre;
+  final String? clienteDireccion;
   // En una visita ya completada el croquis es solo de consulta: no se
   // pueden confirmar, mover ni retirar trampas.
   final bool readOnly;
@@ -49,6 +53,8 @@ class CroquisScreen extends StatefulWidget {
     required this.visitaId,
     this.clienteLat,
     this.clienteLng,
+    this.clienteNombre,
+    this.clienteDireccion,
     this.readOnly = false,
     this.apiClient,
     this.photoStore,
@@ -84,6 +90,9 @@ class _CroquisScreenState extends State<CroquisScreen> {
   bool _sugiriendo = false;
   // true si el usuario dio permiso de ubicación: el mapa muestra el punto azul.
   bool _ubicacionPermitida = false;
+  bool get _hasMapReference =>
+      hasValidMapCoordinates(widget.clienteLat, widget.clienteLng) ||
+      (_croquis?.dispositivos.any((d) => hasValidMapCoordinates(d.lat, d.lng)) ?? false);
   // Header con el token para descargar las fotos (no son públicas).
   Map<String, String> _fotoHeaders = const {};
 
@@ -274,7 +283,7 @@ class _CroquisScreenState extends State<CroquisScreen> {
               subtitle: const Text('Usa la ubicación GPS del teléfono'),
               onTap: () => Navigator.of(context).pop('gps'),
             ),
-            if (AppConfig.mapsEnabled)
+            if (AppConfig.mapsEnabled && _hasMapReference)
               ListTile(
                 leading: const Icon(Icons.touch_app_outlined),
                 title: const Text('Marcarla en el mapa'),
@@ -831,6 +840,9 @@ class _CroquisScreenState extends State<CroquisScreen> {
 
     return Column(
       children: [
+        if (!hasValidMapCoordinates(widget.clienteLat, widget.clienteLng) &&
+            (!AppConfig.mapsEnabled || !_showMap))
+          const _Aviso(texto: 'Ubicación del cliente pendiente de confirmar. Revisa la dirección en el panel.'),
         if (widget.readOnly)
           const _Aviso(
             texto: 'Visita completada: este croquis es solo de consulta.',
@@ -941,13 +953,28 @@ class _CroquisScreenState extends State<CroquisScreen> {
 
   /// Vista de mapa: un pin por trampa (requiere la API key de Google Maps).
   Widget _buildMap(Croquis croquis) {
+    final clientMarker = clientMapMarker(
+      lat: widget.clienteLat,
+      lng: widget.clienteLng,
+      name: widget.clienteNombre,
+      address: widget.clienteDireccion,
+    );
+    final devices = croquis.dispositivos.where((d) => hasValidMapCoordinates(d.lat, d.lng)).toList();
+    return LocationAwareMap(
+      clientLocated: clientMarker != null,
+      trapsLocated: devices.isNotEmpty,
+      mapBuilder: (_) => _buildLocatedMap(devices, clientMarker),
+    );
+  }
+
+  Widget _buildLocatedMap(List<DispositivoTrampa> devices, Marker? clientMarker) {
     final mapa = GoogleMap(
       // Cambiar la key obliga a Flutter a reconstruir el mapa desde cero.
       key: ValueKey(_mapVersion),
       // Satelital con nombres de calles: se ven techos, patios y muros.
       mapType: MapType.hybrid,
       // zoom 19 = nivel de detalle de casa/patio.
-      initialCameraPosition: CameraPosition(target: _centerFor(croquis.dispositivos), zoom: 19),
+      initialCameraPosition: CameraPosition(target: _centerFor(devices, clientMarker), zoom: 19),
       // Punto azul con la posición del técnico (si dio permiso de ubicación).
       myLocationEnabled: _ubicacionPermitida,
       myLocationButtonEnabled: _ubicacionPermitida,
@@ -959,7 +986,9 @@ class _CroquisScreenState extends State<CroquisScreen> {
             }
           : null,
       markers: {
-        for (final dispositivo in croquis.dispositivos)
+        // Fijo y rojo: no se confirma, mueve ni retira como una trampa.
+        ?clientMarker,
+        for (final dispositivo in devices)
           Marker(
             markerId: MarkerId(dispositivo.id),
             position: LatLng(dispositivo.lat, dispositivo.lng),
@@ -1033,18 +1062,14 @@ class _CroquisScreenState extends State<CroquisScreen> {
       };
 
   /// Punto donde se centra el mapa: el promedio de las trampas; si no hay,
-  /// la ubicación del cliente; y si tampoco, un punto por defecto.
-  LatLng _centerFor(List<DispositivoTrampa> dispositivos) {
+  /// la ubicación del cliente. Sin puntos reales no se construye el mapa.
+  LatLng _centerFor(List<DispositivoTrampa> dispositivos, Marker? clientMarker) {
     if (dispositivos.isNotEmpty) {
       final avgLat = dispositivos.map((d) => d.lat).reduce((a, b) => a + b) / dispositivos.length;
       final avgLng = dispositivos.map((d) => d.lng).reduce((a, b) => a + b) / dispositivos.length;
       return LatLng(avgLat, avgLng);
     }
-    if (widget.clienteLat != null && widget.clienteLng != null) {
-      return LatLng(widget.clienteLat!, widget.clienteLng!);
-    }
-    // Centro por defecto: Macul, Santiago (zona de operación de la empresa).
-    return const LatLng(-33.4869, -70.5989);
+    return clientMarker!.position;
   }
 }
 

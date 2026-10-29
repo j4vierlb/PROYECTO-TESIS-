@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:app_movil/models/croquis.dart';
+import 'package:app_movil/config/app_config.dart';
 import 'package:app_movil/screens/croquis_screen.dart';
 import 'package:app_movil/screens/visita_detalle_screen.dart';
 import 'package:app_movil/services/api_client.dart';
@@ -13,6 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'support/fake_pending_photo_files.dart';
 
@@ -43,7 +45,7 @@ Map<String, dynamic> visitJson(String state) => {
   'notas': 'Prueba',
 };
 
-ApiClient mockApi({String? photoUrl, void Function()? onPatch}) => ApiClient(
+ApiClient mockApi({String? photoUrl, void Function()? onPatch, bool emptyCroquis = false}) => ApiClient(
   client: MockClient((request) async {
     if (request.method == 'PATCH') {
       onPatch?.call();
@@ -61,6 +63,7 @@ ApiClient mockApi({String? photoUrl, void Function()? onPatch}) => ApiClient(
         'sugerido_por_ia': false,
         'validado_por_operador': false,
         'dispositivos': [
+          if (!emptyCroquis)
           {
             'id': 'd1',
             'codigo': 'T-01',
@@ -132,6 +135,48 @@ void main() {
     });
     ApiClient.onSesionVencida = null;
   });
+
+  testWidgets('Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps', (tester) async {
+    await openScreen(tester, CroquisScreen(visitaId: 'v1', apiClient: mockApi(emptyCroquis: true)));
+    expect(find.textContaining('Ubicación del cliente pendiente de confirmar'), findsOneWidget);
+    if (AppConfig.mapsEnabled) {
+      await tester.tap(find.text('Mapa', findRichText: false));
+      await tester.pumpAndSettle();
+      expect(find.text('Sin ubicación registrada'), findsOneWidget);
+    }
+    expect(find.byType(GoogleMap), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Sin referencia del mapa conserva GPS pero no ofrece marcar en un centro falso', (tester) async {
+    await openScreen(tester, CroquisScreen(visitaId: 'v1', apiClient: mockApi(emptyCroquis: true)));
+    await tester.tap(find.text('Agregar trampa'));
+    await tester.pumpAndSettle();
+    expect(find.text('Aquí, donde estoy parado'), findsOneWidget);
+    expect(find.text('Marcarla en el mapa'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final state in ['en_curso', 'completada']) {
+    testWidgets('Detalle transmite nombre, dirección y punto al croquis: $state', (tester) async {
+      final api = ApiClient(client: MockClient((request) async {
+        if (request.url.path == '/visitas/v1') {
+          return http.Response(jsonEncode(visitJson(state)), 200);
+        }
+        return mockApi().client!.send(request).then(http.Response.fromStream);
+      }));
+      await openScreen(tester, VisitaDetalleScreen(visitaId: 'v1', apiClient: api));
+      await tester.tap(find.text('Ver croquis'));
+      await tester.pumpAndSettle();
+      final screen = tester.widget<CroquisScreen>(find.byType(CroquisScreen));
+      expect(screen.clienteNombre, 'Cliente QA');
+      expect(screen.clienteDireccion, 'Dirección demo');
+      expect(screen.clienteLat, -33.48);
+      expect(screen.clienteLng, -70.59);
+      expect(screen.readOnly, state == 'completada');
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   for (final url in [
     'https://other.invalid/photo',

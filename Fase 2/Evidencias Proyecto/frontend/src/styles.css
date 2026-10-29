@@ -35,3 +35,4 @@ button:disabled{cursor:not-allowed;opacity:.6}button:focus-visible,input:focus-v
 .inbox-item,.composer textarea{color:var(--text-primary)}
 .inbox-item small,.inbox-item span:not(.pill),.thread-head small,.composer.closed{color:var(--text-secondary)}
 .composer textarea{border-color:var(--border)}
+.location-pending{display:inline-block;max-width:100%;padding:6px 8px;border-radius:6px;background:var(--brand-soft);color:#6b4e00;font-size:12px;font-weight:600}

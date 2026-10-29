@@ -22,7 +22,7 @@ El panel utiliza el usuario de prueba `admin@killbichos.cl` con clave `demo1234`
 - Creación de visitas, edición de notas, asignación o cambio de operador y reprogramación real.
 - Cambiar fecha/hora marca la visita como `reagendada` y lleva la agenda al día guardado.
 - Filtro para visitas sin asignar y acceso rápido a Hoy.
-- CRUD de clientes con coordenadas opcionales y confirmación antes de eliminar.
+- CRUD de clientes con ubicación automática desde la dirección y confirmación antes de eliminar.
 - Resumen de clientes, visitas del día y visitas pendientes.
 - Cargas cancelables al navegar, reintento ante errores y prevención de doble envío.
 - Retorno al login cuando vence la sesión; sin credenciales precargadas.
@@ -38,8 +38,21 @@ cambio de horario se rechaza con un mensaje antes de enviar la solicitud.
 
 `Sin asignar` envía `operador_id: null`. Los clientes que llegan desde WhatsApp
 sin ubicación se muestran como `Sin coordenadas` y se pueden editar sin inventar
-una ubicación. En creación y edición se pueden dejar ambas coordenadas vacías;
-el backend valida que sean un par completo y no las calcula automáticamente.
+una ubicación. El formulario solo solicita nombre, teléfono y dirección; no pide
+latitud ni longitud. Al guardar, el backend intenta geocodificar la dirección
+con `GOOGLE_MAPS_API_KEY` (clave del backend, no la variable `VITE_`).
+
+Ingresar calle, número y comuna de la Región Metropolitana. Si Google no confirma
+un punto confiable, el cliente se guarda y el panel indica «Ubicación pendiente
+de confirmar». Corregir la dirección y volver a guardar permite reintentar.
+Cambiar la dirección recalcula el punto; si falla, se quita el punto anterior
+para no mostrar el lugar equivocado. Guardar la misma dirección ya ubicada no
+vuelve a consultar Google ni mueve una corrección hecha en terreno.
+
+El contrato HTTP mantiene las coordenadas opcionales para integraciones previas,
+pero este formulario no reenvía coordenadas antiguas ni expone la clave del
+backend al navegador. No se implementa autocompletado de Places: la búsqueda se
+hace una vez al guardar, con el servicio de geocodificación ya existente.
 
 ## Reglas del agendamiento
 
@@ -109,6 +122,16 @@ pruebas (107 backend y 98 frontend). Ver el reporte PR14 de la carpeta pruebas.
 La validación se limita al entorno local registrado; no acredita un despliegue
 remoto. Un `RefererNotAllowedMapError` en otro origen requiere revisar los
 referentes permitidos de la clave en Google Cloud.
+
+## Ubicación pendiente en Clientes — 28/10/2026
+
+Cuando faltan coordenadas válidas, la tabla muestra una etiqueta amarilla
+**Ubicación pendiente de confirmar**, incluso después de navegar o recargar.
+No depende del mensaje temporal al guardar. Corregir calle, número y comuna y
+guardar vuelve a intentar la ubicación; si se confirma, la etiqueta se reemplaza
+por las coordenadas. El cliente puede conservarse mientras se corrige la dirección.
+Validación: **130/130 pruebas frontend**, compilación y prueba manual local con
+un cliente sintético. [Evidencias](../pruebas/ubicacion_pendiente_2026-10-28/README.md).
 
 ## Pruebas
 

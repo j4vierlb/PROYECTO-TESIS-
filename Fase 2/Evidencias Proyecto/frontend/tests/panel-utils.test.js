@@ -45,7 +45,10 @@ describe('PANEL-HORA: fecha y hora de Chile, independiente del navegador', () =>
 
 describe('PANEL-CLIENTES: ubicación opcional', () => {
   it.each([{ lat: null, lng: null }, {}, { lat: -33.4, lng: null }])('muestra marcador sin coordenadas: %j', client => {
-    expect(clientLocation(client)).toBe('Sin coordenadas')
+    expect(clientLocation(client)).toBe('Ubicación pendiente de confirmar')
+  })
+  it.each([{ lat: NaN, lng: -70 }, { lat: -33, lng: Infinity }, { lat: 91, lng: 0 }, { lat: 0, lng: -181 }])('una ubicación inválida se muestra pendiente: %j', client => {
+    expect(clientLocation(client)).toBe('Ubicación pendiente de confirmar')
   })
   it('cero es una coordenada válida', () => {
     expect(clientLocation({ lat: 0, lng: 0 })).toBe('0.0000, 0.0000')

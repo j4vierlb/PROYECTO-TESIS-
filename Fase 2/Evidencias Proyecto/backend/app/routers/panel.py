@@ -9,6 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from app.config import settings
 from app.database import get_db
 from app.dependencies import require_web_user
+from app.geocoding import geocodificar
 from app.repositories import _is_within_business_hours
 from app.schemas import (
     ClientCreate, ClientSummary, ClientUpdate, CurrentUser, OperatorSummary,
@@ -128,19 +129,28 @@ def list_clients(user: CurrentUser = Depends(require_web_user), db: Connection =
 
 @router.post("/clientes", response_model=ClientSummary, status_code=status.HTTP_201_CREATED)
 def create_client(payload: ClientCreate, user: CurrentUser = Depends(require_web_user), db: Connection = Depends(get_db)):
+    lat, lng = payload.lat, payload.lng
+    # El panel envía la dirección, no obliga al usuario a conocer coordenadas.
+    # Se conserva compatibilidad con integraciones que proporcionan ambas.
+    if lat is None and lng is None:
+        found = geocodificar(payload.direccion)
+        if found is not None:
+            lat, lng, _ = found
     row = _client_write(db, text("""
         INSERT INTO clientes (empresa_id, nombre, telefono_whatsapp, direccion, ubicacion)
         VALUES (:empresa_id, :nombre, :telefono, :direccion,
                 ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography)
         RETURNING id
     """), {"empresa_id": str(user.empresa_id), "nombre": payload.nombre.strip(), "telefono": payload.telefono_whatsapp.strip(),
-          "direccion": payload.direccion.strip(), "lat": payload.lat, "lng": payload.lng}, returning_id=True)
+          "direccion": payload.direccion.strip(), "lat": lat, "lng": lng}, returning_id=True)
     return _client(_client_row(db, row, user.empresa_id))
 
 
 @router.patch("/clientes/{client_id}", response_model=ClientSummary)
 def update_client(client_id: UUID, payload: ClientUpdate, user: CurrentUser = Depends(require_web_user), db: Connection = Depends(get_db)):
-    _client_row(db, client_id, user.empresa_id)
+    # Serializa cambios de dirección y ubicación del mismo cliente. La consulta
+    # a Google está acotada por el timeout del servicio de geocodificación.
+    current = _client_row(db, client_id, user.empresa_id, lock=True)
     values = payload.model_dump(exclude_unset=True)
     if not values:
         return _client(_client_row(db, client_id, user.empresa_id))
@@ -151,11 +161,18 @@ def update_client(client_id: UUID, payload: ClientUpdate, user: CurrentUser = De
             sets.append(f"{key} = :{key}")
             params[key] = values[key].strip() if isinstance(values[key], str) else values[key]
     if "lat" in values or "lng" in values:
-        current = _client_row(db, client_id, user.empresa_id)
         params.update({"lat": values.get("lat", current["lat"]), "lng": values.get("lng", current["lng"])})
         if (params["lat"] is None) != (params["lng"] is None):
             raise HTTPException(status_code=422, detail="Completa ambas coordenadas o deja ambas vacías")
         sets.append("ubicacion = ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography")
+    elif "direccion" in values:
+        address = params["direccion"]
+        if address != current["direccion"] or current["lat"] is None or current["lng"] is None:
+            # No conservar el punto de la dirección anterior si Google falla.
+            # Volver a guardar una dirección pendiente permite reintentar.
+            found = geocodificar(address) if address else None
+            params.update({"lat": found[0] if found else None, "lng": found[1] if found else None})
+            sets.append("ubicacion = ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography")
     if sets:
         _client_write(db, text(f"UPDATE clientes SET {', '.join(sets)} WHERE id = :id AND empresa_id = :empresa_id"), params)
     return _client(_client_row(db, client_id, user.empresa_id))

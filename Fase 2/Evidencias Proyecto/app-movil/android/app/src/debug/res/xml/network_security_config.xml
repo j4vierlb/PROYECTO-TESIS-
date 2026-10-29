@@ -5,5 +5,8 @@
         <domain>localhost</domain>
         <domain>127.0.0.1</domain>
         <domain>10.0.2.2</domain>
+        <!-- Prueba Wi-Fi del Redmi: IP actual del PC, no toda la red local.
+             Si cambia, actualizar aquí y recompilar con API_BASE_URL igual. -->
+        <domain>192.168.1.12</domain>
     </domain-config>
 </network-security-config>

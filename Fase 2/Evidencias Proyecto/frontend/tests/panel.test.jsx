@@ -46,8 +46,11 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
     await user.type(screen.getByLabelText('Teléfono WhatsApp'), '+00000000009')
     await user.type(screen.getByLabelText('Dirección'), 'Dirección QA 1234')
     await user.click(screen.getByRole('button', { name: 'Guardar cliente' }))
-    await waitFor(() => expect(writes[0]?.body).toEqual({ nombre: 'Nuevo sin GPS', telefono_whatsapp: '+00000000009', direccion: 'Dirección QA 1234', lat: null, lng: null }))
+    await waitFor(() => expect(writes[0]?.body).toEqual({ nombre: 'Nuevo sin GPS', telefono_whatsapp: '+00000000009', direccion: 'Dirección QA 1234' }))
     expect(await screen.findByText('Nuevo sin GPS')).toBeVisible()
+    expect(screen.queryByLabelText('Latitud')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Longitud')).not.toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('Ubicación pendiente de confirmar')
   })
 
   it('el filtro Sin asignar oculta visitas con operador', async () => {
@@ -255,16 +258,26 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
     const user = userEvent.setup()
     render(<App />)
     await user.click(screen.getByRole('button', { name: /Clientes/ }))
-    expect(await screen.findByText('Sin coordenadas')).toBeVisible()
+    expect(await screen.findByText('Ubicación pendiente de confirmar')).toBeVisible()
     await user.click(screen.getByRole('button', { name: 'Editar' }))
-    expect(screen.getByLabelText('Latitud')).toHaveValue(null)
-    expect(screen.getByLabelText('Longitud')).toHaveValue(null)
+    expect(screen.queryByLabelText('Latitud')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Longitud')).not.toBeInTheDocument()
     await user.clear(screen.getByLabelText('Nombre'))
     await user.type(screen.getByLabelText('Nombre'), 'Nombre corregido')
     await user.click(screen.getByRole('button', { name: 'Guardar cliente' }))
-    await waitFor(() => expect(writes[0]?.body).toEqual({ nombre: 'Nombre corregido', telefono_whatsapp: client.telefono_whatsapp, direccion: null, lat: null, lng: null }))
+    await waitFor(() => expect(writes[0]?.body).toEqual({ nombre: 'Nombre corregido', telefono_whatsapp: client.telefono_whatsapp, direccion: null }))
     expect(await screen.findByText('Nombre corregido')).toBeVisible()
-    expect(screen.getByText('Sin coordenadas')).toBeVisible()
+    expect(screen.getByText('Ubicación pendiente de confirmar')).toBeVisible()
+  })
+
+  it('el estado pendiente permanece al volver al listado, sin depender del aviso de guardado', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: /Clientes/ }))
+    expect(await screen.findByText('Ubicación pendiente de confirmar')).toHaveClass('location-pending')
+    await user.click(screen.getByRole('button', { name: /Agenda/ }))
+    await user.click(screen.getByRole('button', { name: /Clientes/ }))
+    expect(await screen.findByText('Ubicación pendiente de confirmar')).toBeVisible()
   })
 
   it('una ubicación completa sigue mostrando sus coordenadas', async () => {
@@ -273,6 +286,61 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
     render(<App />)
     await user.click(screen.getByRole('button', { name: /Clientes/ }))
     expect(await screen.findByText('-33.4869, -70.5989')).toBeVisible()
+  })
+
+  it('editar una dirección no reenvía el punto viejo al backend', async () => {
+    clients = [{ ...client, direccion: 'Macul 1234, Macul', lat: -33.4, lng: -70.6 }]
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: /Clientes/ }))
+    await user.click(await screen.findByRole('button', { name: 'Editar' }))
+    expect(screen.getByText(/Buscaremos la ubicación automáticamente/)).toBeVisible()
+    await user.clear(screen.getByLabelText('Dirección'))
+    await user.type(screen.getByLabelText('Dirección'), 'Providencia 1208, Providencia')
+    await user.click(screen.getByRole('button', { name: 'Guardar cliente' }))
+    await waitFor(() => expect(writes[0]?.body).toEqual({ nombre: client.nombre, telefono_whatsapp: client.telefono_whatsapp, direccion: 'Providencia 1208, Providencia' }))
+    expect(screen.getByRole('status')).toHaveTextContent('Ubicación pendiente de confirmar')
+  })
+
+  it('muestra la ubicación devuelta por el servidor sin pedir números al usuario', async () => {
+    const base = globalThis.fetch
+    vi.stubGlobal('fetch', vi.fn(async (url, options) => {
+      const response = await base(url, options)
+      if (new URL(url).pathname === '/clientes' && options?.method === 'POST') {
+        const saved = { ...JSON.parse(options.body), id: 'cliente-geocodificado', lat: -33.4290994, lng: -70.621161 }
+        clients = [saved]
+        return new Response(JSON.stringify(saved), { status: 201 })
+      }
+      return response
+    }))
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: /Clientes/ }))
+    await user.click(screen.getByRole('button', { name: /Nuevo cliente/ }))
+    await user.type(screen.getByLabelText('Nombre'), 'Cliente ubicado')
+    await user.type(screen.getByLabelText('Teléfono WhatsApp'), '+00000000009')
+    await user.type(screen.getByLabelText('Dirección'), 'Providencia 1208, Providencia')
+    await user.click(screen.getByRole('button', { name: 'Guardar cliente' }))
+    expect(await screen.findByText('-33.4291, -70.6212')).toBeVisible()
+    expect(screen.getByRole('status')).toHaveTextContent('Ubicación disponible para el croquis')
+  })
+
+  it('si falla el guardado conserva la dirección y permite reintentar', async () => {
+    const base = globalThis.fetch
+    vi.stubGlobal('fetch', vi.fn((url, options) => options?.method === 'POST' && new URL(url).pathname === '/clientes'
+      ? Promise.resolve(new Response(JSON.stringify({ detail: 'Servicio temporalmente no disponible' }), { status: 503 }))
+      : base(url, options)))
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: /Clientes/ }))
+    await user.click(screen.getByRole('button', { name: /Nuevo cliente/ }))
+    await user.type(screen.getByLabelText('Nombre'), 'Cliente QA')
+    await user.type(screen.getByLabelText('Teléfono WhatsApp'), '+00000000009')
+    await user.type(screen.getByLabelText('Dirección'), 'Providencia 1208, Providencia')
+    await user.click(screen.getByRole('button', { name: 'Guardar cliente' }))
+    expect(await screen.findByRole('alert')).toBeVisible()
+    expect(screen.getByLabelText('Dirección')).toHaveValue('Providencia 1208, Providencia')
+    expect(screen.getByRole('button', { name: 'Guardar cliente' })).toBeEnabled()
   })
 
   it('agenda una visita Sin asignar con hora chilena, y la vuelve a mostrar', async () => {

@@ -5,7 +5,7 @@ import { request, SESSION_EXPIRED } from './api.js'
 import { CroquisViewer } from './CroquisViewer.jsx'
 import { PasswordRecovery } from './PasswordRecovery.jsx'
 import { BrandLogo } from './BrandLogo.jsx'
-import { addDays, chileDate, chileDateTime, chileTime, chileDateTimeInput, clientLocation, clientPayload, visitPayload } from './panel-utils.js'
+import { addDays, chileDate, chileDateTime, chileTime, chileDateTimeInput, clientLocation, hasClientLocation, visitPayload } from './panel-utils.js'
 
 const statuses = {
   agendada: ['Agendada', 'gray'], en_curso: ['En curso', 'yellow'], completada: ['Completada', 'green'],
@@ -253,15 +253,15 @@ function Clientes() {
     <Feedback error={deleting ? resource.error : error || resource.error} success={success} />
     <div className="list-toolbar"><input className="search" aria-label="Buscar clientes" placeholder="Buscar por nombre, dirección o teléfono" value={query} onChange={e => setQuery(e.target.value)} /><button className="secondary" disabled={resource.loading} onClick={resource.reload}>{resource.error ? 'Reintentar' : 'Actualizar'}</button></div>
     <section className="client-table" aria-label="Clientes registrados" aria-busy={resource.loading}><div className="table-head"><span>Cliente</span><span>Contacto</span><span>Ubicación</span><span>Acciones</span></div>
-      {resource.loading ? <div className="empty" role="status">Cargando clientes…</div> : resource.error ? <div className="empty">No se pudo cargar el listado. Usa Reintentar.</div> : <>{filtered.map(c => <div className="client-row" key={c.id}><div><strong>{c.nombre}</strong><small>{c.direccion || 'Sin dirección registrada'}</small></div><span>{c.telefono_whatsapp}</span><span>{clientLocation(c)}</span><div className="row-actions"><button className="link-button" onClick={() => { setSuccess(''); setModal({ client: c }) }}>Editar</button><button className="link-button danger-text" onClick={() => { setError(''); setSuccess(''); setDeleting(c) }}>Eliminar</button></div></div>)}{!filtered.length && <div className="empty">{clients.length ? 'No hay clientes que coincidan con la búsqueda.' : 'Aún no hay clientes registrados.'}</div>}</>}
+      {resource.loading ? <div className="empty" role="status">Cargando clientes…</div> : resource.error ? <div className="empty">No se pudo cargar el listado. Usa Reintentar.</div> : <>{filtered.map(c => <div className="client-row" key={c.id}><div><strong>{c.nombre}</strong><small>{c.direccion || 'Sin dirección registrada'}</small></div><span>{c.telefono_whatsapp}</span><span className={hasClientLocation(c) ? undefined : 'location-pending'}>{clientLocation(c)}</span><div className="row-actions"><button className="link-button" onClick={() => { setSuccess(''); setModal({ client: c }) }}>Editar</button><button className="link-button danger-text" onClick={() => { setError(''); setSuccess(''); setDeleting(c) }}>Eliminar</button></div></div>)}{!filtered.length && <div className="empty">{clients.length ? 'No hay clientes que coincidan con la búsqueda.' : 'Aún no hay clientes registrados.'}</div>}</>}
     </section>
-    {modal && <ClientModal client={modal.client} onClose={() => setModal(null)} onSaved={() => { setModal(null); setError(''); setSuccess('Cliente guardado correctamente.'); resource.reload() }} />}
+    {modal && <ClientModal client={modal.client} onClose={() => setModal(null)} onSaved={saved => { setModal(null); setError(''); setSuccess(hasClientLocation(saved) ? 'Cliente guardado correctamente. Ubicación disponible para el croquis.' : 'Cliente guardado correctamente. Ubicación pendiente de confirmar: revisa calle, número y comuna, y vuelve a guardar para reintentar.'); resource.reload() }} />}
     {deleting && <Modal title="Eliminar cliente" busy={busy} onClose={() => { setDeleting(null); setError('') }} onSubmit={remove}><p>¿Eliminar a <strong>{deleting.nombre}</strong>? Esta acción no se puede deshacer.</p><p className="field-help">Si tiene visitas asociadas, el sistema impedirá su eliminación para conservar el historial.</p><Feedback error={error} /><div className="modal-actions"><button type="button" className="secondary" disabled={busy} onClick={() => { setDeleting(null); setError('') }}>Cancelar</button><button className="danger" disabled={busy}>{busy ? 'Eliminando…' : 'Confirmar eliminación'}</button></div></Modal>}
   </>
 }
 
 function ClientModal({ client, onClose, onSaved }) {
-  const [form, setForm] = useState({ nombre: client?.nombre ?? '', telefono_whatsapp: client?.telefono_whatsapp ?? '', direccion: client?.direccion ?? '', lat: client?.lat ?? '', lng: client?.lng ?? '' })
+  const [form, setForm] = useState({ nombre: client?.nombre ?? '', telefono_whatsapp: client?.telefono_whatsapp ?? '', direccion: client?.direccion ?? '' })
   const [error, setError] = useState(''), [busy, setBusy] = useState(false)
   const submitting = useRef(false)
   const field = key => ({ value: form[key], onChange: e => setForm({ ...form, [key]: e.target.value }) })
@@ -270,16 +270,17 @@ function ClientModal({ client, onClose, onSaved }) {
     if (submitting.current) return
     submitting.current = true; setBusy(true); setError('')
     try {
-      const payload = clientPayload({ ...form, nombre: form.nombre.trim(), telefono_whatsapp: form.telefono_whatsapp.trim() })
+      // No reenviar coordenadas anteriores al cambiar de dirección.
+      const payload = { nombre: form.nombre.trim(), telefono_whatsapp: form.telefono_whatsapp.trim(), direccion: form.direccion.trim() || null }
       if (payload.nombre.length < 2 || payload.telefono_whatsapp.length < 5 || (!client && !payload.direccion)) throw new Error('Completa nombre, teléfono y dirección válidos.')
-      await request(client ? `/clientes/${client.id}` : '/clientes', { method: client ? 'PATCH' : 'POST', body: JSON.stringify(payload) })
-      onSaved()
+      const saved = await request(client ? `/clientes/${client.id}` : '/clientes', { method: client ? 'PATCH' : 'POST', body: JSON.stringify(payload) })
+      onSaved(saved)
     } catch (err) { setError(err.message) }
     finally { submitting.current = false; setBusy(false) }
   }
   return <Modal title={client ? 'Editar cliente' : 'Nuevo cliente'} busy={busy} onClose={onClose} onSubmit={save}>
     <fieldset disabled={busy}><label>Nombre<input required minLength="2" maxLength="150" autoComplete="name" {...field('nombre')} /></label><label>Teléfono WhatsApp<input required type="tel" minLength="5" maxLength="30" autoComplete="tel" {...field('telefono_whatsapp')} /></label><label>Dirección<input required={!client} autoComplete="street-address" {...field('direccion')} /></label>
-      <div className="two-col"><label>Latitud<input type="number" step="any" min="-90" max="90" {...field('lat')} /></label><label>Longitud<input type="number" step="any" min="-180" max="180" {...field('lng')} /></label></div><p className="field-help">Las coordenadas son opcionales. Completa ambas o deja ambas vacías; no se calculan automáticamente.</p>
+      <p className="field-help">Ingresa calle, número y comuna de la Región Metropolitana. Buscaremos la ubicación automáticamente con Google Maps al guardar. Si no se puede confirmar, el cliente se guardará con ubicación pendiente; corrige la dirección y vuelve a guardar para reintentar.</p>
     </fieldset><Feedback error={error} /><div className="modal-actions"><button type="button" className="secondary" disabled={busy} onClick={onClose}>Cancelar</button><button className="primary" disabled={busy}>{busy ? 'Guardando…' : 'Guardar cliente'}</button></div>
   </Modal>
 }

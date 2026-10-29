@@ -279,8 +279,11 @@ class _VisitaDetalleScreenState extends State<VisitaDetalleScreen> {
                 MaterialPageRoute(
                   builder: (_) => CroquisScreen(
                     visitaId: visita.id,
+                    apiClient: widget.apiClient,
                     clienteLat: visita.cliente.lat,
                     clienteLng: visita.cliente.lng,
+                    clienteNombre: visita.cliente.nombre,
+                    clienteDireccion: visita.cliente.direccion,
                     // Visita completada = croquis solo de consulta.
                     readOnly: completada,
                   ),

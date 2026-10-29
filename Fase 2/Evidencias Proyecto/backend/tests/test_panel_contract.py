@@ -23,6 +23,7 @@ COMPANY_ID = '11111111-1111-1111-1111-111111111111'
 
 class PanelContractTest(unittest.TestCase):
     def setUp(self):
+        self.enterContext(patch('app.routers.panel.geocodificar', return_value=None))
         self.enterContext(patch.multiple(settings, killbichos_open_time='08:00', killbichos_close_time='18:00', killbichos_operating_days='0,1,2,3,4,5'))
         self.conflict = False
         self.operator_exists = True

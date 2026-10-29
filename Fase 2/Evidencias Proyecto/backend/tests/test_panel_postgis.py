@@ -33,6 +33,7 @@ class PanelPostgisTest(unittest.TestCase):
         cls.engine.dispose()
 
     def setUp(self):
+        self.geocoder = self.enterContext(patch('app.routers.panel.geocodificar', return_value=None))
         self.enterContext(patch.multiple(settings, killbichos_open_time='08:00', killbichos_close_time='18:00', killbichos_operating_days='0,1,2,3,4,5'))
         self.connection = self.engine.connect()
         self.transaction = self.connection.begin()
@@ -96,6 +97,93 @@ class PanelPostgisTest(unittest.TestCase):
         self.assertEqual(response.status_code, 201, response.text)
         self.assertEqual(response.json()['lat'], 0)
         self.assertEqual(response.json()['lng'], 0)
+
+    def located_client(self):
+        self.db.execute(text("""UPDATE clientes SET direccion = 'Dirección anterior, Macul',
+            ubicacion = ST_SetSRID(ST_MakePoint(-70.6, -33.4), 4326)::geography
+            WHERE id = :id"""), dict(id=CLIENT_ID))
+
+    def test_direccion_crea_cliente_con_punto_postgis_sin_coordenadas_del_usuario(self):
+        self.geocoder.return_value = (-33.4290994, -70.621161, 'ROOFTOP')
+        response = self.client.post('/clientes', json=dict(nombre='Cliente geocodificado QA',
+            telefono_whatsapp='+00000000030', direccion='  Providencia 1208, Providencia  '))
+        self.assertEqual(response.status_code, 201, response.text)
+        self.geocoder.assert_called_once_with('Providencia 1208, Providencia')
+        self.assertAlmostEqual(response.json()['lat'], -33.4290994)
+        persisted = self.db.execute(text('SELECT ST_X(ubicacion::geometry) FROM clientes WHERE id = :id'),
+            dict(id=response.json()['id'])).scalar_one()
+        self.assertAlmostEqual(persisted, -70.621161)
+
+    def test_geocodificacion_sin_resultado_guarda_cliente_sin_inventar_punto(self):
+        response = self.client.post('/clientes', json=dict(nombre='Cliente pendiente QA',
+            telefono_whatsapp='+00000000031', direccion='Dirección ambigua QA'))
+        self.assertEqual(response.status_code, 201, response.text)
+        self.assertIsNone(response.json()['lat'])
+        self.assertIsNone(response.json()['lng'])
+        self.geocoder.assert_called_once()
+
+    def test_coordenadas_explicitas_conservan_compatibilidad_sin_consultar_google(self):
+        response = self.client.post('/clientes', json=dict(nombre='Cliente manual QA',
+            telefono_whatsapp='+00000000032', direccion='Dirección QA', lat=-33.4, lng=-70.6))
+        self.assertEqual(response.status_code, 201, response.text)
+        self.geocoder.assert_not_called()
+        self.assertAlmostEqual(response.json()['lng'], -70.6)
+
+    def test_cambiar_direccion_reemplaza_punto_anterior(self):
+        self.located_client()
+        self.geocoder.return_value = (-33.4290994, -70.621161, 'ROOFTOP')
+        response = self.client.patch(f'/clientes/{CLIENT_ID}', json=dict(direccion='  Providencia 1208, Providencia  '))
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()['direccion'], 'Providencia 1208, Providencia')
+        self.assertAlmostEqual(response.json()['lat'], -33.4290994)
+        self.geocoder.assert_called_once_with('Providencia 1208, Providencia')
+
+    def test_direccion_nueva_sin_resultado_elimina_coordenadas_anteriores(self):
+        self.located_client()
+        response = self.client.patch(f'/clientes/{CLIENT_ID}', json=dict(direccion='Dirección no ubicable QA'))
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertIsNone(response.json()['lat'])
+        self.assertIsNone(response.json()['lng'])
+        self.assertEqual(response.json()['direccion'], 'Dirección no ubicable QA')
+
+    def test_guardar_misma_direccion_ubicada_no_consume_google_ni_mueve_el_punto(self):
+        self.located_client()
+        response = self.client.patch(f'/clientes/{CLIENT_ID}', json=dict(nombre='Nombre corregido QA', direccion='Dirección anterior, Macul'))
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertAlmostEqual(response.json()['lat'], -33.4)
+        self.geocoder.assert_not_called()
+
+    def test_guardar_direccion_pendiente_reintenta_geocodificacion(self):
+        self.db.execute(text('UPDATE clientes SET direccion = :address WHERE id = :id'),
+            dict(address='Providencia 1208, Providencia', id=CLIENT_ID))
+        self.geocoder.return_value = (-33.4290994, -70.621161, 'ROOFTOP')
+        response = self.client.patch(f'/clientes/{CLIENT_ID}', json=dict(direccion='Providencia 1208, Providencia'))
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertAlmostEqual(response.json()['lng'], -70.621161)
+        self.geocoder.assert_called_once()
+
+    def test_borrar_direccion_quita_punto_sin_consultar_google(self):
+        for address in (None, '   '):
+            with self.subTest(address=address):
+                self.located_client()
+                response = self.client.patch(f'/clientes/{CLIENT_ID}', json=dict(direccion=address))
+                self.assertEqual(response.status_code, 200, response.text)
+                self.assertIsNone(response.json()['direccion'] or None)
+                self.assertIsNone(response.json()['lat'])
+                self.assertIsNone(response.json()['lng'])
+        self.geocoder.assert_not_called()
+
+    def test_editar_solo_nombre_conserva_punto_y_no_consulta_google(self):
+        self.located_client()
+        response = self.client.patch(f'/clientes/{CLIENT_ID}', json=dict(nombre='Nombre nuevo QA'))
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertAlmostEqual(response.json()['lat'], -33.4)
+        self.geocoder.assert_not_called()
+
+    def test_cliente_de_otra_empresa_no_se_geocodifica_ni_se_edita(self):
+        response = self.client.patch(f'/clientes/{OTHER_CLIENT_ID}', json=dict(direccion='Providencia 1208, Providencia'))
+        self.assertEqual(response.status_code, 404)
+        self.geocoder.assert_not_called()
 
     def test_sin_asignar_se_guarda_null_y_reaparece_en_la_agenda(self):
         visit = self.create_visit()

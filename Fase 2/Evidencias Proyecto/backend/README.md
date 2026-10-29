@@ -2,6 +2,32 @@
 
 API FastAPI conectada a PostgreSQL + PostGIS (carpeta `../database/`).
 
+## Ubicación de clientes por dirección — panel web
+
+`POST /clientes` calcula la ubicación si no recibe coordenadas. Usa el servicio
+existente `app/geocoding.py`, con `GOOGLE_MAPS_API_KEY` configurada en el `.env`
+raíz al ejecutar Docker. La clave debe autorizar Geocoding API y nunca llevar
+el prefijo `VITE_` ni enviarse al navegador.
+
+`PATCH /clientes/{id}` recalcula al cambiar la dirección o al volver a guardar
+una dirección todavía sin ubicación. Si falla, deja `ubicacion` en NULL: no
+conserva coordenadas de una dirección anterior. Borrar la dirección también
+borra su punto. La edición se serializa por cliente con `FOR UPDATE`; la
+consulta externa conserva el timeout de 5 segundos del servicio existente.
+
+Se conservan la validación de Región Metropolitana, el descarte de coincidencias
+parciales, ambiguas o aproximadas y el aislamiento por empresa. El fallo de
+Google no impide guardar el cliente. El panel interpreta `lat/lng` nulos como
+ubicación pendiente y explica cómo reintentar. Una dirección sin cambios y con
+punto válido no genera una nueva consulta; editar solo nombre/teléfono tampoco.
+
+Por compatibilidad, enviar coordenadas explícitas continúa siendo válido y
+prioritario, incluida la limpieza explícita con ambos valores nulos en PATCH.
+El formulario nuevo solo envía nombre, teléfono y dirección. No se altera el
+contrato móvil ni la lógica de las trampas, ni se necesita una migración para
+esta mejora. Las migraciones pendientes de WhatsApp/recuperación corresponden
+a sus entregas anteriores y deben aplicarse antes de desplegar todo el código.
+
 ## Instalación y ejecución
 
 **Con Docker (recomendado):** desde la raíz del repo, `docker compose up --build` levanta la base, este backend y el panel web. Ver el `README.md` de la raíz.

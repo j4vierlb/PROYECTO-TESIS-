@@ -36,7 +36,18 @@ void main() {
     store = SqliteLocalStore(LocalDatabase.forTesting(ruta));
   });
 
-  tearDown(() => carpeta.deleteSync(recursive: true));
+  tearDown(() async {
+    // El factory reutiliza la conexión abierta de esta ruta. Cerrar primero:
+    // Windows impide borrar un archivo SQLite que todavía tiene un handle.
+    final db = await databaseFactory.openDatabase(ruta);
+    await db.close();
+    final tempRoot = Directory.systemTemp.resolveSymbolicLinksSync();
+    final target = carpeta.resolveSymbolicLinksSync();
+    if (!p.isWithin(tempRoot, target) || !p.basename(target).startsWith('kb_sqlite_test')) {
+      throw StateError('La limpieza solo admite el directorio temporal de esta prueba');
+    }
+    await carpeta.delete(recursive: true);
+  });
 
   test('guarda y lee la cache por cuenta; reemplazar pisa el valor anterior', () async {
     await store.putCache('a', 'visitas_hoy', '[1]');
@@ -113,6 +124,9 @@ void main() {
   test('los datos sobreviven al cerrar y volver a abrir la base', () async {
     await store.putCache('a', 'k', 'persistente');
     await store.enqueue(op('a', OpKind.foto, payload: {'deviceId': 't', 'path': '/outbox/1.jpg'}));
+    // Probar persistencia real: no reutilizar la misma conexión abierta.
+    final firstConnection = await databaseFactory.openDatabase(ruta);
+    await firstConnection.close();
     final otraSesion = SqliteLocalStore(LocalDatabase.forTesting(ruta));
     expect(await otraSesion.getCache('a', 'k'), 'persistente');
     expect((await otraSesion.pending('a')).single.payload['path'], '/outbox/1.jpg');
