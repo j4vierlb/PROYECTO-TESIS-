@@ -8,13 +8,15 @@ from sqlalchemy.exc import IntegrityError
 
 from app.config import settings
 from app.database import get_db
-from app.dependencies import require_web_user
+from app.dependencies import require_admin, require_web_user
 from app.geocoding import geocodificar
 from app.repositories import _is_within_business_hours
 from app.schemas import (
-    ClientCreate, ClientSummary, ClientUpdate, CurrentUser, OperatorSummary,
-    PanelStats, PanelVisitResponse, PanelVisitUpdate, VisitCreate, VisitStatus,
+    ClientCreate, ClientSummary, ClientUpdate, CurrentUser, OperatorCreate, OperatorDetail,
+    OperatorSummary, OperatorUpdate, PanelStats, PanelVisitResponse, PanelVisitUpdate,
+    VisitCreate, VisitStatus,
 )
+from app.security import hash_password
 from app.whatsapp_saliente import (
     AVISO_AGENDADA, AVISO_CANCELADA, AVISO_REAGENDADA, avisar_visita_en_segundo_plano,
 )
@@ -95,13 +97,76 @@ def _client_row(db: Connection, client_id: UUID, empresa_id: UUID, *, lock=False
     return dict(row)
 
 
-@router.get("/panel/operadores", response_model=list[OperatorSummary])
-def operators(user: CurrentUser = Depends(require_web_user), db: Connection = Depends(get_db)):
+@router.get("/panel/operadores", response_model=list[OperatorDetail])
+def operators(incluir_inactivos: bool = False, user: CurrentUser = Depends(require_web_user),
+              db: Connection = Depends(get_db)):
+    # Sin el parámetro se mantiene la lista de activos que usan los
+    # desplegables del panel. Los inactivos solo los ve el administrador.
+    if incluir_inactivos and user.rol != "admin":
+        raise HTTPException(status_code=403, detail="Se requiere un administrador")
     rows = db.execute(text("""
-        SELECT id, nombre, email FROM operadores
-        WHERE empresa_id = :empresa_id AND activo = TRUE ORDER BY nombre
-    """), {"empresa_id": str(user.empresa_id)}).mappings().all()
-    return [OperatorSummary(**dict(row)) for row in rows]
+        SELECT id, nombre, email, telefono, activo FROM operadores
+        WHERE empresa_id = :empresa_id AND (activo = TRUE OR :todos) ORDER BY nombre
+    """), {"empresa_id": str(user.empresa_id), "todos": incluir_inactivos}).mappings().all()
+    return [OperatorDetail(**dict(row)) for row in rows]
+
+
+def _operator_row(db: Connection, operator_id: UUID, empresa_id: UUID, *, lock=False) -> dict:
+    row = db.execute(text("""
+        SELECT id, nombre, email, telefono, activo FROM operadores
+        WHERE id = :id AND empresa_id = :empresa_id
+    """ + (" FOR UPDATE" if lock else "")), {"id": str(operator_id), "empresa_id": str(empresa_id)}).mappings().first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Técnico no encontrado")
+    return dict(row)
+
+
+@router.post("/panel/operadores", response_model=OperatorDetail, status_code=status.HTTP_201_CREATED)
+def create_operator(payload: OperatorCreate, user: CurrentUser = Depends(require_admin), db: Connection = Depends(get_db)):
+    # El login busca primero en operadores y después en usuarios: si el correo
+    # estuviera en ambas tablas, la cuenta del panel quedaría inaccesible.
+    taken = db.execute(text("""
+        SELECT EXISTS (SELECT 1 FROM operadores WHERE lower(email) = :email)
+            OR EXISTS (SELECT 1 FROM usuarios WHERE lower(email) = :email)
+    """), {"email": payload.email}).scalar_one()
+    if taken:
+        raise HTTPException(status_code=409, detail="Ya existe una cuenta con ese correo")
+    try:
+        row_id = db.execute(text("""
+            INSERT INTO operadores (empresa_id, nombre, email, telefono, password_hash)
+            VALUES (:empresa_id, :nombre, :email, :telefono, :password_hash) RETURNING id
+        """), {"empresa_id": str(user.empresa_id), "nombre": payload.nombre, "email": payload.email,
+              "telefono": payload.telefono, "password_hash": hash_password(payload.clave)}).scalar_one()
+        db.commit()
+    except IntegrityError as exc:
+        # Dos altas simultáneas con el mismo correo: la restricción UNIQUE decide.
+        db.rollback()
+        if getattr(exc.orig, "sqlstate", None) == "23505":
+            raise HTTPException(status_code=409, detail="Ya existe una cuenta con ese correo") from exc
+        raise
+    return OperatorDetail(**_operator_row(db, row_id, user.empresa_id))
+
+
+@router.patch("/panel/operadores/{operator_id}", response_model=OperatorDetail)
+def update_operator(operator_id: UUID, payload: OperatorUpdate, user: CurrentUser = Depends(require_admin),
+                    db: Connection = Depends(get_db)):
+    # No se eliminan técnicos: se desactivan para conservar el historial de
+    # visitas. Un técnico inactivo no puede iniciar sesión ni usar su token.
+    _operator_row(db, operator_id, user.empresa_id, lock=True)
+    values = payload.model_dump(exclude_unset=True)
+    sets, params = [], {"id": str(operator_id), "empresa_id": str(user.empresa_id)}
+    for key in ("nombre", "telefono", "activo"):
+        if key in values:
+            sets.append(f"{key} = :{key}")
+            params[key] = values[key]
+    if "clave" in values:
+        # Subir session_version cierra las sesiones abiertas en la app.
+        sets += ["password_hash = :password_hash", "session_version = session_version + 1"]
+        params["password_hash"] = hash_password(values["clave"])
+    if sets:
+        db.execute(text(f"UPDATE operadores SET {', '.join(sets)} WHERE id = :id AND empresa_id = :empresa_id"), params)
+        db.commit()
+    return OperatorDetail(**_operator_row(db, operator_id, user.empresa_id))
 
 
 @router.get("/panel/stats", response_model=PanelStats)

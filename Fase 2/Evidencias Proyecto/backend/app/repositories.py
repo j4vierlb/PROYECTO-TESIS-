@@ -448,7 +448,10 @@ def add_suggested_devices(
 def fetch_operator_by_email(db: Connection, email: str) -> dict[str, Any] | None:
     """Busca un operador activo por email (para el login). None si no existe."""
     row = db.execute(
-        text("SELECT id, nombre, empresa_id, password_hash FROM operadores WHERE email = :email AND activo = TRUE"),
+        text(
+            "SELECT id, nombre, empresa_id, password_hash, session_version FROM operadores "
+            "WHERE email = :email AND activo = TRUE"
+        ),
         {"email": email},
     ).mappings().first()
     return dict(row) if row else None
@@ -469,7 +472,7 @@ def fetch_web_user_by_email(db: Connection, email: str) -> dict[str, Any] | None
 def fetch_operator_by_id(db: Connection, user_id: UUID) -> dict[str, Any] | None:
     """Busca un operador activo por id (para validar el token en cada request)."""
     row = db.execute(
-        text("SELECT id, nombre, empresa_id FROM operadores WHERE id = :id AND activo = TRUE"),
+        text("SELECT id, nombre, empresa_id, session_version FROM operadores WHERE id = :id AND activo = TRUE"),
         {"id": str(user_id)},
     ).mappings().first()
     return dict(row) if row else None

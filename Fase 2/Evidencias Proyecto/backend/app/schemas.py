@@ -157,6 +157,71 @@ class OperatorSummary(BaseModel):
     email: str | None = None
 
 
+class OperatorDetail(OperatorSummary):
+    """Técnico tal como lo ve el administrador. Nunca incluye la clave."""
+    telefono: str | None = None
+    activo: bool
+
+
+def _valid_operator_password(value):
+    # bcrypt solo usa los primeros 72 bytes y no admite el carácter nulo.
+    if value is not None:
+        if "\x00" in value:
+            raise ValueError("La clave contiene un carácter no permitido")
+        if len(value.encode("utf-8")) > 72:
+            raise ValueError("La clave no debe superar 72 bytes")
+    return value
+
+
+def _optional_phone(value):
+    # Un teléfono vacío se guarda como NULL, no como texto vacío.
+    return (value.strip() or None) if isinstance(value, str) else value
+
+
+class OperatorCreate(BaseModel):
+    nombre: str = Field(min_length=2, max_length=150)
+    email: str = Field(min_length=3, max_length=150, pattern=r"^[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+$")
+    telefono: str | None = Field(default=None, min_length=5, max_length=30)
+    clave: str = Field(min_length=12, max_length=72)
+
+    @field_validator("nombre", mode="before")
+    @classmethod
+    def trim_name(cls, value):
+        return value.strip() if isinstance(value, str) else value
+
+    @field_validator("email", mode="before")
+    @classmethod
+    def normalize_email(cls, value):
+        # El login compara el correo en minúsculas y sin espacios.
+        return value.strip().lower() if isinstance(value, str) else value
+
+    _phone = field_validator("telefono", mode="before")(_optional_phone)
+    _password = field_validator("clave")(_valid_operator_password)
+
+
+class OperatorUpdate(BaseModel):
+    nombre: str | None = Field(default=None, min_length=2, max_length=150)
+    telefono: str | None = Field(default=None, min_length=5, max_length=30)
+    activo: bool | None = None
+    clave: str | None = Field(default=None, min_length=12, max_length=72)
+
+    @field_validator("nombre", "activo", "clave", mode="before")
+    @classmethod
+    def not_null(cls, value):
+        # Solo el teléfono se puede borrar; el resto se omite si no cambia.
+        if value is None:
+            raise ValueError("Este campo no puede quedar vacío")
+        return value
+
+    @field_validator("nombre", mode="before")
+    @classmethod
+    def trim_name(cls, value):
+        return value.strip() if isinstance(value, str) else value
+
+    _phone = field_validator("telefono", mode="before")(_optional_phone)
+    _password = field_validator("clave")(_valid_operator_password)
+
+
 class VisitCreate(BaseModel):
     cliente_id: UUID
     operador_id: UUID | None = None
