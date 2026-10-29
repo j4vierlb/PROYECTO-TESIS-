@@ -258,7 +258,7 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
     const user = userEvent.setup()
     render(<App />)
     await user.click(screen.getByRole('button', { name: /Clientes/ }))
-    expect(await screen.findByText('Sin coordenadas')).toBeVisible()
+    expect(await screen.findByText('Ubicación pendiente de confirmar')).toBeVisible()
     await user.click(screen.getByRole('button', { name: 'Editar' }))
     expect(screen.queryByLabelText('Latitud')).not.toBeInTheDocument()
     expect(screen.queryByLabelText('Longitud')).not.toBeInTheDocument()
@@ -267,7 +267,17 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
     await user.click(screen.getByRole('button', { name: 'Guardar cliente' }))
     await waitFor(() => expect(writes[0]?.body).toEqual({ nombre: 'Nombre corregido', telefono_whatsapp: client.telefono_whatsapp, direccion: null }))
     expect(await screen.findByText('Nombre corregido')).toBeVisible()
-    expect(screen.getByText('Sin coordenadas')).toBeVisible()
+    expect(screen.getByText('Ubicación pendiente de confirmar')).toBeVisible()
+  })
+
+  it('el estado pendiente permanece al volver al listado, sin depender del aviso de guardado', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: /Clientes/ }))
+    expect(await screen.findByText('Ubicación pendiente de confirmar')).toHaveClass('location-pending')
+    await user.click(screen.getByRole('button', { name: /Agenda/ }))
+    await user.click(screen.getByRole('button', { name: /Clientes/ }))
+    expect(await screen.findByText('Ubicación pendiente de confirmar')).toBeVisible()
   })
 
   it('una ubicación completa sigue mostrando sus coordenadas', async () => {

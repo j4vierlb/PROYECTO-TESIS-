@@ -23,10 +23,15 @@ export function chileDateTimeInput(value) {
   return `${chileDate(new Date(value))}T${chileTime(value)}`
 }
 
-export function clientLocation(client) {
+export function hasClientLocation(client) {
   return Number.isFinite(client.lat) && Number.isFinite(client.lng)
+    && client.lat >= -90 && client.lat <= 90 && client.lng >= -180 && client.lng <= 180
+}
+
+export function clientLocation(client) {
+  return hasClientLocation(client)
     ? `${client.lat.toFixed(4)}, ${client.lng.toFixed(4)}`
-    : 'Sin coordenadas'
+    : 'Ubicación pendiente de confirmar'
 }
 
 export function visitPayload(form) {
