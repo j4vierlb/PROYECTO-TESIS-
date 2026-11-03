@@ -38,6 +38,19 @@ docker compose down            # apagar (los datos se conservan)
 docker compose down -v         # apagar y BORRAR la base (vuelve a cero)
 ```
 
+### Túnel ngrok para WhatsApp (opcional)
+
+Twilio necesita una URL pública para avisar al backend cuando llega un mensaje, y `localhost` no lo es. Por eso el `docker-compose.yml` trae un servicio `ngrok` que se enciende con el mismo comando, pero solo si lo configuras en `.env`:
+
+```
+COMPOSE_PROFILES=tunel
+NGROK_AUTHTOKEN=<token de tu cuenta en dashboard.ngrok.com>
+NGROK_DOMAIN=<tu dominio fijo gratis, sin https://>
+TWILIO_WEBHOOK_URL=https://<NGROK_DOMAIN>/webhooks/whatsapp
+```
+
+Esa misma URL se pega en el Sandbox de Twilio ("When a message comes in"). Sin estas variables, `docker compose up --build` funciona igual, solo que sin túnel. Cada persona usa su propia cuenta y token de ngrok, que van solo en el `.env`. Las peticiones que llegan se ven en http://localhost:4040.
+
 ### Claves y variables
 
 - Todas las variables están en `.env`, que **no se sube a git** (`.gitignore`).
