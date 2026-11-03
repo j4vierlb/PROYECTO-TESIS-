@@ -61,6 +61,7 @@ CREATE TABLE operadores (
     telefono       VARCHAR(30),
     email          VARCHAR(150) UNIQUE,
     password_hash  TEXT NOT NULL,
+    session_version INTEGER NOT NULL DEFAULT 0,
     activo         BOOLEAN NOT NULL DEFAULT TRUE,
     created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );

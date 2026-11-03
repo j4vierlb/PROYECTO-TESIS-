@@ -56,9 +56,9 @@ def get_current_user(
         user = fetch_web_user_by_id(db, user_id)
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuario no encontrado")
-    if rol != "operador" and (
-        payload.get("sv", 0) != user.get("session_version", 0)
-        or rol != user.get("rol", rol)
+    # Cambiar la clave sube session_version: los tokens anteriores dejan de servir.
+    if payload.get("sv", 0) != user.get("session_version", 0) or (
+        rol != "operador" and rol != user.get("rol", rol)
     ):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Sesión revocada: vuelve a iniciar sesión")
     return CurrentUser(id=user["id"], nombre=user["nombre"], rol=rol, empresa_id=user["empresa_id"])
@@ -77,6 +77,13 @@ def require_web_user(user: CurrentUser = Depends(get_current_user)) -> CurrentUs
     """Restringe el panel web a usuarios administrativos de la empresa."""
     if user.rol not in {"admin", "coordinador"}:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Se requiere un usuario del panel")
+    return user
+
+
+def require_admin(user: CurrentUser = Depends(get_current_user)) -> CurrentUser:
+    """Solo el administrador gestiona las cuentas de los técnicos."""
+    if user.rol != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Se requiere un administrador")
     return user
 
 

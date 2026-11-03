@@ -134,7 +134,7 @@ app/
 
 El frontend está en `../frontend/` y consume los endpoints protegidos del panel:
 
-- `GET /panel/stats`, `GET /panel/operadores`
+- `GET /panel/stats`, `GET/POST /panel/operadores`, `PATCH /panel/operadores/{id}`
 - `GET/POST /clientes`, `PATCH/DELETE /clientes/{id}`
 - `GET/POST /panel/visitas`, `PATCH/DELETE /panel/visitas/{id}` (el `PATCH` también acepta `fecha_hora` y `operador_id` para reagendar)
 - `GET /panel/conversaciones`, `GET/PATCH /panel/conversaciones/{id}`, `POST /panel/conversaciones/{id}/mensajes`
@@ -142,6 +142,22 @@ El frontend está en `../frontend/` y consume los endpoints protegidos del panel
 
 El acceso está limitado a usuarios con rol `admin` o `coordinador`; todas las consultas
 se filtran por `empresa_id` para mantener el aislamiento del tenant.
+
+### Técnicos (solo administrador)
+
+- `POST /panel/operadores` con `{nombre, email, telefono?, clave}` crea un técnico de la
+  empresa del administrador (201). La clave va de 12 a 72 caracteres y se guarda cifrada
+  con bcrypt. Si el correo ya existe en `operadores` o en `usuarios` responde 409, para
+  que el login no quede ambiguo.
+- `PATCH /panel/operadores/{id}` con `{nombre?, telefono?, activo?, clave?}` edita,
+  desactiva/reactiva o cambia la clave. Un técnico de otra empresa responde 404. No se
+  elimina a nadie: se desactiva para conservar el historial de visitas. Cambiar la clave
+  sube `session_version` y cierra las sesiones abiertas en la app; desactivar también.
+- `GET /panel/operadores` sigue devolviendo solo los activos (los desplegables del panel
+  dependen de eso). Con `?incluir_inactivos=true` (solo admin) devuelve todos. Cada
+  elemento trae `{id, nombre, email, telefono, activo}`.
+
+Una base creada antes de este cambio necesita `../database/migracion_sesion_tecnicos.sql`.
 
 Las coordenadas se guardan en PostgreSQL como `GEOGRAPHY(Point, 4326)` (PostGIS) y se convierten a `lat`/`lng` sueltos en las respuestas de la API con `ST_Y`/`ST_X`.
 
