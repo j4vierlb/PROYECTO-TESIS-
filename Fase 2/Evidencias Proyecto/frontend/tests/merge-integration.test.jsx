@@ -48,7 +48,7 @@ it('mantiene logo, las tres vistas y la bandeja con fechas de Chile', async () =
   const user = userEvent.setup()
   await inbox(user)
   const nav = screen.getByRole('navigation', { name: 'Navegación principal' })
-  expect(within(nav).getAllByRole('button')).toHaveLength(3)
+  expect(within(nav).getAllByRole('button')).toHaveLength(4)
   expect(screen.getByRole('img', { name: 'Kill Bichos, control de plagas' })).toBeVisible()
   expect(screen.getByText(`Aviso automático · ${chileDateTime(createdAt)}`)).toBeVisible()
   expect(screen.getByText('✓✓ Entregado')).toBeVisible()

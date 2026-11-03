@@ -196,3 +196,13 @@
 .app-shell .table-head,.app-shell .client-row{grid-template-columns:2fr 1.3fr 1.5fr 1fr;gap:16px}
 .app-shell .row-actions{flex-wrap:nowrap;gap:18px}
 @media(max-width:800px){.app-shell .client-table .table-head{display:none}.app-shell .client-table .client-row{grid-template-columns:1fr;gap:10px}}
+
+/* ----- Equipo ----- */
+.team-count{font-size:14px;color:var(--text-secondary);margin:0 0 16px}
+.app-shell .team-table .table-head,.app-shell .team-table .client-row{grid-template-columns:2fr 1.2fr .8fr 1fr}
+.app-shell .client-row.is-inactive .client-name,.app-shell .client-row.is-inactive>span:nth-child(2){opacity:.55}
+.key-field{display:flex;gap:10px;align-items:center;margin-top:6px}
+.key-field input{margin-top:0!important}
+.key-field .link-button{white-space:nowrap}
+.modal input[readonly]{background:#f4f4ef;color:var(--text-secondary)}
+@media(max-width:800px){.app-shell nav{grid-template-columns:repeat(4,1fr)}.app-shell nav button{font-size:10.5px}.app-shell .team-table .client-row{grid-template-columns:1fr}}

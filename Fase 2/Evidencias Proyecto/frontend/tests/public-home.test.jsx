@@ -64,7 +64,7 @@ it('con sesión muestra primero la portada y solo entra al panel al pulsar Ingre
   await user.click(screen.getByRole('button', { name: 'Ingresar', exact: true }))
   expect(await screen.findByRole('heading', { name: 'Agenda' })).toBeVisible()
   expect(screen.queryByLabelText('Contraseña')).not.toBeInTheDocument()
-  expect(within(screen.getByRole('navigation', { name: 'Navegación principal' })).getAllByRole('button')).toHaveLength(3)
+  expect(within(screen.getByRole('navigation', { name: 'Navegación principal' })).getAllByRole('button')).toHaveLength(4)
   expect(screen.queryByRole('button', { name: 'Ingresar', exact: true })).not.toBeInTheDocument()
   await waitFor(() => expect(screen.getByRole('button', { name: /Nueva visita/ })).toBeEnabled())
 })
