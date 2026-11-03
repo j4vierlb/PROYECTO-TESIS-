@@ -1,0 +1,198 @@
+/* ---------------------------------------------------------------------------
+   Panel de administración: marco, agenda, clientes y bandeja de WhatsApp.
+   Se carga después de styles.css y solo cambia el aspecto (la estructura y los
+   textos son los mismos). Movimiento: solo transform y opacity, con curvas de
+   salida rápidas; los efectos con el mouse van solo en dispositivos con mouse
+   y todo se apaga con "movimiento reducido".
+   --------------------------------------------------------------------------- */
+:root{--ease-out:cubic-bezier(.23,1,.32,1);--radius:18px;--shadow:0 1px 2px #1a1a1a08,0 10px 30px #1a1a1a0b;--ink-2:#46463f}
+.icon{display:block;flex-shrink:0}
+
+/* ----- Menú lateral ----- */
+.app-shell>aside{width:264px;padding:28px 16px 22px;position:sticky;top:0;height:100dvh;overflow-y:auto}
+.app-shell .logo{padding:0 10px 36px}
+.app-shell .logo>.company-logo{width:44px;height:44px}
+.app-shell .logo strong{font-size:17px;letter-spacing:-.3px}
+.app-shell nav{gap:6px}
+.app-shell nav button{padding:13px 14px;border-radius:12px;font-size:15px;font-weight:500;transition:transform 160ms var(--ease-out),background-color 160ms ease,color 160ms ease}
+.app-shell nav button:first-letter{font-size:inherit}
+.app-shell nav button:active{transform:scale(.97)}
+.app-shell nav button.active{font-weight:700;box-shadow:0 6px 18px #f5c51833}
+.app-shell .user-chip{border-top-color:#34342f}
+.app-shell .avatar{width:34px;height:34px;font-size:12px}
+.app-shell .user-chip strong{font-size:13px}
+.app-shell .user-chip small{font-size:11px}
+.app-shell .logout{display:flex;align-items:center;gap:10px;color:var(--sidebar-muted);font-size:13px;padding:10px 10px;margin-top:6px;border-radius:10px;width:100%;transition:background-color 160ms ease,color 160ms ease,transform 160ms var(--ease-out)}
+.app-shell .logout:active{transform:scale(.98)}
+
+/* ----- Contenido ----- */
+.app-shell .content{max-width:1360px;width:100%;margin:0;padding:48px clamp(28px,4vw,64px) 72px;align-self:flex-start}
+.app-shell .topbar{align-items:flex-end;gap:24px;margin-bottom:34px;padding-bottom:28px;border-bottom:1px solid var(--border)}
+.app-shell h1{font-size:clamp(34px,4vw,48px);letter-spacing:-.04em;line-height:1;margin:10px 0 12px}
+.app-shell .eyebrow{font-size:11px;letter-spacing:2px;font-weight:700;display:flex;align-items:center;gap:9px}
+.app-shell .topbar .eyebrow::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--brand-yellow);box-shadow:0 0 0 3px var(--brand-soft)}
+.app-shell .muted{font-size:15px;line-height:1.5}
+.app-shell .primary{border-radius:999px;padding:13px 22px;font-size:14px;box-shadow:0 8px 20px #f5c51840;transition:transform 160ms var(--ease-out),box-shadow 200ms var(--ease-out),background-color 160ms ease}
+.app-shell .primary:active:not(:disabled){transform:scale(.97)}
+.app-shell .secondary{border-radius:999px;padding:11px 18px;font-size:14px;font-weight:500;background:#fff;border:1px solid var(--border);transition:transform 160ms var(--ease-out),background-color 160ms ease,border-color 160ms ease}
+.app-shell .secondary:active:not(:disabled){transform:scale(.97)}
+
+/* ----- Contadores ----- */
+.app-shell .stats{gap:18px;margin-bottom:32px}
+.app-shell .stat{border-radius:var(--radius);padding:22px 24px;gap:18px;box-shadow:var(--shadow);border-color:var(--border)}
+.app-shell .stat-icon{width:46px;height:46px;border-radius:14px;background:var(--brand-soft);color:var(--brand-black)}
+.app-shell .stat small{font-size:13px;color:var(--text-secondary);font-weight:500}
+.app-shell .stat strong{font-size:38px;letter-spacing:-.04em;line-height:1;margin-top:6px}
+.app-shell .stat:nth-child(2){background:var(--brand-black);border-color:var(--brand-black);color:#fff}
+.app-shell .stat:nth-child(2) .stat-icon{background:var(--brand-yellow);color:var(--brand-black)}
+.app-shell .stat:nth-child(2) small{color:#C9C9C0}
+.app-shell .stat:nth-child(2) strong{color:var(--brand-yellow)}
+
+/* ----- Barra de filtros ----- */
+.app-shell .toolbar{gap:10px;margin-bottom:20px}
+.app-shell .date-picker{border-radius:999px;padding:0 6px;box-shadow:0 1px 2px #1a1a1a08}
+.app-shell .date-picker button{width:36px;transition:color 160ms ease,transform 160ms var(--ease-out)}
+.app-shell .date-picker button:active{transform:scale(.9)}
+.app-shell .date-picker input{padding:11px 4px}
+.app-shell .toolbar select{border-radius:999px;padding:11px 16px;min-width:210px}
+
+/* ----- Agenda ----- */
+.agenda-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:start}
+.app-shell .schedule{border-radius:var(--radius);box-shadow:var(--shadow)}
+.app-shell .schedule-head{padding:14px 26px;grid-template-columns:104px 1fr}
+.app-shell .time-row{grid-template-columns:104px 1fr;padding:22px 26px;min-height:0;gap:6px}
+.app-shell .time{font-size:24px;font-weight:700;letter-spacing:-.03em;line-height:1}
+.app-shell .time small{font-size:11px;margin-top:8px;font-weight:500}
+.app-shell .cards{gap:12px}
+.app-shell .visit-card{border:1px solid var(--border);border-left:4px solid var(--brand-yellow);border-radius:14px;padding:16px 18px;gap:18px;background:#fff;transition:transform 220ms var(--ease-out),box-shadow 220ms var(--ease-out),border-color 220ms ease}
+.app-shell .visit-card strong{font-size:16px;letter-spacing:-.01em}
+.app-shell .visit-card p{font-size:13px;line-height:1.5}
+.app-shell .visit-card p.small{font-size:12px}
+.app-shell .visit-dot{display:none}
+.app-shell .visit-card{flex-direction:column;align-items:stretch;gap:14px}
+.app-shell .visit-meta{gap:10px;flex-wrap:wrap;justify-content:flex-start;padding-top:14px;border-top:1px dashed var(--border)}
+.app-shell .visit-meta .link-button{margin-left:auto}
+.app-shell .pill{padding:6px 12px;font-size:11px;letter-spacing:.2px}
+.app-shell .operator{font-size:13px;font-weight:500;color:var(--ink-2)}
+.app-shell .visit-meta select{border:1px solid var(--border);border-radius:999px;padding:7px 10px;font-size:12px;background:#fff;color:var(--ink-2)}
+.app-shell .link-button{font-size:13px;padding:8px 4px}
+.app-shell .visit-meta>.secondary{background:var(--brand-black);color:#fff;border-color:var(--brand-black);font-weight:600}
+
+/* Resumen lateral */
+.day-summary{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);position:sticky;top:24px}
+.day-summary h2{font-size:24px;letter-spacing:-.03em;margin:12px 0 18px;line-height:1.1}
+.day-summary h2::first-letter{text-transform:uppercase}
+.day-total{display:flex;align-items:baseline;gap:10px;margin:0 0 22px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.day-total strong{font-family:'Space Grotesk';font-size:56px;letter-spacing:-.05em;line-height:1}
+.day-total span{font-size:14px;color:var(--text-secondary)}
+.load-list{list-style:none;margin:0;padding:0;display:grid;gap:16px}
+.load-list div{display:flex;justify-content:space-between;gap:12px;font-size:14px;margin-bottom:8px}
+.load-list strong{font-family:'Space Grotesk'}
+.load-list i{display:block;height:8px;border-radius:99px;background:#efefe8;position:relative;overflow:hidden}
+.load-list i::after{content:"";position:absolute;inset:0;width:var(--w);background:var(--brand-yellow);border-radius:99px;transform-origin:left;animation:panel-grow 700ms var(--ease-out) both}
+.load-warn i::after{background:var(--brand-black)}
+.load-warn span{font-weight:700}
+@keyframes panel-grow{from{transform:scaleX(0)}to{transform:none}}
+
+.app-shell .empty{padding:64px 24px;font-size:15px}
+
+/* ----- Clientes ----- */
+.app-shell .list-toolbar{margin-bottom:20px}
+.app-shell .search{width:min(420px,100%);border-radius:999px;padding:12px 18px;font-size:14px;box-shadow:0 1px 2px #1a1a1a08}
+.app-shell .client-table{border-radius:var(--radius);box-shadow:var(--shadow)}
+.app-shell .table-head{padding:14px 26px}
+.app-shell .client-row{padding:18px 26px;font-size:14px;transition:background-color 160ms ease}
+.app-shell .client-row strong{font-size:15px}
+.client-name{display:flex;gap:14px;align-items:center;min-width:0}
+.client-name>div{min-width:0}
+.client-initial{width:40px;height:40px;border-radius:50%;background:var(--brand-soft);color:#6b5400;display:grid;place-items:center;font-weight:700;font-size:15px;flex-shrink:0}
+
+/* ----- Bandeja de WhatsApp ----- */
+.app-shell .inbox{border-radius:var(--radius);box-shadow:var(--shadow);grid-template-columns:340px 1fr;height:calc(100dvh - 270px);min-height:480px}
+.app-shell .inbox-item{padding:16px 20px;transition:background-color 160ms ease}
+.app-shell .inbox-item.active{background:var(--brand-soft);box-shadow:inset 4px 0 0 var(--brand-yellow)}
+.app-shell .thread-head{padding:16px 24px}
+.app-shell .messages{padding:22px 24px;background:#FAF9F3}
+.app-shell .bubble{border-radius:16px;padding:11px 14px;border-color:var(--border);max-width:min(75%,520px)}
+.app-shell .bubble.agente_ia,.app-shell .bubble.sistema{background:var(--brand-soft);border-color:#f1e2a2;border-bottom-right-radius:5px}
+.app-shell .bubble.operador{background:var(--brand-black);border-color:var(--brand-black);border-bottom-right-radius:5px}
+.app-shell .bubble.operador p{color:#fff}
+.app-shell .bubble.operador small,.app-shell .bubble.operador .delivery{color:#C9C9C0}
+.app-shell .bubble.cliente{border-bottom-left-radius:5px}
+.app-shell .bubble p{color:var(--text-primary);font-size:14px;line-height:1.5}
+.app-shell .composer{padding:16px 24px}
+.app-shell .composer textarea{border-radius:14px;padding:12px 14px}
+
+/* ----- Ventanas ----- */
+.app-shell .overlay,.overlay{backdrop-filter:blur(2px)}
+.modal{border-radius:22px;padding:30px}
+
+/* ----- Entrada de cada pantalla ----- */
+@keyframes panel-rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.app-shell .content>*{animation:panel-rise 380ms var(--ease-out) both}
+.app-shell .content>*:nth-child(2){animation-delay:40ms}
+.app-shell .content>*:nth-child(3){animation-delay:80ms}
+.app-shell .content>*:nth-child(4){animation-delay:120ms}
+.app-shell .content>*:nth-child(5){animation-delay:160ms}
+.agenda-layout>*{animation:panel-rise 420ms var(--ease-out) both}
+.agenda-layout>.day-summary{animation-delay:90ms}
+
+@media (hover:hover) and (pointer:fine){
+  .app-shell .primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 12px 26px #f5c5184d}
+  .app-shell .secondary:hover:not(:disabled){border-color:#cfcfc4;background:#fafaf6}
+  .app-shell .visit-card:hover{transform:translateY(-2px);box-shadow:0 10px 24px #1a1a1a12;border-color:#d9d9cf;border-left-color:var(--brand-yellow)}
+  .app-shell .client-row:hover{background:#fcfbf6}
+  .app-shell .inbox-item:hover:not(.active){background:#faf9f3}
+  .app-shell .logout:hover{background:#2a2a26;color:#fff}
+  .app-shell .stat{transition:transform 220ms var(--ease-out),box-shadow 220ms var(--ease-out)}
+  .app-shell .stat:hover{transform:translateY(-2px)}
+}
+
+/* ----- Pantallas medianas ----- */
+@media(max-width:1240px){.agenda-layout{grid-template-columns:1fr}.day-summary{position:static;order:-1}.load-list{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}.day-total{margin-bottom:18px}}
+
+/* ----- Celular y tablet angosta: barra superior mínima y navegación abajo ----- */
+@media(max-width:800px){
+  .app-shell{flex-direction:column;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+  .app-shell>aside{position:sticky;top:0;z-index:4;width:100%;height:auto;overflow:visible;flex-direction:row;align-items:center;justify-content:space-between;padding:10px 16px}
+  .app-shell .logo{padding:0}
+  .app-shell .logo>.company-logo{width:36px;height:36px}
+  .app-shell .logo small{display:none}
+  .app-shell .logo div{display:block}
+  .app-shell .sidebar-bottom{display:none}
+  .app-shell .logout{width:auto;margin:0;padding:8px 10px;min-height:40px}
+  .app-shell .logout span{display:none}
+  .app-shell nav{position:fixed;left:0;right:0;bottom:0;z-index:5;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:var(--brand-black);border-top:1px solid #34342f;flex:none}
+  .app-shell nav button{flex-direction:column;gap:4px;padding:8px 4px;font-size:11px;justify-content:center;text-align:center;border-radius:12px}
+  .app-shell nav span{display:inline}
+  .app-shell nav button.active{box-shadow:none}
+  .app-shell .content{padding:24px 16px 32px!important}
+  .app-shell .topbar{flex-direction:column;align-items:stretch;gap:18px;padding-bottom:20px;margin-bottom:22px}
+  .app-shell .topbar .primary,.app-shell .topbar .secondary{align-self:flex-start}
+  .app-shell .stats{grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}
+  .app-shell .stat{flex-direction:column;align-items:flex-start;gap:12px;padding:14px}
+  .app-shell .stat-icon{width:36px;height:36px;border-radius:11px}
+  .app-shell .stat strong{font-size:28px}
+  .app-shell .stat small{font-size:11px;line-height:1.3}
+  .app-shell .toolbar select{flex:1 1 180px;min-width:0}
+  .app-shell .time-row{grid-template-columns:1fr!important;padding:18px 14px!important;gap:12px}
+  .app-shell .time{display:flex;align-items:baseline;gap:8px}
+  .app-shell .time small{margin-top:0}
+  .app-shell .schedule-head{display:none}
+  .app-shell .visit-card{padding:14px!important}
+  .app-shell .search{width:100%}
+  .app-shell .inbox{grid-template-columns:1fr;height:auto}
+  .app-shell .client-row{padding:16px 16px}
+  .day-summary{padding:20px;order:0}
+  .day-total strong{font-size:44px}
+}
+@media(max-width:380px){.app-shell .stat small{font-size:10px}.app-shell .stat{padding:12px 10px}}
+
+@media (prefers-reduced-motion:reduce){
+  .app-shell *,.agenda-layout *,.day-summary *{animation:none!important;transition-property:color,background-color,border-color,box-shadow!important}
+}
+
+/* Acciones de cada cliente en una sola línea y con espacio para la ubicación. */
+.app-shell .table-head,.app-shell .client-row{grid-template-columns:2fr 1.3fr 1.5fr 1fr;gap:16px}
+.app-shell .row-actions{flex-wrap:nowrap;gap:18px}
+@media(max-width:800px){.app-shell .client-table .table-head{display:none}.app-shell .client-table .client-row{grid-template-columns:1fr;gap:10px}}
