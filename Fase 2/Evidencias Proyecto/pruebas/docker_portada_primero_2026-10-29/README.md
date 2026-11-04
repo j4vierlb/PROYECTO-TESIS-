@@ -1,5 +1,10 @@
 # Docker actualizado y portada como entrada inicial — 29/10/2026
 
+**Cambio posterior del 3/11:** la regla de mostrar siempre la portada se
+sustituyó por entrada directa con sesión, regreso manual y salida del login
+inactivo. Este registro conserva el corte histórico;
+[la conducta vigente y sus pruebas están aquí](../navegacion_login_2026-11-03/README.md).
+
 Base de trabajo `0a03c30`, exclusivamente en `juan`, más la corrección
 descrita aquí. Juan solicitó el 29/10 hacer commit, push y su PR, sin crear ramas.
 
