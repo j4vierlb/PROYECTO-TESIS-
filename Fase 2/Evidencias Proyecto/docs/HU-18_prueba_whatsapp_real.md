@@ -31,7 +31,7 @@ Pasos detallados: [backend/README.md](../backend/README.md), sección "Prueba re
 | 5 | Pedir un horario a menos de 1 h de otra visita | Ofrece un horario alternativo | ☑ |
 | 6 | Aceptar el horario alternativo (`sí, ese me sirve`) | Agenda en el horario ofrecido | ☑ |
 | 7 | `Quiero cancelar mi visita` | Indica que un operador confirmará; no cambia nada en la base | ☑ |
-| 8 | `OPENAI_API_KEY` vacía y reiniciar el backend | Mensaje de contingencia "un operador te contactará" | ☐ |
+| 8 | `OPENAI_API_KEY` vacía y reiniciar el backend | Mensaje de contingencia "un operador te contactará" | ☑ (06/11, mensajes firmados al webhook; ver abajo) |
 | 9 | `curl` al webhook sin firma, con validación activa | 403 Firma de Twilio inválida | ☑ |
 
 ## Cuenta Trial de Twilio: cómo se hizo la prueba
@@ -84,6 +84,23 @@ Después del Upgrade de la cuenta Twilio se usó el **Sandbox de WhatsApp** (+1 
 
 Cada mensaje del cliente quedó en `mensajes_whatsapp` con su `message_sid` real de Twilio. Capturas: `HU18_00_sandbox_04_whatsapp.jpg` y `HU18_04-07_whatsapp.jpg` (fondo del chat difuminado).
 
+### Caso 8 sin clave de OpenAI (06/11/2026)
+
+Se usó el stack de la prueba de clon limpio ([`pruebas/clon_limpio_2026-11-06`](../pruebas/clon_limpio_2026-11-06/README.md)): `.env` copiado de `.env.example`, con `OPENAI_API_KEY` vacía y `TWILIO_VALIDATE_SIGNATURE=true`. Se dio un `TWILIO_AUTH_TOKEN` de prueba y `TWILIO_WEBHOOK_URL` local, y se reinició el backend.
+
+Los mensajes se enviaron al webhook con el mismo formato que Twilio y con `X-Twilio-Signature` calculada con `RequestValidator` de la librería de Twilio. No pasaron por el teléfono ni por el Sandbox.
+
+| Mensaje | Respuesta del sistema | Verificación |
+|---|---|---|
+| (cliente del seed) Hola, quiero agendar mañana a las 10 | Gracias por escribirnos 😊 Un operador te contactará pronto para ayudarte. | HTTP 200, no crea visita |
+| (número nuevo) Hola, ¿qué servicios tienen? | Gracias por escribirnos 😊 Un operador te contactará pronto para ayudarte. | HTTP 200 |
+| (mismo número) Quiero agendar hoy a las 17:00 en Av. Macul 1234, Macul | Gracias por escribirnos 😊 Un operador te contactará pronto para ayudarte. | HTTP 200, no crea visita |
+| Mensaje sin firma | `403 {"detail":"Firma de Twilio inválida"}` | la validación sigue activa |
+
+Visitas en la base: 3 antes y 3 después. Cada mensaje y su respuesta quedaron en `mensajes_whatsapp` con su `MessageSid`, y el log del backend registra `RuntimeError: OPENAI_API_KEY no está configurada` en cada uno. Evidencia: [`HU18_08_sin_openai.txt`](evidencias/HU-18/HU18_08_sin_openai.txt).
+
+Opcional: repetirlo desde el teléfono con el Sandbox (dejar la clave vacía, `docker compose up -d backend` y escribir) y guardar `HU18_08_whatsapp.png`. El código que responde es el mismo.
+
 ## Evidencia (capturas)
 
 Guardar en [`evidencias/HU-18/`](evidencias/HU-18/) con este nombre: `HU18_<n°caso>_<descripción>.png`.
@@ -104,3 +121,4 @@ Guardar en [`evidencias/HU-18/`](evidencias/HU-18/) con este nombre: `HU18_<n°c
 |---|---|---|
 | 20–21/10/2026 (en curso) | 4/9 desde el teléfono; 4, 5 y 6 OK con mensajes simulados | Prueba con cuenta Trial vía puente (ver arriba). Caso 4 corregido el 21/10. Pendientes: casos 4–8 desde el teléfono y capturas de panel y app. |
 | 22/10/2026 | 8/9 (casos 1–7 y 9) | Casos 4–7 desde el teléfono con el Sandbox después del Upgrade. Falta el caso 8 y las capturas de panel y app del caso 3. |
+| 06/11/2026 | 9/9 | Caso 8 aprobado con mensajes firmados al webhook (sin OpenAI → mensaje de contingencia, sin agendar). **Pendiente:** capturas `HU18_03_panel.png` y `HU18_03_app.png` del caso 3. |
