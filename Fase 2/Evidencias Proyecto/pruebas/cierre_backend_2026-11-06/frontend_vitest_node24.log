@@ -1,0 +1,48 @@
+Fecha: 2026-11-06T04:09:48+00:00
+v24.22.2
+
+ RUN  v5.0.3 /p/frontend
+
+ ✓ tests/api.test.js (18 tests) 95ms
+ ✓ tests/croquis-map.test.js (14 tests) 28ms
+ ✓ tests/panel-utils.test.js (30 tests) 91ms
+ ✓ tests/public-home-motion.test.jsx (7 tests) 1084ms
+   ✓ la insignia de WhatsApp es decorativa, lleva los colores de la marca y no cambia el texto accesible 867ms
+ ✓ tests/brand.test.jsx (4 tests) 1270ms
+   ✓ muestra el logo original con texto accesible en el login 774ms
+   ✓ muestra el logo en la navegación y conserva los colores por estado compartidos con la app 368ms
+ ✓ tests/croquis.test.jsx (16 tests) 1891ms
+   ✓ CRW visor de croquis de solo lectura (16)
+     ✓ CRW01 carga únicamente con GET y no ofrece acciones de modificación 588ms
+     ✓ CRW15 abre croquis desde una visita completada y cierra con Escape 446ms
+ ✓ tests/brand-assets.test.js (2 tests) 18ms
+ ✓ tests/merge-integration.test.jsx (5 tests) 2464ms
+   ✓ mantiene logo, las tres vistas y la bandeja con fechas de Chile 1117ms
+   ✓ permite responder en la bandeja y conserva los estados de entrega 678ms
+   ✓ conserva tomar/devolver conversación y el envío manual de recordatorios 405ms
+ ✓ tests/password-recovery.test.jsx (9 tests) 2984ms
+   ✓ permite pedir recuperación desde el login sin enviar contraseña ni sesión 1261ms
+   ✓ no permite guardar si la confirmación no coincide 386ms
+   ✓ valida máximo de bytes UTF8 antes de enviar 441ms
+ ✓ tests/public-home.test.jsx (30 tests) 3268ms
+   ✓ sin sesión muestra la portada, sus servicios y contacto, sin consultar la API 1216ms
+   ✓ con sesión muestra primero la portada y solo entra al panel al pulsar Ingresar 351ms
+ ✓ tests/equipo.test.jsx (5 tests) 3321ms
+   ✓ Equipo: gestión de técnicos desde el panel (5)
+     ✓ lista activos e inactivos y cuenta solo los activos 1121ms
+     ✓ crea un técnico con la clave inicial y lo muestra en la lista 977ms
+     ✓ no envía una clave corta y muestra el error del servidor si el correo ya existe 646ms
+     ✓ edita solo lo que cambió, deja el correo fijo y permite una clave nueva 355ms
+ ✓ tests/panel.test.jsx (34 tests) 7300ms
+   ✓ Regresión del panel: interacción con el formulario y respuestas API (30)
+     ✓ crea clientes manuales sin exigir coordenadas 2084ms
+     ✓ crea un cliente de Viña del Mar por dirección y muestra el punto devuelto por la API 666ms
+     ✓ crea un cliente de Concepción por dirección y muestra el punto devuelto por la API 474ms
+     ✓ muestra la ubicación devuelta por el servidor sin pedir números al usuario 307ms
+     ✓ si falla el guardado conserva la dirección y permite reintentar 317ms
+
+ Test Files  12 passed (12)
+      Tests  174 passed (174)
+   Start at  04:09:49
+   Duration  12.98s (environment 43%, tests 42%, setup 6%, transform 5%, import 3%, worker 1%)
+

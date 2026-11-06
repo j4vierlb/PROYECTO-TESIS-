@@ -1,0 +1,10 @@
+panel_regression <- schema.sql: exit 0
+panel_regression <- migracion_message_sid.sql: exit 0
+panel_regression <- migracion_croquis_terreno.sql: exit 0
+panel_regression <- migracion_whatsapp_saliente.sql: exit 0
+panel_regression <- migracion_sesion_tecnicos.sql: exit 0
+croquis_regression <- schema.sql: exit 0
+croquis_regression <- migracion_message_sid.sql: exit 0
+croquis_regression <- migracion_croquis_terreno.sql: exit 0
+croquis_regression <- migracion_whatsapp_saliente.sql: exit 0
+croquis_regression <- migracion_sesion_tecnicos.sql: exit 0
