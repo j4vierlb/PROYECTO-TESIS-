@@ -1,0 +1,206 @@
+ Image killbichos-limpio-backend Building 
+ Image killbichos-limpio-web Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.71kB 0.0s done
+#1 DONE 0.0s
+
+#2 [backend internal] load build definition from Dockerfile
+#2 transferring dockerfile:
+#2 transferring dockerfile: 1.50kB done
+#2 DONE 1.7s
+
+#3 [web internal] load build definition from Dockerfile
+#3 transferring dockerfile: 1.38kB done
+#3 DONE 2.3s
+
+#4 [backend internal] load metadata for docker.io/library/python:3.12-slim
+#4 DONE 3.2s
+
+#5 [web internal] load metadata for docker.io/library/nginx:1.27-alpine
+#5 ...
+
+#6 [backend internal] load .dockerignore
+#6 transferring context: 291B done
+#6 DONE 1.2s
+
+#7 [web internal] load metadata for docker.io/library/node:22-alpine
+#7 DONE 4.0s
+
+#5 [web internal] load metadata for docker.io/library/nginx:1.27-alpine
+#5 ...
+
+#8 [backend internal] load build context
+#8 DONE 0.0s
+
+#9 [backend 1/6] FROM docker.io/library/python:3.12-slim@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704
+#9 resolve docker.io/library/python:3.12-slim@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704
+#9 ...
+
+#5 [web internal] load metadata for docker.io/library/nginx:1.27-alpine
+#5 DONE 4.7s
+
+#10 [web internal] load .dockerignore
+#10 transferring context: 136B done
+#10 DONE 1.3s
+
+#9 [backend 1/6] FROM docker.io/library/python:3.12-slim@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704
+#9 ...
+
+#11 [web internal] load build context
+#11 DONE 0.0s
+
+#12 [web stage-1 1/3] FROM docker.io/library/nginx:1.27-alpine@sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10
+#12 ...
+
+#9 [backend 1/6] FROM docker.io/library/python:3.12-slim@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704
+#9 resolve docker.io/library/python:3.12-slim@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704 2.3s done
+#9 DONE 2.6s
+
+#8 [backend internal] load build context
+#8 transferring context: 988B done
+#8 DONE 1.8s
+
+#12 [web stage-1 1/3] FROM docker.io/library/nginx:1.27-alpine@sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10
+#12 resolve docker.io/library/nginx:1.27-alpine@sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10
+#12 ...
+
+#13 [backend 4/6] RUN pip install --no-cache-dir -r requirements.txt
+#13 CACHED
+
+#14 [backend 5/6] COPY app ./app
+#14 CACHED
+
+#15 [backend 2/6] WORKDIR /app
+#15 CACHED
+
+#16 [backend 3/6] COPY requirements.txt .
+#16 CACHED
+
+#17 [backend 6/6] RUN useradd --create-home --uid 1000 appuser     && mkdir -p /app/uploads     && chown appuser:appuser /app/uploads
+#17 CACHED
+
+#18 [web build 1/6] FROM docker.io/library/node:22-alpine@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914
+#18 resolve docker.io/library/node:22-alpine@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914
+#18 resolve docker.io/library/node:22-alpine@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914 3.8s done
+#18 DONE 4.9s
+
+#11 [web internal] load build context
+#11 ...
+
+#12 [web stage-1 1/3] FROM docker.io/library/nginx:1.27-alpine@sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10
+#12 resolve docker.io/library/nginx:1.27-alpine@sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10 3.6s done
+#12 DONE 5.2s
+
+#19 [backend] exporting to image
+#19 exporting layers done
+#19 exporting manifest sha256:4cc33976cf04f1ed4edd0127bac3be44510ab5a9fcc5b2bff472a03a3099ca66 0.6s done
+#19 exporting config sha256:413e41477dd16b7767518160acfa966226eefba18e2dfa97a1932f7e7898f276 0.6s done
+#19 ...
+
+#11 [web internal] load build context
+#11 transferring context: 1.85kB done
+#11 DONE 2.1s
+
+#19 [backend] exporting to image
+#19 ...
+
+#20 [web build 4/6] RUN npm ci
+#20 CACHED
+
+#21 [web build 2/6] WORKDIR /app
+#21 CACHED
+
+#22 [web build 3/6] COPY package.json package-lock.json ./
+#22 CACHED
+
+#23 [web build 5/6] COPY . .
+#23 CACHED
+
+#24 [web build 6/6] RUN npm run build
+#24 ...
+
+#19 [backend] exporting to image
+#19 exporting attestation manifest sha256:8ca9ed31d8c34b9317a40c2620f7ce5fa5cdf045aad773721c1f2a28236eb5f1 2.6s done
+#19 exporting manifest list sha256:d89a98b04a55b765331fa666a8f8ae45889eac9904e43a596fa185eda9ae546d
+#19 exporting manifest list sha256:d89a98b04a55b765331fa666a8f8ae45889eac9904e43a596fa185eda9ae546d 3.4s done
+#19 naming to docker.io/library/killbichos-limpio-backend:latest
+#19 naming to docker.io/library/killbichos-limpio-backend:latest 0.6s done
+#19 unpacking to docker.io/library/killbichos-limpio-backend:latest 1.2s done
+#19 DONE 13.2s
+
+#24 [web build 6/6] RUN npm run build
+#24 9.127 
+#24 9.127 > kill-bichos-panel@0.1.0 build
+#24 9.127 > vite build
+#24 9.127 
+#24 9.426 vite v8.3.1 building client environment for production...
+#24 9.441 transforming...
+#24 9.540 ✓ 55 modules transformed.
+#24 9.591 rendering chunks...
+#24 9.656 computing gzip size...
+#24 9.661 dist/index.html                   0.60 kB │ gzip:  0.36 kB
+#24 9.661 dist/assets/index-DQiZq0nD.css   42.06 kB │ gzip:  8.83 kB
+#24 9.661 dist/assets/index-CG-4XdNg.js   306.51 kB │ gzip: 95.69 kB
+#24 9.661 
+#24 9.662 ✓ built in 233ms
+#24 DONE 14.5s
+
+#25 [web stage-1 2/3] COPY nginx.conf /etc/nginx/conf.d/default.conf
+#25 CACHED
+
+#26 [web stage-1 3/3] COPY --from=build /app/dist /usr/share/nginx/html
+#26 DONE 7.0s
+
+#27 [web] exporting to image
+#27 exporting layers
+#27 ...
+
+#28 [backend] resolving provenance for metadata file
+#28 DONE 0.2s
+
+#27 [web] exporting to image
+#27 exporting layers 16.2s done
+#27 exporting manifest sha256:e9b8fba74d53294b8a3fff539dc7bca9cb6c1f8033cf97e0fe16576e7698d67c
+#27 exporting manifest sha256:e9b8fba74d53294b8a3fff539dc7bca9cb6c1f8033cf97e0fe16576e7698d67c 1.4s done
+#27 exporting config sha256:4b4512a8ea265b79a54e41f542f82cb68eeb19ab5c0616b3d1e7c7ee104f0903
+#27 exporting config sha256:4b4512a8ea265b79a54e41f542f82cb68eeb19ab5c0616b3d1e7c7ee104f0903 1.8s done
+#27 exporting attestation manifest sha256:e7381d24ba44d39ae8dc4d3abdbe640bc37772fa3b0aac78f2ba8b45fe58476b
+#27 exporting attestation manifest sha256:e7381d24ba44d39ae8dc4d3abdbe640bc37772fa3b0aac78f2ba8b45fe58476b 2.1s done
+#27 exporting manifest list sha256:19a3312ba2937ae1f612bd1d074a1408f53f8e95096eb87009433179421b1d85
+#27 exporting manifest list sha256:19a3312ba2937ae1f612bd1d074a1408f53f8e95096eb87009433179421b1d85 4.3s done
+#27 naming to docker.io/library/killbichos-limpio-web:latest
+#27 naming to docker.io/library/killbichos-limpio-web:latest 1.5s done
+#27 unpacking to docker.io/library/killbichos-limpio-web:latest
+#27 unpacking to docker.io/library/killbichos-limpio-web:latest 4.3s done
+#27 DONE 33.7s
+
+#29 [web] resolving provenance for metadata file
+#29 DONE 0.0s
+ Image killbichos-limpio-backend Built 
+ Image killbichos-limpio-web Built 
+ Volume killbichos-limpio_uploads_data Creating 
+ Volume killbichos-limpio_db_data Creating 
+ Volume killbichos-limpio_uploads_data Creating 
+ Network killbichos-limpio_default Creating 
+ Volume killbichos-limpio_db_data Creating 
+ Network killbichos-limpio_default Creating 
+ Volume killbichos-limpio_uploads_data Created 
+ Volume killbichos-limpio_uploads_data Created 
+ Volume killbichos-limpio_db_data Created 
+ Volume killbichos-limpio_db_data Created 
+ Network killbichos-limpio_default Created 
+ Network killbichos-limpio_default Created 
+ Container killbichos-limpio-db-1 Creating 
+ Container killbichos-limpio-db-1 Created 
+ Container killbichos-limpio-backend-1 Creating 
+ Container killbichos-limpio-backend-1 Created 
+ Container killbichos-limpio-web-1 Creating 
+ Container killbichos-limpio-web-1 Created 
+ Container killbichos-limpio-db-1 Starting 
+ Container killbichos-limpio-db-1 Started 
+ Container killbichos-limpio-db-1 Waiting 
+ Container killbichos-limpio-db-1 Healthy 
+ Container killbichos-limpio-backend-1 Starting 
+ Container killbichos-limpio-backend-1 Started 
+ Container killbichos-limpio-web-1 Starting 
+ Container killbichos-limpio-web-1 Started 
