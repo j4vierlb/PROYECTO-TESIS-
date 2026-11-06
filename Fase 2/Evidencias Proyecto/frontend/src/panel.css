@@ -206,3 +206,11 @@
 .key-field .link-button{white-space:nowrap}
 .modal input[readonly]{background:#f4f4ef;color:var(--text-secondary)}
 @media(max-width:800px){.app-shell nav{grid-template-columns:repeat(4,1fr)}.app-shell nav button{font-size:10.5px}.app-shell .team-table .client-row{grid-template-columns:1fr}}
+
+/* Acceso a la portada separado de cerrar sesión; visible también en celular. */
+.app-shell .panel-actions{display:grid;gap:4px}
+.app-shell .home-link{display:flex;align-items:center;gap:10px;width:100%;min-height:40px;padding:10px;background:transparent;color:var(--sidebar-muted);font-size:13px;text-align:left;border-radius:10px}
+.app-shell .home-link:focus-visible{outline-color:var(--brand-yellow)!important}
+.login-idle-help{font-size:12px;line-height:1.6;color:var(--text-secondary);margin:18px 0 0;text-align:center}
+@media(hover:hover){.app-shell .home-link:hover{background:#2a2a26;color:#fff}}
+@media(max-width:800px){.app-shell .panel-actions{display:flex;align-items:center;gap:4px;margin-left:auto}.app-shell .home-link{width:auto;min-width:40px;padding:8px 10px}.app-shell .home-link span{display:none}}

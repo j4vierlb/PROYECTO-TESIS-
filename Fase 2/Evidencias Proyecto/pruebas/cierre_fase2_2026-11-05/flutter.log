@@ -1,0 +1,206 @@
+00:00 +0: test/android_network_policy_test.dart
+00:00 +0: test/android_network_policy_test.dart: HTTP debug permite solo los cuatro destinos de prueba explícitos
+00:00 +1: test/android_network_policy_test.dart: La excepción HTTP permanece en el manifiesto debug, no en main
+00:00 +2: test/android_network_policy_test.dart: Si se compila para HTTP, su destino coincide con la lista debug
+00:00 +3: test/api_client_test.dart: Agenda transmite token en header, nunca en URL
+00:00 +4: test/api_client_test.dart: 401 renueva y repite una sola vez con el token nuevo
+00:00 +5: test/api_client_test.dart: Segundo 401 no forma bucle: cierra sesion y avisa una vez
+00:00 +6: test/api_client_test.dart: Sin red conserva tokens para reintentar
+00:00 +7: test/cliente_test.dart: Cliente de WhatsApp sin dirección ni coordenadas no rompe la app
+00:00 +8: test/cliente_test.dart: Cliente de WhatsApp sin dirección ni coordenadas no rompe la app
+00:00 +9: test/api_client_test.dart: Timeout de login tambien esta acotado
+00:00 +10: test/cliente_test.dart: Cliente con dirección pero todavía sin coordenadas
+00:00 +11: test/api_client_test.dart: Timeout contempla el cuerpo, no solo los headers
+00:00 +12: test/api_client_test.dart: Timeout contempla el cuerpo, no solo los headers
+00:00 +13: test/api_client_test.dart: 422 mantiene el mensaje de validacion del backend
+00:00 +14: test/api_client_test.dart: Foto relativa conserva la version de cache del backend
+00:00 +15: test/api_client_test.dart: Rechaza foto fuera del contrato: null
+00:00 +16: test/api_client_test.dart: Rechaza foto fuera del contrato:
+00:00 +17: test/api_client_test.dart: Rechaza foto fuera del contrato: http://[
+00:00 +18: test/api_client_test.dart: Rechaza foto fuera del contrato: https://other.invalid/foto
+00:00 +19: test/api_client_test.dart: Rechaza foto fuera del contrato: //other.invalid/foto
+00:00 +20: test/api_client_test.dart: Rechaza foto fuera del contrato: /other/foto
+00:00 +21: test/api_client_test.dart: Rechaza foto fuera del contrato: /dispositivos-trampa/d1/foto?token=secret
+00:00 +22: test/api_client_test.dart: Rechaza foto fuera del contrato: /dispositivos-trampa/../foto
+00:00 +23: test/api_client_test.dart: Rechaza foto fuera del contrato: /dispositivos-trampa/%FF/foto
+00:00 +24: test/api_client_test.dart: Rechaza foto fuera del contrato: /dispositivos-trampa/d1/foto?v=%FF
+00:00 +25: test/api_client_test.dart: Rechaza foto fuera del contrato: /dispositivos-trampa/d1/otra/foto
+00:00 +26: test/api_client_test.dart: Rechaza foto fuera del contrato: /dispositivos-trampa/%2F../foto
+00:00 +27: test/api_client_test.dart: Cabeceras de fotos renuevan access vencido antes de abrir imagen
+00:00 +28: test/api_client_test.dart: Upload PNG conserva MIME y Authorization
+00:01 +29: test/client_map_marker_test.dart: El cliente tiene un pin rojo fijo en su punto exacto y con su dirección
+00:01 +30: test/client_map_marker_test.dart: Sin nombre o dirección no inventa datos en la etiqueta
+00:01 +31: test/client_map_marker_test.dart: No coloca pin en el centro por defecto si faltan coordenadas
+00:01 +32: test/client_map_marker_test.dart: Rechaza coordenadas no finitas o fuera del rango geográfico
+00:01 +33: test/client_map_marker_test.dart: Cero es una coordenada válida, no un dato ausente
+00:01 +34: test/client_map_marker_test.dart: El pin no cambia de identidad cuando se corrige la dirección
+00:01 +35: test/company_brand_test.dart: Conserva la paleta compartida con iOS
+00:01 +36: test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:01 +37: test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:01 +38: test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:01 +39: test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:01 +40: test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:01 +41: test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:01 +42: test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:01 +43: test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:01 +44: test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:01 +45: test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:01 +46: test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:01 +47: test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +48: test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +49: test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +50: test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +51: test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +52: test/company_brand_test.dart: El logo usa el archivo original completo y un nombre accesible
+00:02 +53: test/company_brand_test.dart: Cabecera mantiene logo y título: Agenda del día
+00:02 +54: test/company_brand_test.dart: Cabecera mantiene logo y título: Historial de visitas
+00:02 +55: test/company_brand_test.dart: Cabecera mantiene logo y título: Detalle de visita
+00:02 +56: test/company_brand_test.dart: Cabecera mantiene logo y título: Croquis
+00:02 +57: test/field_location_test.dart: Android usa GPS nativo e iOS conserva el proveedor de plataforma
+00:02 +58: test/company_brand_test.dart: Cabecera pequeña con texto grande no desborda ni tapa acciones
+00:02 +59: test/company_brand_test.dart: Cabecera pequeña con texto grande no desborda ni tapa acciones
+00:02 +60: test/company_brand_test.dart: Cabecera pequeña con texto grande no desborda ni tapa acciones
+00:02 +61: test/company_brand_test.dart: Cabecera pequeña con texto grande no desborda ni tapa acciones
+00:02 +62: test/company_brand_test.dart: Cabecera pequeña con texto grande no desborda ni tapa acciones
+00:02 +63: test/company_brand_test.dart: Cabecera pequeña con texto grande no desborda ni tapa acciones
+00:02 +64: test/company_brand_test.dart: Cabecera pequeña con texto grande no desborda ni tapa acciones
+00:02 +65: test/company_brand_test.dart: Cabecera pequeña con texto grande no desborda ni tapa acciones
+00:02 +66: test/company_brand_test.dart: Cabecera pequeña con texto grande no desborda ni tapa acciones
+00:02 +67: test/company_brand_test.dart: Cabecera pequeña con texto grande no desborda ni tapa acciones
+00:02 +68: test/company_brand_test.dart: Cabecera pequeña con texto grande no desborda ni tapa acciones
+00:02 +69: test/company_brand_test.dart: Cabecera pequeña con texto grande no desborda ni tapa acciones
+00:03 +70: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:03 +71: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:03 +72: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:03 +73: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:03 +74: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:03 +75: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:03 +76: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:03 +77: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:03 +78: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:04 +79: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:04 +80: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:04 +81: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:04 +82: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:04 +83: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:04 +84: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:04 +85: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:04 +86: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:05 +87: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:05 +88: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:05 +89: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:05 +90: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:05 +91: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:05 +92: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:05 +93: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:05 +94: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:05 +95: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:05 +96: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:05 +97: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:05 +98: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:05 +99: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:05 +100: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:05 +101: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:05 +102: test/field_review_widget_test.dart: Sin ubicación ni trampas el croquis muestra aviso en vez de Google Maps
+00:05 +103: test/historial_test.dart: La barra inferior cambia de Hoy a Historial
+00:05 +104: test/historial_test.dart: La barra inferior cambia de Hoy a Historial
+00:05 +105: test/historial_test.dart: La barra inferior cambia de Hoy a Historial
+00:05 +106: test/historial_test.dart: La barra inferior cambia de Hoy a Historial
+00:05 +107: test/historial_test.dart: La barra inferior cambia de Hoy a Historial
+00:05 +108: test/historial_test.dart: La barra inferior cambia de Hoy a Historial
+00:05 +109: test/historial_test.dart: La barra inferior cambia de Hoy a Historial
+00:05 +110: test/historial_test.dart: La barra inferior cambia de Hoy a Historial
+00:05 +111: test/historial_test.dart: La barra inferior cambia de Hoy a Historial
+00:05 +112: test/historial_test.dart: La barra inferior cambia de Hoy a Historial
+00:05 +113: test/historial_test.dart: La barra inferior cambia de Hoy a Historial
+00:05 +114: test/historial_test.dart: La barra inferior cambia de Hoy a Historial
+00:05 +115: test/field_review_widget_test.dart: Sin referencia del mapa conserva GPS pero no ofrece marcar en un centro falso
+00:05 +116: test/field_review_widget_test.dart: Sin referencia del mapa conserva GPS pero no ofrece marcar en un centro falso
+00:05 +117: test/field_review_widget_test.dart: Sin referencia del mapa conserva GPS pero no ofrece marcar en un centro falso
+00:05 +118: test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:05 +119: test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:05 +120: test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:05 +121: test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:05 +122: test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:05 +123: test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:05 +124: test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +125: test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +126: test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +127: test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +128: test/offline_ui_test.dart: Franja de conexión no aparece cuando todo está en orden
+00:06 +129: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:06 +130: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:06 +131: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:06 +132: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:06 +133: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:06 +134: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:06 +135: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:06 +136: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:06 +137: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:06 +138: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:06 +139: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:06 +140: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:06 +141: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:06 +142: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:06 +143: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:06 +144: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:06 +145: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:06 +146: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:06 +147: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:06 +148: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: https://other.invalid/photo
+00:06 +149: test/offline_ui_test.dart: Franja de conexión sin señal muestra el contador y, al volver, "Enviar ahora" lo vacía
+00:06 +150: test/offline_ui_test.dart: Franja de conexión sin señal muestra el contador y, al volver, "Enviar ahora" lo vacía
+00:06 +151: test/offline_ui_test.dart: Franja de conexión sin señal muestra el contador y, al volver, "Enviar ahora" lo vacía
+00:06 +152: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: http://[
+00:06 +153: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: http://[
+00:06 +154: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: http://[
+00:06 +155: test/offline_ui_test.dart: Franja de conexión varios cambios se cuentan en plural
+00:06 +156: test/offline_ui_test.dart: Franja de conexión varios cambios se cuentan en plural
+00:06 +157: test/offline_ui_test.dart: Franja de conexión varios cambios se cuentan en plural
+00:06 +158: test/offline_ui_test.dart: Franja de conexión varios cambios se cuentan en plural
+00:06 +159: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: /dispositivos-trampa/%FF/foto
+00:06 +160: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: /dispositivos-trampa/%FF/foto
+00:06 +161: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: /dispositivos-trampa/%FF/foto
+00:06 +162: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: /dispositivos-trampa/%FF/foto
+00:06 +163: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: /dispositivos-trampa/%FF/foto
+00:06 +164: test/field_review_widget_test.dart: Croquis con URL inválida mantiene la trampa sin foto: /dispositivos-trampa/%FF/foto
+00:06 +165: test/proximas_test.dart: Pantalla agrupa por día con su encabezado
+00:07 +166: test/proximas_test.dart: Pantalla agrupa por día con su encabezado
+00:07 +167: test/proximas_test.dart: Pantalla agrupa por día con su encabezado
+00:07 +168: test/proximas_test.dart: Pantalla agrupa por día con su encabezado
+00:07 +169: test/proximas_test.dart: Pantalla agrupa por día con su encabezado
+00:07 +170: test/proximas_test.dart: Pantalla agrupa por día con su encabezado
+00:07 +171: test/proximas_test.dart: Pantalla agrupa por día con su encabezado
+00:07 +172: test/proximas_test.dart: Pantalla agrupa por día con su encabezado
+00:07 +173: test/proximas_test.dart: Pantalla agrupa por día con su encabezado
+00:07 +174: test/proximas_test.dart: Pantalla agrupa por día con su encabezado
+00:07 +175: test/proximas_test.dart: Pantalla agrupa por día con su encabezado
+00:07 +176: test/proximas_test.dart: Pantalla agrupa por día con su encabezado
+00:07 +177: test/proximas_test.dart: Pantalla agrupa por día con su encabezado
+00:07 +178: test/visita_enlaces_test.dart: "Cómo llegar" abre la ruta a las coordenadas del cliente
+00:07 +179: test/visita_enlaces_test.dart: "Cómo llegar" abre la ruta a las coordenadas del cliente
+00:07 +180: test/visita_enlaces_test.dart: "Cómo llegar" abre la ruta a las coordenadas del cliente
+00:08 +181: test/visita_enlaces_test.dart: "Cómo llegar" abre la ruta a las coordenadas del cliente
+00:08 +182: test/visita_enlaces_test.dart: "Cómo llegar" abre la ruta a las coordenadas del cliente
+00:08 +183: test/visita_enlaces_test.dart: "Cómo llegar" abre la ruta a las coordenadas del cliente
+00:08 +184: test/visita_enlaces_test.dart: "Cómo llegar" abre la ruta a las coordenadas del cliente
+00:08 +185: test/visita_enlaces_test.dart: "Cómo llegar" abre la ruta a las coordenadas del cliente
+00:08 +186: test/visita_enlaces_test.dart: "Cómo llegar" abre la ruta a las coordenadas del cliente
+00:08 +187: test/visita_enlaces_test.dart: "Cómo llegar" abre la ruta a las coordenadas del cliente
+00:08 +188: test/visita_enlaces_test.dart: "Cómo llegar" abre la ruta a las coordenadas del cliente
+00:08 +189: test/widget_test.dart: Sin sesión guardada muestra la pantalla de login al arrancar
+00:08 +190: test/widget_test.dart: Sin sesión guardada muestra la pantalla de login al arrancar
+00:09 +191: test/widget_test.dart: Sin sesión guardada muestra la pantalla de login al arrancar
+00:09 +192: test/widget_test.dart: Sin sesión guardada muestra la pantalla de login al arrancar
+00:09 +193: test/visita_enlaces_test.dart: sin coordenadas navega a la dirección escrita
+00:09 +194: test/field_review_widget_test.dart: Fallo de disco mantiene el envío visible y no simula fallo de cámara
+00:09 +195: test/field_review_widget_test.dart: Fallo de disco mantiene el envío visible y no simula fallo de cámara
+00:09 +196: test/widget_test.dart: Con sesión guardada entra directo a la agenda, sin pedir la clave
+00:09 +197: test/visita_enlaces_test.dart: "Escribir por WhatsApp" abre el chat con el cliente
+00:09 +198: test/field_review_widget_test.dart: Logout advierte: Volver conserva tokens y foto; confirmar descarta
+00:09 +199: test/field_review_widget_test.dart: Logout advierte: Volver conserva tokens y foto; confirmar descarta
+00:09 +200: test/field_review_widget_test.dart: Logout advierte: Volver conserva tokens y foto; confirmar descarta
+00:09 +201: test/visita_enlaces_test.dart: si el teléfono no puede abrir el enlace, se lo dice al técnico
+00:09 +202: test/visita_enlaces_test.dart: el mapa se abre dentro de la app y la llamada y WhatsApp fuera de ella
+00:10 +203: test/visita_enlaces_test.dart: en una visita completada los botones también funcionan
+00:10 +204: All tests passed!

@@ -4,12 +4,24 @@ Panel operativo para administrar clientes y agendar visitas por operador.
 
 ## Portada pública
 
-Al abrir o recargar el sistema siempre aparece la portada con información de
-Kill Bichos, servicios, contacto, horarios y la guía de tres pasos del WhatsApp
-de prueba, incluso si existe una sesión activa. **Ingresar** abre el login
-existente si no hay sesión; si la sesión sigue activa, abre el panel. La portada
-no borra la sesión ni consulta datos privados mientras no se pulse Ingresar.
-Cerrar o vencer la sesión conserva el retorno al login y sus mensajes actuales.
+Al abrir o recargar el sistema con sesión activa se entra directamente al panel.
+Sin sesión se muestra la portada con información de Kill Bichos, servicios,
+contacto, horarios y la guía de tres pasos del WhatsApp de prueba; **Ingresar**
+abre el login existente.
+
+El botón **Página principal** del panel vuelve a la portada sin cerrar la sesión.
+Desde allí, Ingresar permite regresar al panel sin volver a pedir credenciales.
+En celular el botón se representa con una casa junto al de cerrar sesión, con
+el nombre accesible «Volver a la página principal». El login también tiene un
+botón para volver manualmente a la portada.
+
+Tras **5 minutos sin actividad en el login** se regresa a la portada y se
+descartan sus campos. Teclado, puntero, rueda e interacción táctil reinician
+la espera; el tiempo en otra pestaña cuenta como inactividad. Se pausa la salida
+durante el ingreso y se retiran los listeners y el temporizador al salir del
+login. No es un cierre automático de sesiones del panel y no se aplica a la
+recuperación de contraseña. Cerrar o vencer la sesión conserva el retorno al
+login y sus mensajes actuales.
 
 El enlace `#restablecer=...` tiene prioridad sobre portada y panel. Su token se
 consume y retira de la barra como antes; la portada no lo envía a WhatsApp.
@@ -33,6 +45,9 @@ La portada requiere recompilar el frontend para desplegar sus cambios.
 La decisión posterior de mostrar siempre la portada y el despliegue local en
 Docker se registran en
 [portada como entrada inicial](../pruebas/docker_portada_primero_2026-10-29/README.md).
+Esa decisión fue reemplazada el 3/11 por la entrada directa con sesión y el
+regreso manual/inactivo a la portada:
+[navegación y login inactivo](../pruebas/navegacion_login_2026-11-03/README.md).
 
 ## Ejecución
 

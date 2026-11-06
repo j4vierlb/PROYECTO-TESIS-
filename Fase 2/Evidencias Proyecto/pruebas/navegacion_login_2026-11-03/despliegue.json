@@ -1,0 +1,28 @@
+{
+  "fecha": "2026-11-03",
+  "rama": "juan",
+  "base": "95a2844",
+  "url": "http://localhost:8080/",
+  "web_status": 200,
+  "js": "/assets/index-IRwDK-XP.js",
+  "tests_frontend": 191,
+  "idle_login_minutos": 5,
+  "scope": "Frontend, pruebas y documentacion; verificacion local previa a publicar la PR",
+  "servicios": [
+    {
+      "nombre": "killbichos-web-1",
+      "image": "sha256:b4fa339b638558620dc93d643cfed086d9eb8b14bd995dcba45ce9f101181fb8",
+      "id": "d0006b9802572d8ff9e23a6eac6d469495167b2eb5f735a4c7a18160befc4b8d"
+    },
+    {
+      "nombre": "killbichos-backend-1",
+      "image": "sha256:59162df6c845f7905c9133e3a1e6674a74d83fc875a6e0090a6143542a027418",
+      "id": "27b4c8dc5ec25ccafabcb2c0ff3fd2a706bbc1c40731a44d81ac4953fa10e317"
+    },
+    {
+      "nombre": "killbichos_db",
+      "image": "sha256:44126d872ac91993766c341e369c539e8196614321765d36a6f1bab0419a5fa5",
+      "id": "594cde76c67fc7534dbc8afec79aa904854cb4a7b54ed626bec6ca57a6b5f4dc"
+    }
+  ]
+}
