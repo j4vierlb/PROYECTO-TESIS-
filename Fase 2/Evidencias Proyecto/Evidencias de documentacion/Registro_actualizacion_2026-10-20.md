@@ -54,3 +54,34 @@ Todos quedaron bloqueados por el mismo error: LibreOffice soffice.exe no
 está disponible. Por lo tanto, **el contenido está actualizado pero la
 maquetación no está aprobada**. No se generaron PNG de páginas ni se afirma
 haber comprobado cortes de tabla, solapamientos o paginación visualmente.
+
+## Actualización de cifras de pruebas — 06/11/2026
+
+Responsable: Pedro Vergiu. Base: `main` en el commit `95a2844` (después de las
+PR #33 a #37). Las cifras de E4 de arriba (205, del 20/10) quedan como
+historial; para el cierre valen estas:
+
+| Componente | Pruebas | Resultado | Evidencia |
+| --- | --- | --- | --- |
+| Backend | 251 | **251/251**, 0 fallas y 0 omisiones | `pruebas/cierre_backend_2026-11-06/backend_regression.log` |
+| Frontend (panel) | 174 | **174/174** con Node 24; 173/174 con Node 22 (ver nota) | `pruebas/cierre_backend_2026-11-06/frontend_vitest_node24.log` |
+| App móvil | 204 | 204 informadas por el equipo; **no se volvieron a ejecutar** en esta revisión (no hay Flutter en este equipo) | — |
+| **Total** | **629** | | |
+
+- El backend se probó en un PostgreSQL/PostGIS temporal, sin puerto
+  publicado y eliminado al terminar; no se usó la base de trabajo ni el `.env`.
+  Las bases de prueba se crean con `schema.sql` **más las migraciones 4 a 7**:
+  solo con `schema.sql` falla por la columna `foto_path` (primer intento
+  guardado como `intento1_solo_schema.log`).
+- Nota del frontend: `CRW08` falla en Node 22 por cómo el mock lee un `Blob`
+  con jsdom y pasa en Node 24. No es un fallo del panel, pero conviene fijar
+  la versión de Node con que se corren las pruebas.
+- Instalación desde un clon limpio (`cp .env.example .env` y
+  `docker compose up --build`): OK en 3 min 50 s, con puertos cambiados porque
+  el stack diario estaba corriendo. Ver `pruebas/clon_limpio_2026-11-06`.
+- HU-18: caso 8 (sin `OPENAI_API_KEY`) aprobado el 06/11; quedan 9/9 casos.
+  Siguen pendientes las capturas del caso 3 en el panel y en la app.
+
+Los Word (01 a 11) **no se modificaron** en esta actualización; las cifras
+de E4 (205) en los Word, por ejemplo en 02 Backlog y 07 Pruebas, deben
+cambiarse a las de esta tabla al preparar la versión final.
