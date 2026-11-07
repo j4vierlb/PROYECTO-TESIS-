@@ -58,11 +58,58 @@ Se hizo en el mismo computador de desarrollo, no en otro equipo:
    `node:22-alpine` ya estaban descargadas. En un PC limpio la primera vez
    tarda más por la descarga.
 
-Pendiente para Pedro: repetir el comando literal (sin override) en otro
-equipo, o en este con el stack diario detenido, y anotar el resultado aquí.
+Este pendiente se cerró el 07/11 (sección siguiente).
+
+## Repetición con el comando literal — 07/11/2026
+
+Pedida en la revisión del PR #39: sin override y sin cambiar puertos.
+
+**Por qué no se hizo en el Docker de este PC.** `docker-compose.yml` fija
+`name: killbichos`, así que cualquier clon, en cualquier carpeta, usa el
+proyecto y los volúmenes del stack diario (`killbichos_db_data`). Aun
+deteniendo ese stack, el comando literal habría reutilizado la base existente
+(sin ejecutar los scripts de inicio) y reemplazado los contenedores diarios.
+No sería un PC limpio.
+
+**Cómo se hizo.** Se levantó un Docker nuevo y vacío dentro de un contenedor
+(`docker:27-dind`, Docker 27.5.1): 0 imágenes, 0 volúmenes y los puertos 5432,
+8000 y 8080 libres. Ahí se ejecutaron los comandos tal cual:
+
+```bash
+git clone https://github.com/j4vierlb/PROYECTO-TESIS-.git   # main, 95a2844
+cd PROYECTO-TESIS-
+cp .env.example .env
+docker compose up --build
+```
+
+**Resultado: OK.** Sin `docker-compose.override.yml`, sin editar el `.env` y con
+los puertos por defecto. Tardó **5 min 25 s** (03:08:43 a 03:14:08 UTC),
+contando la descarga de todas las imágenes base.
+
+| Comprobación | Resultado |
+|---|---|
+| Servicios | `db` healthy en 5432, `backend` en 8000, `web` en 8080 |
+| Scripts de inicio de la base | 7 ejecutados, 0 errores |
+| Datos de prueba | 1 empresa, 1 usuario, 1 técnico, 2 clientes, 3 visitas |
+| Panel `http://localhost:8080/` y API `/docs` | 200 y 200 |
+| Login admin y técnico (`demo1234`) | 200 con tokens; clave incorrecta 401 |
+| CORS desde `http://localhost:8080` | permitido sin tocar `ALLOWED_ORIGINS` |
+
+Evidencia: [literal_compose_up.log](literal_compose_up.log),
+[literal_verificacion.txt](literal_verificacion.txt) (tokens ocultos) y
+[literal_db_init.log](literal_db_init.log). El Docker de prueba se eliminó al
+terminar; el stack diario no se detuvo ni se modificó.
+
+Diferencia que queda con otro computador: el sistema operativo y Docker
+Desktop son los de este equipo. Si alguien del equipo puede repetirlo en
+su PC, basta anotar aquí la fecha y el resultado.
+
+**Aviso para quien ya tiene el proyecto:** como el nombre del proyecto es fijo,
+un clon nuevo en el mismo PC usa la base que ya existe. Para empezar de cero
+hay que ejecutar `docker compose down -v`, que **borra** esa base.
 
 ## Uso posterior
 
-Con este mismo stack (sin `OPENAI_API_KEY`) se ejecutó el caso 8 de HU-18.
+Con el stack del 06/11 (sin `OPENAI_API_KEY`) se ejecutó el caso 8 de HU-18.
 Ver [`docs/evidencias/HU-18/HU18_08_sin_openai.txt`](../../docs/evidencias/HU-18/HU18_08_sin_openai.txt).
 Al terminar se eliminó con `docker compose -p killbichos-limpio down -v`.

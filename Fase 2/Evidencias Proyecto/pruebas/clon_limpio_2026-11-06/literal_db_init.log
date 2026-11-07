@@ -1,0 +1,142 @@
+db-1  | The files belonging to this database system will be owned by user "postgres".
+db-1  | This user must also own the server process.
+db-1  | 
+db-1  | The database cluster will be initialized with locale "en_US.utf8".
+db-1  | The default database encoding has accordingly been set to "UTF8".
+db-1  | The default text search configuration will be set to "english".
+db-1  | 
+db-1  | Data page checksums are disabled.
+db-1  | 
+db-1  | fixing permissions on existing directory /var/lib/postgresql/data ... ok
+db-1  | creating subdirectories ... ok
+db-1  | selecting dynamic shared memory implementation ... posix
+db-1  | selecting default max_connections ... 100
+db-1  | selecting default shared_buffers ... 128MB
+db-1  | selecting default time zone ... Etc/UTC
+db-1  | creating configuration files ... ok
+db-1  | running bootstrap script ... ok
+db-1  | performing post-bootstrap initialization ... ok
+db-1  | syncing data to disk ... ok
+db-1  | 
+db-1  | 
+db-1  | Success. You can now start the database server using:
+db-1  | 
+db-1  |     pg_ctl -D /var/lib/postgresql/data -l logfile start
+db-1  | 
+db-1  | initdb: warning: enabling "trust" authentication for local connections
+db-1  | initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+db-1  | waiting for server to start....2026-11-07 03:13:18.513 UTC [49] LOG:  starting PostgreSQL 16.4 (Debian 16.4-1.pgdg110+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 10.2.1-6) 10.2.1 20210110, 64-bit
+db-1  | 2026-11-07 03:13:18.593 UTC [49] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+db-1  | 2026-11-07 03:13:18.994 UTC [52] LOG:  database system was shut down at 2026-11-07 03:13:15 UTC
+db-1  | 2026-11-07 03:13:19.072 UTC [49] LOG:  database system is ready to accept connections
+db-1  |  done
+db-1  | server started
+db-1  | CREATE DATABASE
+db-1  | 
+db-1  | 
+db-1  | /usr/local/bin/docker-entrypoint.sh: sourcing /docker-entrypoint-initdb.d/10_postgis.sh
+db-1  | CREATE DATABASE
+db-1  | Loading PostGIS extensions into template_postgis
+db-1  | CREATE EXTENSION
+db-1  | CREATE EXTENSION
+db-1  | You are now connected to database "template_postgis" as user "killbichos".
+db-1  | CREATE EXTENSION
+db-1  | CREATE EXTENSION
+db-1  | Loading PostGIS extensions into killbichos
+db-1  | CREATE EXTENSION
+db-1  | CREATE EXTENSION
+db-1  | You are now connected to database "killbichos" as user "killbichos".
+db-1  | CREATE EXTENSION
+db-1  | CREATE EXTENSION
+db-1  | 
+db-1  | /usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/1_schema.sql
+db-1  | psql:/docker-entrypoint-initdb.d/1_schema.sql:6: NOTICE:  extension "postgis" already exists, skipping
+db-1  | CREATE EXTENSION
+db-1  | CREATE EXTENSION
+db-1  | CREATE TABLE
+db-1  | CREATE TABLE
+db-1  | CREATE TABLE
+db-1  | CREATE INDEX
+db-1  | CREATE TABLE
+db-1  | CREATE INDEX
+db-1  | CREATE TABLE
+db-1  | CREATE TABLE
+db-1  | CREATE TABLE
+db-1  | CREATE TABLE
+db-1  | CREATE TABLE
+db-1  | CREATE TABLE
+db-1  | CREATE TABLE
+db-1  | CREATE INDEX
+db-1  | CREATE INDEX
+db-1  | CREATE INDEX
+db-1  | CREATE INDEX
+db-1  | CREATE INDEX
+db-1  | 
+db-1  | 
+db-1  | /usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/2_seed.sql
+db-1  | INSERT 0 1
+db-1  | INSERT 0 1
+db-1  | INSERT 0 1
+db-1  | INSERT 0 2
+db-1  | INSERT 0 1
+db-1  | INSERT 0 3
+db-1  | INSERT 0 1
+db-1  | INSERT 0 1
+db-1  | INSERT 0 3
+db-1  | 
+db-1  | 
+db-1  | /usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/3_demo_historial.sql
+db-1  | INSERT 0 2
+db-1  | INSERT 0 2
+db-1  | INSERT 0 5
+db-1  | 
+db-1  | 
+db-1  | /usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/4_migracion_message_sid.sql
+db-1  | psql:/docker-entrypoint-initdb.d/4_migracion_message_sid.sql:10: NOTICE:  column "message_sid" of relation "mensajes_whatsapp" already exists, skipping
+db-1  | ALTER TABLE
+db-1  | 
+db-1  | 
+db-1  | /usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/5_migracion_croquis_terreno.sql
+db-1  | ALTER TABLE
+db-1  | CREATE INDEX
+db-1  | CREATE INDEX
+db-1  | 
+db-1  | 
+db-1  | /usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/6_migracion_whatsapp_saliente.sql
+db-1  | psql:/docker-entrypoint-initdb.d/6_migracion_whatsapp_saliente.sql:20: NOTICE:  column "atendida_por_humano" of relation "conversaciones_whatsapp" already exists, skipping
+db-1  | ALTER TABLE
+db-1  | psql:/docker-entrypoint-initdb.d/6_migracion_whatsapp_saliente.sql:22: NOTICE:  column "atendida_por_humano_desde" of relation "conversaciones_whatsapp" already exists, skipping
+db-1  | ALTER TABLE
+db-1  | ALTER TABLE
+db-1  | ALTER TABLE
+db-1  | psql:/docker-entrypoint-initdb.d/6_migracion_whatsapp_saliente.sql:28: NOTICE:  column "estado_entrega" of relation "mensajes_whatsapp" already exists, skipping
+db-1  | ALTER TABLE
+db-1  | psql:/docker-entrypoint-initdb.d/6_migracion_whatsapp_saliente.sql:29: NOTICE:  column "error_entrega" of relation "mensajes_whatsapp" already exists, skipping
+db-1  | ALTER TABLE
+db-1  | psql:/docker-entrypoint-initdb.d/6_migracion_whatsapp_saliente.sql:31: NOTICE:  column "recordatorio_enviado_at" of relation "visitas" already exists, skipping
+db-1  | ALTER TABLE
+db-1  | 
+db-1  | 
+db-1  | /usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/7_migracion_sesion_tecnicos.sql
+db-1  | psql:/docker-entrypoint-initdb.d/7_migracion_sesion_tecnicos.sql:12: NOTICE:  column "session_version" of relation "operadores" already exists, skipping
+db-1  | ALTER TABLE
+db-1  | 
+db-1  | 
+db-1  | waiting for server to shut down...2026-11-07 03:13:54.976 UTC [49] LOG:  received fast shutdown request
+db-1  | .2026-11-07 03:13:55.052 UTC [49] LOG:  aborting any active transactions
+db-1  | 2026-11-07 03:13:55.053 UTC [49] LOG:  background worker "logical replication launcher" (PID 55) exited with exit code 1
+db-1  | 2026-11-07 03:13:55.054 UTC [50] LOG:  shutting down
+db-1  | 2026-11-07 03:13:55.140 UTC [50] LOG:  checkpoint starting: shutdown immediate
+db-1  | .....2026-11-07 03:14:00.012 UTC [50] LOG:  checkpoint complete: wrote 4547 buffers (27.8%); 0 WAL file(s) added, 0 removed, 2 recycled; write=0.195 s, sync=3.863 s, total=4.959 s; sync files=1013, longest=0.367 s, average=0.004 s; distance=35329 kB, estimate=35329 kB; lsn=0/3767150, redo lsn=0/3767150
+db-1  | 2026-11-07 03:14:00.019 UTC [49] LOG:  database system is shut down
+db-1  |  done
+db-1  | server stopped
+db-1  | 
+db-1  | PostgreSQL init process complete; ready for start up.
+db-1  | 
+db-1  | 2026-11-07 03:14:00.260 UTC [1] LOG:  starting PostgreSQL 16.4 (Debian 16.4-1.pgdg110+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 10.2.1-6) 10.2.1 20210110, 64-bit
+db-1  | 2026-11-07 03:14:00.261 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+db-1  | 2026-11-07 03:14:00.261 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+db-1  | 2026-11-07 03:14:00.423 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+db-1  | 2026-11-07 03:14:00.623 UTC [143] LOG:  database system was shut down at 2026-11-07 03:13:59 UTC
+db-1  | 2026-11-07 03:14:00.713 UTC [1] LOG:  database system is ready to accept connections
