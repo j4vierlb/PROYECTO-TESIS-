@@ -31,8 +31,8 @@ La cuenta de OpenAI de producción es de Kill Bichos. Se recomienda un tope mens
 
 En producción este es el costo principal, mayor que el de la IA. Se compone de dos cobros por mensaje:
 
-- **Twilio:** alrededor de **0,005 USD por mensaje**, enviado o recibido.
-- **Meta:** cobra por cada **plantilla** enviada (avisos y recordatorios), según país y categoría. Para Chile, una fuente externa indica ~0,02 USD por plantilla de categoría *utility*; **no está confirmado contra la tabla oficial de Meta** y Meta la actualiza cada trimestre. Las respuestas a un cliente que escribió en las últimas 24 h (lo que hace el bot) no pagan plantilla, pero desde octubre de 2026 Meta empezó a cobrar las plantillas *utility* también dentro de esa ventana, según aviso de Twilio.
+- **Twilio:** **0,005 USD por mensaje**, enviado o recibido, más 0,001 USD por cada mensaje que termine como *Failed* (confirmado en la página oficial de Twilio, *pricing current as of September 2026*, revisada el 07/11/2026).
+- **Meta:** cobra por cada **plantilla** enviada (avisos y recordatorios), según país y categoría. La documentación oficial de Meta confirma que Chile tiene tarifa propia, que la tabla vigente rige desde el **1 de octubre de 2026** y que desde esa fecha las plantillas *utility* se cobran también dentro de la ventana de 24 h. Las respuestas de texto libre del bot a un cliente que escribió no pagan plantilla. **El valor para Chile no se pudo leer automáticamente** (solo aparece en el selector interactivo y en el CSV de la tabla de Meta); ~0,02 USD por plantilla *utility* viene de una fuente externa y es una **estimación** hasta revisarlo a mano.
 
 Estimación orientativa con 300 conversaciones (≈10 mensajes entre ida y vuelta cada una) y 300 avisos o recordatorios al mes:
 
@@ -43,7 +43,7 @@ Estimación orientativa con 300 conversaciones (≈10 mensajes entre ida y vuelt
 | Meta, plantillas | 300 × ~0,02 | ~6 |
 | **Total mensajería** | | **~22,5 USD (~21.000 CLP)** |
 
-A esto se suma el número de teléfono en Twilio (cargo mensual fijo) y el servidor (sección 4). Antes de cotizar a la empresa hay que confirmar los valores en <https://www.twilio.com/whatsapp/pricing> y en la tabla de precios de Meta.
+A esto se suma el número de teléfono en Twilio (cargo mensual fijo) y el servidor (sección 4). El cobro de Twilio está confirmado; el de Meta queda como estimación. Antes de dar la cifra a la empresa, abrir <https://whatsappbusiness.com/es-la/products/platform-pricing/>, elegir Chile, USD y la categoría *utility*, y reemplazar los ~0,02 USD de la tabla.
 
 ### 2.3 Google Maps
 
@@ -57,7 +57,7 @@ La demostración usa el **Sandbox de WhatsApp de Twilio** (+1 415 523 8886), un 
 2. **No es público:** solo responde a los teléfonos unidos. Un cliente real de Kill Bichos no podría escribir.
 3. **Ventana de 24 h:** los avisos y recordatorios que envía el sistema solo salen como texto libre si el cliente escribió en las últimas 24 h. Fuera de esa ventana WhatsApp exige una plantilla aprobada por Meta; sin ella el mensaje queda guardado como **no enviado** y el panel no deja responder (`409`).
 4. **El número es de Twilio**, compartido y en inglés, no el de la empresa.
-5. **URL pública temporal:** Twilio necesita una dirección pública. En la demo se usa un túnel de ngrok (servicio opcional en `docker-compose.yml`); si el computador se apaga, el bot deja de responder.
+5. **URL pública:** Twilio necesita una dirección pública. En la demo local se usa un túnel de ngrok (servicio opcional en `docker-compose.yml`), y en ese modo el bot solo responde mientras el computador que corre el túnel está encendido. <!-- Actualizar cuando el backend esté desplegado en el servidor: indicar su URL fija y que este límite ya no aplica. -->
 
 Durante la prueba HU-18 también se encontró que la **cuenta Trial** nueva de Twilio no permite configurar el webhook ni enviar texto libre (errores 21654 y 20003). Se trabajó primero con un script puente que reenviaba los mensajes al webhook y, tras el Upgrade de la cuenta, con el Sandbox. Resultado: 9 de 9 casos aprobados. Los casos 1 a 7 y 9 se hicieron con mensajes reales desde el teléfono. El caso 8 (sin clave de OpenAI) se verificó el 06/11/2026 enviando al webhook mensajes firmados igual que Twilio: el cliente recibió el mensaje de contingencia y no se agendó nada (ver HU-18).
 
@@ -91,7 +91,8 @@ El agente de WhatsApp cumple el flujo de agendamiento con un costo de IA bajo (~
 ## Fuentes externas
 
 - Precios de `gpt-4.1-mini`: <https://developers.openai.com/api/docs/models/gpt-4.1-mini>
-- Precios de WhatsApp en Twilio: <https://www.twilio.com/whatsapp/pricing>
+- Precios de WhatsApp en Twilio: <https://www.twilio.com/en-us/whatsapp/pricing>
+- Tarifas de Meta por país (selector interactivo): <https://whatsappbusiness.com/es-la/products/platform-pricing/>
 - Aviso de Twilio sobre el cambio de precios de Meta (octubre 2026): <https://support.twilio.com/hc/en-us/articles/53100480177819-Notice-Changes-to-WhatsApp-s-Pricing-October-2026>
 - Precios de la plataforma de WhatsApp de Meta: <https://developers.facebook.com/docs/whatsapp/pricing>
 - Calculadora con tarifas por país (referencial, no oficial): <https://zernio.com/whatsapp-api-pricing>

@@ -64,21 +64,22 @@ historial; para el cierre valen estas:
 | Componente | Pruebas | Resultado | Evidencia |
 | --- | --- | --- | --- |
 | Backend | 251 | **251/251**, 0 fallas y 0 omisiones | `pruebas/cierre_backend_2026-11-06/backend_regression.log` |
-| Frontend (panel) | 174 | **174/174** con Node 24; 173/174 con Node 22 (ver nota) | `pruebas/cierre_backend_2026-11-06/frontend_vitest_node24.log` |
-| App móvil | 204 | 204 informadas por el equipo; **no se volvieron a ejecutar** en esta revisión (no hay Flutter en este equipo) | — |
-| **Total** | **629** | | |
+| Frontend (panel) | 174 (191 al fusionar el PR #38 de Juan) | **174/174** con Node 22 y con Node 24 | `pruebas/cierre_backend_2026-11-06/frontend_vitest_node22_mock_corregido.log` |
+| App móvil | 204 | **204/204**, re-ejecutadas por el equipo | — |
+| **Total** | **629** (646 con el PR #38) | | |
 
 - El backend se probó en un PostgreSQL/PostGIS temporal, sin puerto
   publicado y eliminado al terminar; no se usó la base de trabajo ni el `.env`.
-  Las bases de prueba se crean con `schema.sql` **más las migraciones 4 a 7**:
-  solo con `schema.sql` falla por la columna `foto_path` (primer intento
-  guardado como `intento1_solo_schema.log`).
-- Nota del frontend: `CRW08` falla en Node 22 por cómo el mock lee un `Blob`
-  con jsdom y pasa en Node 24. No es un fallo del panel, pero conviene fijar
-  la versión de Node con que se corren las pruebas.
+  Al principio la base creada solo con `schema.sql` fallaba por la columna
+  `foto_path` (`intento1_solo_schema.log`). El 07/11 se agregó a `schema.sql`
+  y la suite da 251/251 con ese archivo solo.
+- Frontend: `CRW08` fallaba en Node 22 por el `Blob` de jsdom en el mock; el
+  07/11 se corrigió el mock y pasa en Node 22 y 24. Al fusionar el PR #38 la
+  cifra pasa a 191 y hay que volver a ejecutarla.
 - Instalación desde un clon limpio (`cp .env.example .env` y
-  `docker compose up --build`): OK en 3 min 50 s, con puertos cambiados porque
-  el stack diario estaba corriendo. Ver `pruebas/clon_limpio_2026-11-06`.
+  `docker compose up --build`): el 07/11 se repitió con el comando literal,
+  sin override y con los puertos por defecto, en un Docker nuevo y vacío: OK en
+  5 min 25 s. Ver `pruebas/clon_limpio_2026-11-06`.
 - HU-18: caso 8 (sin `OPENAI_API_KEY`) aprobado el 06/11; quedan 9/9 casos.
   Siguen pendientes las capturas del caso 3 en el panel y en la app.
 
