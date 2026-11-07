@@ -24,8 +24,13 @@ el logo y el tema de la app).
   en Node 22 con jsdom y el visor muestra "No se pudo conectar con el servidor".
   La misma prueba pasa en Node 24, así que depende de la versión de Node y no
   del código del panel. Evidencia: [frontend_vitest_node22.log](frontend_vitest_node22.log).
-  Conviene fijar la versión de Node para las pruebas (por ejemplo con
-  `engines` en `package.json`) o ajustar el mock.
+
+**Corregido el 07/11/2026:** el mock de CRW08 ahora entrega bytes
+(`TextEncoder`) en vez de un `Blob` de jsdom. No se fijó `engines` en Node 24
+porque la imagen del panel (`frontend/Dockerfile`) compila con Node 22.
+Resultado con el mock corregido: **174/174 en Node 22 y 174/174 en Node 24**
+([frontend_vitest_node22_mock_corregido.log](frontend_vitest_node22_mock_corregido.log),
+[frontend_vitest_node24_mock_corregido.log](frontend_vitest_node24_mock_corregido.log)).
 
 ## Entorno aislado
 
@@ -48,9 +53,18 @@ El primer intento se hizo con las bases creadas **solo con `schema.sql`** y dio
 todas las migraciones al crear la base. Se dejó el log como registro:
 [intento1_solo_schema.log](intento1_solo_schema.log).
 
-Recomendación: agregar `foto_path` (y los índices de esa migración) a
-`schema.sql`, o indicar en el README del backend que la base de prueba necesita
-también las migraciones.
+**Corregido el 07/11/2026** (revisión del PR #39): `schema.sql` ahora trae
+`foto_path` y los índices únicos `uq_croquis_visita` y
+`uq_dispositivos_croquis_codigo`. La migración sigue sirviendo para bases
+antiguas y no hace nada en una nueva. Comprobación:
+
+- Bases de prueba creadas **solo con `schema.sql`**: **251/251**
+  ([backend_regression_solo_schema.log](backend_regression_solo_schema.log)).
+- El orden de `docker compose` (schema, seed, demo y migraciones 4 a 7) se
+  ejecuta sin errores sobre el `schema.sql` nuevo
+  ([preparacion_bases_solo_schema.log](preparacion_bases_solo_schema.log)).
+- El README del backend ya no pide la migración para la base de prueba y avisa
+  qué hacer con una base creada antes de este cambio.
 
 ## Reproducción
 
