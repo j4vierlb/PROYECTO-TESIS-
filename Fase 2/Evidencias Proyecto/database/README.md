@@ -21,7 +21,7 @@ La primera vez que se crea la base (volumen vacío), PostgreSQL ejecuta estos sc
 | 2 | `seed.sql` | Datos de prueba: empresa, admin, técnico, clientes, visita de hoy, croquis y trampas |
 | 3 | `demo_historial.sql` | 2 visitas pasadas completadas, para el historial de la app |
 | 4 | `migracion_message_sid.sql` | Columna `message_sid` para el agente de WhatsApp (en una base nueva ya viene en `schema.sql`; aquí no hace nada y es seguro) |
-| 5 | `migracion_croquis_terreno.sql` | Columna `foto_path` para la foto de cada trampa, y evita croquis duplicados por visita y códigos de trampa repetidos |
+| 5 | `migracion_croquis_terreno.sql` | Columna `foto_path` para la foto de cada trampa, y evita croquis duplicados por visita y códigos de trampa repetidos (en una base nueva ya viene en `schema.sql`) |
 | 6 | `migracion_whatsapp_saliente.sql` | Bandeja del panel, estado de entrega de cada mensaje y recordatorio del día anterior (en una base nueva ya viene en `schema.sql`) |
 | 7 | `migracion_sesion_tecnicos.sql` | Columna `session_version` en operadores: cambiar la clave de un técnico cierra sus sesiones abiertas (en una base nueva ya viene en `schema.sql`) |
 
