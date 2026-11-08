@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import './styles.css'
 import './panel.css'
@@ -7,6 +7,7 @@ import { CroquisViewer } from './CroquisViewer.jsx'
 import { PasswordRecovery } from './PasswordRecovery.jsx'
 import { BrandLogo } from './BrandLogo.jsx'
 import { PublicHome } from './PublicHome.jsx'
+import { useLoginIdle } from './useLoginIdle.js'
 import { addDays, chileDate, chileDateTime, chileTime, chileDateTimeInput, clientLocation, hasClientLocation, visitPayload } from './panel-utils.js'
 
 // Íconos de línea para el menú y los contadores (decorativos: el texto de al lado ya dice qué son).
@@ -18,6 +19,7 @@ const ICONS = {
   hoy: <><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></>,
   pendientes: <><path d="M5 12.5 9.5 17 19 7.5" /></>,
   salir: <><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4M15 8l4 4-4 4M19 12H9" /></>,
+  inicio: <><path d="m3 10 9-7 9 7M5 9v11h14V9M9 20v-7h6v7" /></>,
 }
 function Icon({ name }) { return <svg className="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{ICONS[name]}</svg> }
 
@@ -72,9 +74,10 @@ function Modal({ title, busy, onClose, onSubmit = event => event.preventDefault(
   </form></div>
 }
 
-function Login({ onLogin, notice, onForgot }) {
+function Login({ onLogin, notice, onForgot, onHome }) {
   const [form, setForm] = useState({ usuario: '', clave: '' }), [error, setError] = useState(''), [busy, setBusy] = useState(false)
   const submitting = useRef(false)
+  useLoginIdle(onHome, busy)
   async function submit(event) {
     event.preventDefault()
     if (submitting.current) return
@@ -98,13 +101,16 @@ function Login({ onLogin, notice, onForgot }) {
     {notice && <p role="status" className="info">{notice}</p>}
     <form onSubmit={submit} aria-busy={busy}><label>Correo<input required type="email" autoComplete="username" value={form.usuario} onChange={e => setForm({ ...form, usuario: e.target.value })} /></label><label>Contraseña<input required type="password" autoComplete="current-password" value={form.clave} onChange={e => setForm({ ...form, clave: e.target.value })} /></label><Feedback error={error} /><button className="primary full" disabled={busy}>{busy ? 'Ingresando…' : 'Ingresar al panel'}</button></form>
     <button type="button" className="secondary full" onClick={onForgot} disabled={busy}>Olvidé mi contraseña</button>
+    <button type="button" className="secondary full" onClick={onHome} disabled={busy}>Volver a la página principal</button>
+    <p className="login-idle-help">Tras 5 minutos sin actividad volverás a la página principal.</p>
   </div></main>
 }
 
 export function App() {
   const [resetToken, setResetToken] = useState(() => new URLSearchParams(window.location.hash.slice(1)).get('restablecer') || '')
   const [recovering, setRecovering] = useState(false)
-  const [entered, setEntered] = useState(false)
+  const [entered, setEntered] = useState(() => Boolean(localStorage.token))
+  const goHome = useCallback(() => { setEntered(false); setNotice('') }, [])
   useEffect(() => {
     function consumeLink() {
       const token = new URLSearchParams(window.location.hash.slice(1)).get('restablecer')
@@ -130,12 +136,12 @@ export function App() {
   }} onReset={message => {
     setResetToken(''); setRecovering(false); setLogged(false); setEntered(true); localStorage.removeItem('token'); setNotice(message)
   }} />
-  if (!entered) return <PublicHome onEnter={() => setEntered(true)} />
-  if (!logged) return <Login notice={notice} onForgot={() => setRecovering(true)} onLogin={() => { setNotice(''); setLogged(true) }} />
+  if (!entered) return <PublicHome onEnter={() => { setLogged(Boolean(localStorage.token)); setEntered(true) }} />
+  if (!logged) return <Login notice={notice} onHome={goHome} onForgot={() => setRecovering(true)} onLogin={() => { setNotice(''); setLogged(true) }} />
   return <div className="app-shell"><aside><div className="logo"><BrandLogo /><div><strong>Kill Bichos</strong><small>Panel operativo</small></div></div>
     <nav aria-label="Navegación principal"><button className={view === 'agenda' ? 'active' : ''} aria-current={view === 'agenda' ? 'page' : undefined} onClick={() => setView('agenda')}><Icon name="agenda" /><span>Agenda</span></button><button className={view === 'clientes' ? 'active' : ''} aria-current={view === 'clientes' ? 'page' : undefined} onClick={() => setView('clientes')}><Icon name="clientes" /><span>Clientes</span></button><button className={view === 'whatsapp' ? 'active' : ''} aria-current={view === 'whatsapp' ? 'page' : undefined} onClick={() => setView('whatsapp')}><Icon name="whatsapp" /><span>WhatsApp</span></button><button className={view === 'equipo' ? 'active' : ''} aria-current={view === 'equipo' ? 'page' : undefined} onClick={() => setView('equipo')}><Icon name="equipo" /><span>Equipo</span></button></nav>
     <div className="sidebar-bottom"><div className="user-chip"><div className="avatar">KB</div><div><strong>Cuenta del panel</strong><small>Gestión administrativa</small></div></div></div>
-    <button className="logout" onClick={() => { localStorage.removeItem('token'); setNotice(''); setLogged(false); setEntered(true) }}><Icon name="salir" /><span>Cerrar sesión</span></button>
+    <div className="panel-actions"><button type="button" className="home-link" aria-label="Volver a la página principal" title="Volver a la página principal" onClick={goHome}><Icon name="inicio" /><span>Página principal</span></button><button className="logout" aria-label="Cerrar sesión" title="Cerrar sesión" onClick={() => { localStorage.removeItem('token'); setNotice(''); setLogged(false); setEntered(true) }}><Icon name="salir" /><span>Cerrar sesión</span></button></div>
   </aside><main className="content">{{ agenda: <Agenda />, clientes: <Clientes />, whatsapp: <Bandeja />, equipo: <Equipo /> }[view]}</main></div>
 }
 

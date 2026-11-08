@@ -1,0 +1,42 @@
+[
+  {
+    "id": "WEB-PC-01",
+    "status": "Aprobado",
+    "detail": "Portada, login y agenda del rediseño contra FastAPI y PostGIS con datos de prueba."
+  },
+  {
+    "id": "WEB-PC-02",
+    "status": "Aprobado",
+    "detail": "Equipo permite crear y editar. El técnico recién creado inicia sesión por la API."
+  },
+  {
+    "id": "WEB-PC-03",
+    "status": "Aprobado",
+    "detail": "Desactivación rechaza nuevo ingreso y token previo con 401. Reactivación permite ingresar."
+  },
+  {
+    "id": "WEB-PC-04",
+    "status": "Aprobado",
+    "detail": "Navegación y retorno a portada conservan la sesión. Equipo sin desplazamiento horizontal a 1440 px."
+  },
+  {
+    "id": "WEB-movil-01",
+    "status": "Aprobado",
+    "detail": "Portada, login y agenda del rediseño contra FastAPI y PostGIS con datos de prueba."
+  },
+  {
+    "id": "WEB-movil-02",
+    "status": "Aprobado",
+    "detail": "Equipo permite crear y editar. El técnico recién creado inicia sesión por la API."
+  },
+  {
+    "id": "WEB-movil-03",
+    "status": "Aprobado",
+    "detail": "Desactivación rechaza nuevo ingreso y token previo con 401. Reactivación permite ingresar."
+  },
+  {
+    "id": "WEB-movil-04",
+    "status": "Aprobado",
+    "detail": "Navegación y retorno a portada conservan la sesión. Equipo sin desplazamiento horizontal a 390 px."
+  }
+]

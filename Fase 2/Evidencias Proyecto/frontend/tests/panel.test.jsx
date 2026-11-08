@@ -1,5 +1,5 @@
 import React from 'react'
-import { fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { renderAccess } from './support/render-access.jsx'
@@ -267,10 +267,12 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
     }))
     renderAccess()
     await waitFor(() => expect(resolveFirst).toBeDefined())
-    fireEvent.change(screen.getByLabelText('Fecha de la agenda'), { target: { value: '2026-11-03' } })
+    const initialDate = screen.getByLabelText('Fecha de la agenda').value
+    fireEvent.click(screen.getByRole('button', { name: 'Día siguiente' }))
+    expect(screen.getByLabelText('Fecha de la agenda').value).not.toBe(initialDate)
     expect(await screen.findByText('Día nuevo')).toBeVisible()
-    resolveFirst(new Response(JSON.stringify([existingVisit({ cliente: { ...client, nombre: 'Día anterior' } })]), { status: 200 }))
-    await waitFor(() => expect(screen.queryByText('Día anterior')).not.toBeInTheDocument())
+    await act(async () => resolveFirst(new Response(JSON.stringify([existingVisit({ cliente: { ...client, nombre: 'Día anterior' } })]), { status: 200 })))
+    expect(screen.queryByText('Día anterior')).not.toBeInTheDocument()
     expect(screen.getByText('Día nuevo')).toBeVisible()
   })
 
