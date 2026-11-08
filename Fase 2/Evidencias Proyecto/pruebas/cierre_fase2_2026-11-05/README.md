@@ -77,3 +77,19 @@ que Juan observe físicamente en el [Redmi](recorrido_redmi.md).
 La conformidad de la empresa, los escenarios aceptados y las firmas se completan
 en el acta 11 durante la sesión con Rodrigo Quiroga. Los resultados de laboratorio
 no completan los campos de aprobación del cliente.
+
+## Seguimiento del 8 de noviembre de 2026
+
+La PR #38 quedó integrada en `main` en `38a02a6`. El registro de las pruebas
+anteriores conserva su fecha del 05/11 y el corte `c90c58a` que las produjo.
+
+Juan realizará más adelante la prueba completa en el Redmi y el panel en Chrome.
+La URL del servidor aún está pendiente de recibir. Los registros preparados son
+el [recorrido físico](recorrido_redmi.md) y la
+[comprobación remota](validacion_servidor.md).
+
+La sesión con Rodrigo dispone de un
+[guion de nueve escenarios y cuentas de prueba](../../Evidencias%20de%20documentacion/Guion_sesion_Rodrigo_Quiroga.md)
+y del acta preparada. La solicitud se gestiona por Juan. Su aporte al informe
+final cubre panel, Android, documentación y pruebas en la
+[sección de Fase 3](../../../../Fase%203/Informe_final_Panel_Android_Pruebas_Borquez_Juan.md).
