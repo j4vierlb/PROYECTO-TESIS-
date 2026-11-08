@@ -20,7 +20,8 @@ beforeEach(() => {
   vi.mocked(drawCroquis).mockReset().mockReturnValue(map)
   vi.stubGlobal('fetch', vi.fn(async (url, options = {}) => {
     const path = new URL(url).pathname
-    if (path.includes('/foto')) return photoStatus === 200 ? new Response(new Blob(['png'], { type: 'image/png' }), { headers: { 'Content-Type': 'image/png' } }) : new Response('{}', { status: photoStatus })
+    // Bytes y no un Blob de jsdom: el fetch de Node 22 no acepta ese Blob como cuerpo.
+    if (path.includes('/foto')) return photoStatus === 200 ? new Response(new TextEncoder().encode('png'), { headers: { 'Content-Type': 'image/png' } }) : new Response('{}', { status: photoStatus })
     return new Response(JSON.stringify(body))
   }))
   URL.createObjectURL = vi.fn(() => 'blob:foto-qa')

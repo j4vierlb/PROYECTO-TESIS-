@@ -97,11 +97,13 @@ python -m unittest discover tests
 Las de integración usan PostgreSQL/PostGIS real en una base **aislada** y se saltan si no se indica la variable. Nunca usar la base de trabajo: cada prueba se deshace al final, pero igual exigen un nombre de base fijo:
 
 ```bash
-# Croquis en terreno: base croquis_regression con schema.sql + migracion_croquis_terreno.sql
+# Croquis en terreno: base croquis_regression creada con schema.sql (ya trae foto_path)
 CROQUIS_TEST_DATABASE_URL=postgresql+psycopg://usuario:clave@127.0.0.1:15434/croquis_regression python -m unittest discover tests
 # Panel web: base panel_regression (ver ../pruebas/Panel_regresion_2026-10-09.md)
 PANEL_TEST_DATABASE_URL=postgresql+psycopg://usuario:clave@127.0.0.1:15432/panel_regression python -m unittest discover tests
 ```
+
+Basta con crear cada base con `schema.sql`: ya incluye las columnas de todas las migraciones. Una base creada con un `schema.sql` anterior al 06/11/2026 no tiene `foto_path` y unas 60 pruebas fallan con `column "foto_path" ... does not exist`; en ese caso aplica también `../database/migracion_croquis_terreno.sql`.
 
 ## Estructura
 

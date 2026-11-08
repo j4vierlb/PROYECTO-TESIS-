@@ -1,0 +1,20 @@
+== Prueba clon limpio 2026-11-06T01:04:39-03:00 ==
+-- docker compose ps
+backend  Up 47 seconds
+db  Up 2 minutes (healthy)
+web  Up 43 seconds
+-- login admin@killbichos.cl: {"access_token":"<oculto>","refresh_token":"<oculto>","token_type":"bearer","expires_in":28800} HTTP 200
+-- login tecnico1@killbichos.cl: {"access_token":"<oculto>","refresh_token":"<oculto>","token_type":"bearer","expires_in":28800} HTTP 200
+-- login clave mala: 401
+-- CORS preflight desde el panel:
+HTTP/1.1 200 OK
+access-control-allow-origin: http://localhost:18080
+-- panel /: 200  /docs: 200
+-- conteos en la base nueva:
+empresas|1
+usuarios|1
+operadores|1
+clientes|2
+visitas|3
+-- errores en el init de la base:
+0

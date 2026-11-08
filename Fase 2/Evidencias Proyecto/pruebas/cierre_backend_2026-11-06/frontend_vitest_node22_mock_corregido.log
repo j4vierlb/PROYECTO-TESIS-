@@ -1,0 +1,47 @@
+Fecha: 2026-11-07T03:06:08+00:00
+v22.23.4
+
+ RUN  v5.0.3 /p/frontend
+
+ ✓ tests/croquis-map.test.js (14 tests) 41ms
+ ✓ tests/api.test.js (18 tests) 109ms
+ ✓ tests/panel-utils.test.js (30 tests) 221ms
+ ✓ tests/public-home-motion.test.jsx (7 tests) 999ms
+   ✓ la insignia de WhatsApp es decorativa, lleva los colores de la marca y no cambia el texto accesible 826ms
+ ✓ tests/brand.test.jsx (4 tests) 1059ms
+   ✓ muestra el logo original con texto accesible en el login 705ms
+ ✓ tests/croquis.test.jsx (16 tests) 1669ms
+   ✓ CRW visor de croquis de solo lectura (16)
+     ✓ CRW01 carga únicamente con GET y no ofrece acciones de modificación 437ms
+     ✓ CRW15 abre croquis desde una visita completada y cierra con Escape 357ms
+ ✓ tests/brand-assets.test.js (2 tests) 14ms
+ ✓ tests/merge-integration.test.jsx (5 tests) 2208ms
+   ✓ mantiene logo, las tres vistas y la bandeja con fechas de Chile 976ms
+   ✓ permite responder en la bandeja y conserva los estados de entrega 613ms
+   ✓ conserva tomar/devolver conversación y el envío manual de recordatorios 368ms
+ ✓ tests/password-recovery.test.jsx (9 tests) 2814ms
+   ✓ permite pedir recuperación desde el login sin enviar contraseña ni sesión 1064ms
+   ✓ no permite guardar si la confirmación no coincide 360ms
+   ✓ valida máximo de bytes UTF8 antes de enviar 451ms
+ ✓ tests/public-home.test.jsx (30 tests) 3151ms
+   ✓ sin sesión muestra la portada, sus servicios y contacto, sin consultar la API 1099ms
+   ✓ con sesión muestra primero la portada y solo entra al panel al pulsar Ingresar 316ms
+ ✓ tests/equipo.test.jsx (5 tests) 3403ms
+   ✓ Equipo: gestión de técnicos desde el panel (5)
+     ✓ lista activos e inactivos y cuenta solo los activos 1072ms
+     ✓ crea un técnico con la clave inicial y lo muestra en la lista 1027ms
+     ✓ no envía una clave corta y muestra el error del servidor si el correo ya existe 643ms
+     ✓ edita solo lo que cambió, deja el correo fijo y permite una clave nueva 411ms
+ ✓ tests/panel.test.jsx (34 tests) 7519ms
+   ✓ Regresión del panel: interacción con el formulario y respuestas API (30)
+     ✓ crea clientes manuales sin exigir coordenadas 1779ms
+     ✓ crea un cliente de Viña del Mar por dirección y muestra el punto devuelto por la API 743ms
+     ✓ crea un cliente de Concepción por dirección y muestra el punto devuelto por la API 511ms
+     ✓ muestra la ubicación devuelta por el servidor sin pedir números al usuario 357ms
+     ✓ si falla el guardado conserva la dirección y permite reintentar 340ms
+
+ Test Files  12 passed (12)
+      Tests  174 passed (174)
+   Start at  03:06:09
+   Duration  12.90s (tests 43%, environment 40%, setup 7%, transform 6%, import 4%)
+

@@ -1,0 +1,286 @@
+Fecha: 2026-11-06T04:06:36+00:00
+v22.23.4
+
+ RUN  v5.0.3 /p/frontend
+
+ ✓ tests/panel-utils.test.js (30 tests) 74ms
+ ✓ tests/api.test.js (18 tests) 73ms
+ ✓ tests/croquis-map.test.js (14 tests) 24ms
+ ✓ tests/public-home-motion.test.jsx (7 tests) 1040ms
+   ✓ la insignia de WhatsApp es decorativa, lleva los colores de la marca y no cambia el texto accesible 882ms
+ ✓ tests/brand.test.jsx (4 tests) 1121ms
+   ✓ muestra el logo original con texto accesible en el login 711ms
+ ✓ tests/brand-assets.test.js (2 tests) 14ms
+ ✓ tests/merge-integration.test.jsx (5 tests) 2374ms
+   ✓ mantiene logo, las tres vistas y la bandeja con fechas de Chile 1132ms
+   ✓ permite responder en la bandeja y conserva los estados de entrega 589ms
+   ✓ conserva tomar/devolver conversación y el envío manual de recordatorios 386ms
+ ❯ tests/croquis.test.jsx (16 tests | 1 failed) 2581ms
+   ❯ CRW visor de croquis de solo lectura (16)
+     ✓ CRW01 carga únicamente con GET y no ofrece acciones de modificación 558ms
+     ✓ CRW02 conserva retiradas y distingue propuestas IA 103ms
+     ✓ CRW03 croquis inexistente no se crea automáticamente 48ms
+     ✓ CRW04 informa permisos insuficientes sin mostrar trampas 40ms
+     ✓ CRW05 maneja un croquis vacío 51ms
+     ✓ CRW06 mantiene el listado y fotos si Google Maps falla 97ms
+     ✓ CRW07 no inventa ubicaciones ni carga Maps sin coordenadas 32ms
+     × CRW08 muestra una foto autenticada como blob y la libera al cerrar 1017ms
+     ✓ CRW09 foto responde 403 44ms
+     ✓ CRW09 foto responde 404 26ms
+     ✓ CRW10 sincroniza selección en listado y mapa 133ms
+     ✓ CRW11 actualizar vuelve a leer sin escribir 65ms
+     ✓ CRW12 aborta cargas antiguas al cambiar de visita 3ms
+     ✓ CRW13 rechaza respuestas de otra visita 16ms
+     ✓ CRW14 sesión vencida en una foto expira la sesión del panel 15ms
+     ✓ CRW15 abre croquis desde una visita completada y cierra con Escape 328ms
+ ✓ tests/password-recovery.test.jsx (9 tests) 2963ms
+   ✓ permite pedir recuperación desde el login sin enviar contraseña ni sesión 1166ms
+   ✓ no permite guardar si la confirmación no coincide 353ms
+   ✓ valida máximo de bytes UTF8 antes de enviar 456ms
+ ✓ tests/public-home.test.jsx (30 tests) 3306ms
+   ✓ sin sesión muestra la portada, sus servicios y contacto, sin consultar la API 1151ms
+   ✓ con sesión muestra primero la portada y solo entra al panel al pulsar Ingresar 303ms
+ ✓ tests/equipo.test.jsx (5 tests) 3522ms
+   ✓ Equipo: gestión de técnicos desde el panel (5)
+     ✓ lista activos e inactivos y cuenta solo los activos 1086ms
+     ✓ crea un técnico con la clave inicial y lo muestra en la lista 1067ms
+     ✓ no envía una clave corta y muestra el error del servidor si el correo ya existe 733ms
+     ✓ edita solo lo que cambió, deja el correo fijo y permite una clave nueva 391ms
+ ✓ tests/panel.test.jsx (34 tests) 7639ms
+   ✓ Regresión del panel: interacción con el formulario y respuestas API (30)
+     ✓ crea clientes manuales sin exigir coordenadas 1801ms
+     ✓ crea un cliente de Viña del Mar por dirección y muestra el punto devuelto por la API 847ms
+     ✓ crea un cliente de Concepción por dirección y muestra el punto devuelto por la API 535ms
+     ✓ muestra la ubicación devuelta por el servidor sin pedir números al usuario 338ms
+     ✓ si falla el guardado conserva la dirección y permite reintentar 331ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/croquis.test.jsx > CRW visor de croquis de solo lectura > CRW08 muestra una foto autenticada como blob y la libera al cerrar
+TestingLibraryElementError: Unable to find role="img" and name `/Foto de la trampa T-01/`
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="croquis-viewer"
+    >
+      <p
+        class="muted"
+      >
+        Cliente QA
+         · Solo lectura. Las trampas se gestionan desde la app del técnico.
+      </p>
+      <div
+        class="croquis-summary"
+      >
+        <span>
+          Versión 
+          2
+           · 
+          1
+           trampas
+        </span>
+        <span>
+          Validado por el técnico
+        </span>
+        <button
+          class="secondary"
+          type="button"
+        >
+          Actualizar croquis
+        </button>
+      </div>
+      <p
+        class="field-help"
+      >
+        Verde: confirmada · Amarillo: IA sin confirmar · Azul: sin confirmar · Naranja: revisar · Gris tenue: retirada.
+      </p>
+      <section
+        aria-label="Ubicación de trampas"
+        class="croquis-map-section"
+      >
+        <div
+          aria-label="Mapa satelital del croquis"
+          class="croquis-map "
+        />
+      </section>
+      <div
+        class="croquis-details"
+      >
+        <section
+          aria-label="Trampas del croquis"
+          class="trap-list"
+        >
+          <button
+            aria-pressed="true"
+            class="trap-item confirmed"
+            type="button"
+          >
+            <strong>
+              T-01
+            </strong>
+            <span>
+              Confirmada
+            </span>
+            <small>
+              cebadero
+               · 
+              Con foto
+            </small>
+          </button>
+        </section>
+        <section
+          aria-label="Detalle de T-01"
+          class="trap-detail"
+        >
+          <h3>
+            T-01
+          </h3>
+          <p>
+            Confirmada
+          </p>
+          <p
+            class="field-help"
+          >
+            -33.450000, -70.660000
+          </p>
+          <p
+            class="error"
+            role="alert"
+          >
+            No se pudo conectar con el servidor. Comprueba tu conexión e intenta nuevamente.
+          </p>
+          <button
+            class="secondary"
+            type="button"
+          >
+            Reintentar foto
+          </button>
+        </section>
+      </div>
+    </div>
+  </div>
+</body>
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="croquis-viewer"
+    >
+      <p
+        class="muted"
+      >
+        Cliente QA
+         · Solo lectura. Las trampas se gestionan desde la app del técnico.
+      </p>
+      <div
+        class="croquis-summary"
+      >
+        <span>
+          Versión 
+          2
+           · 
+          1
+           trampas
+        </span>
+        <span>
+          Validado por el técnico
+        </span>
+        <button
+          class="secondary"
+          type="button"
+        >
+          Actualizar croquis
+        </button>
+      </div>
+      <p
+        class="field-help"
+      >
+        Verde: confirmada · Amarillo: IA sin confirmar · Azul: sin confirmar · Naranja: revisar · Gris tenue: retirada.
+      </p>
+      <section
+        aria-label="Ubicación de trampas"
+        class="croquis-map-section"
+      >
+        <div
+          aria-label="Mapa satelital del croquis"
+          class="croquis-map "
+        />
+      </section>
+      <div
+        class="croquis-details"
+      >
+        <section
+          aria-label="Trampas del croquis"
+          class="trap-list"
+        >
+          <button
+            aria-pressed="true"
+            class="trap-item confirmed"
+            type="button"
+          >
+            <strong>
+              T-01
+            </strong>
+            <span>
+              Confirmada
+            </span>
+            <small>
+              cebadero
+               · 
+              Con foto
+            </small>
+          </button>
+        </section>
+        <section
+          aria-label="Detalle de T-01"
+          class="trap-detail"
+        >
+          <h3>
+            T-01
+          </h3>
+          <p>
+            Confirmada
+          </p>
+          <p
+            class="field-help"
+          >
+            -33.450000, -70.660000
+          </p>
+          <p
+            class="error"
+            role="alert"
+          >
+            No se pudo conectar con el servidor. Comprueba tu conexión e intenta nuevamente.
+          </p>
+          <button
+            class="secondary"
+            type="button"
+          >
+            Reintentar foto
+          </button>
+        </section>
+      </div>
+    </div>
+  </div>
+</body>
+ ❯ waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ tests/croquis.test.jsx:82:25
+     80|     body = data([trap({ foto_url: `/dispositivos-trampa/${trap().id}/f…
+     81|     const { unmount } = render(<CroquisViewer visit={visit} />)
+     82|     expect(await screen.findByRole('img', { name: /Foto de la trampa T…
+       |                         ^
+     83|     const [url, options] = fetch.mock.calls.find(([url]) => url.includ…
+     84|     expect(url).not.toContain('token')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 11 passed (12)
+      Tests  1 failed | 173 passed (174)
+   Start at  04:06:37
+   Duration  10.72s (tests 44%, environment 40%, transform 6%, setup 6%, import 4%)
+

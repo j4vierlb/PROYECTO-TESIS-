@@ -1,0 +1,146 @@
+The files belonging to this database system will be owned by user "postgres".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "en_US.utf8".
+The default database encoding has accordingly been set to "UTF8".
+The default text search configuration will be set to "english".
+
+Data page checksums are disabled.
+
+fixing permissions on existing directory /var/lib/postgresql/data ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default max_connections ... 100
+selecting default shared_buffers ... 128MB
+selecting default time zone ... Etc/UTC
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+initdb: warning: enabling "trust" authentication for local connections
+initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+syncing data to disk ... ok
+
+
+Success. You can now start the database server using:
+
+    pg_ctl -D /var/lib/postgresql/data -l logfile start
+
+waiting for server to start....2026-11-06 04:02:17.260 UTC [83] LOG:  starting PostgreSQL 16.4 (Debian 16.4-1.pgdg110+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 10.2.1-6) 10.2.1 20210110, 64-bit
+2026-11-06 04:02:17.418 UTC [83] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-11-06 04:02:17.911 UTC [86] LOG:  database system was shut down at 2026-11-06 04:01:53 UTC
+.2026-11-06 04:02:18.123 UTC [83] LOG:  database system is ready to accept connections
+ done
+server started
+CREATE DATABASE
+
+
+/usr/local/bin/docker-entrypoint.sh: sourcing /docker-entrypoint-initdb.d/10_postgis.sh
+CREATE DATABASE
+Loading PostGIS extensions into template_postgis
+CREATE EXTENSION
+CREATE EXTENSION
+You are now connected to database "template_postgis" as user "killbichos".
+CREATE EXTENSION
+CREATE EXTENSION
+Loading PostGIS extensions into killbichos
+CREATE EXTENSION
+CREATE EXTENSION
+You are now connected to database "killbichos" as user "killbichos".
+CREATE EXTENSION
+CREATE EXTENSION
+
+/usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/1_schema.sql
+CREATE EXTENSION
+psql:/docker-entrypoint-initdb.d/1_schema.sql:6: NOTICE:  extension "postgis" already exists, skipping
+CREATE EXTENSION
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+
+
+/usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/2_seed.sql
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 2
+INSERT 0 1
+INSERT 0 3
+INSERT 0 1
+INSERT 0 1
+INSERT 0 3
+
+
+/usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/3_demo_historial.sql
+INSERT 0 2
+INSERT 0 2
+INSERT 0 5
+
+
+/usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/4_migracion_message_sid.sql
+psql:/docker-entrypoint-initdb.d/4_migracion_message_sid.sql:10: NOTICE:  column "message_sid" of relation "mensajes_whatsapp" already exists, skipping
+ALTER TABLE
+
+
+/usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/5_migracion_croquis_terreno.sql
+ALTER TABLE
+CREATE INDEX
+CREATE INDEX
+
+
+/usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/6_migracion_whatsapp_saliente.sql
+psql:/docker-entrypoint-initdb.d/6_migracion_whatsapp_saliente.sql:20: NOTICE:  column "atendida_por_humano" of relation "conversaciones_whatsapp" already exists, skipping
+ALTER TABLE
+psql:/docker-entrypoint-initdb.d/6_migracion_whatsapp_saliente.sql:22: NOTICE:  column "atendida_por_humano_desde" of relation "conversaciones_whatsapp" already exists, skipping
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+psql:/docker-entrypoint-initdb.d/6_migracion_whatsapp_saliente.sql:28: NOTICE:  column "estado_entrega" of relation "mensajes_whatsapp" already exists, skipping
+ALTER TABLE
+psql:/docker-entrypoint-initdb.d/6_migracion_whatsapp_saliente.sql:29: NOTICE:  column "error_entrega" of relation "mensajes_whatsapp" already exists, skipping
+ALTER TABLE
+psql:/docker-entrypoint-initdb.d/6_migracion_whatsapp_saliente.sql:31: NOTICE:  column "recordatorio_enviado_at" of relation "visitas" already exists, skipping
+ALTER TABLE
+
+
+/usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/7_migracion_sesion_tecnicos.sql
+psql:/docker-entrypoint-initdb.d/7_migracion_sesion_tecnicos.sql:12: NOTICE:  column "session_version" of relation "operadores" already exists, skipping
+ALTER TABLE
+
+
+2026-11-06 04:03:39.040 UTC [83] LOG:  received fast shutdown request
+waiting for server to shut down....2026-11-06 04:03:39.216 UTC [83] LOG:  aborting any active transactions
+2026-11-06 04:03:39.217 UTC [83] LOG:  background worker "logical replication launcher" (PID 89) exited with exit code 1
+2026-11-06 04:03:39.217 UTC [84] LOG:  shutting down
+2026-11-06 04:03:39.371 UTC [84] LOG:  checkpoint starting: shutdown immediate
+...........2026-11-06 04:03:50.496 UTC [84] LOG:  checkpoint complete: wrote 4578 buffers (27.9%); 0 WAL file(s) added, 0 removed, 2 recycled; write=0.573 s, sync=9.666 s, total=11.279 s; sync files=1018, longest=1.863 s, average=0.010 s; distance=35755 kB, estimate=35755 kB; lsn=0/37D18F8, redo lsn=0/37D18F8
+2026-11-06 04:03:50.503 UTC [83] LOG:  database system is shut down
+ done
+server stopped
+
+PostgreSQL init process complete; ready for start up.
+
+2026-11-06 04:03:50.893 UTC [1] LOG:  starting PostgreSQL 16.4 (Debian 16.4-1.pgdg110+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 10.2.1-6) 10.2.1 20210110, 64-bit
+2026-11-06 04:03:50.927 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2026-11-06 04:03:50.927 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2026-11-06 04:03:51.244 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-11-06 04:03:51.544 UTC [249] LOG:  database system was shut down at 2026-11-06 04:03:50 UTC
+2026-11-06 04:03:51.689 UTC [1] LOG:  database system is ready to accept connections
+2026-11-06 04:05:48.708 UTC [495] ERROR:  column c.telefono does not exist at character 74
+2026-11-06 04:05:48.708 UTC [495] STATEMENT:  select m.created_at at time zone 'America/Santiago' as hora_chile, right(c.telefono,4) as tel, m.emisor, coalesce(m.message_sid,'-') as message_sid, coalesce(m.intencion_detectada,'-') as intencion, left(m.contenido,60) as contenido from mensajes_whatsapp m join conversaciones_whatsapp cw on cw.id=m.conversacion_id join clientes c on c.id=cw.cliente_id where m.created_at > now() - interval '30 minutes' order by m.created_at
+2026-11-06 04:05:54.131 UTC [518] ERROR:  column c.whatsapp does not exist at character 102
+2026-11-06 04:05:54.131 UTC [518] STATEMENT:  select to_char(m.created_at at time zone 'America/Santiago','DD/MM HH24:MI:SS') as hora_chile, right(c.whatsapp,4) as tel, m.emisor, coalesce(m.message_sid,'-') as message_sid, coalesce(m.intencion_detectada,'-') as intencion, left(m.contenido,58) as contenido from mensajes_whatsapp m join conversaciones_whatsapp cw on cw.id=m.conversacion_id join clientes c on c.id=cw.cliente_id where m.created_at > now() - interval '30 minutes' order by m.created_at

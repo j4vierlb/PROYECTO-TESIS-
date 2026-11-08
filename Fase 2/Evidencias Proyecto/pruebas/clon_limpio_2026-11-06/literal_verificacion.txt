@@ -1,0 +1,20 @@
+== Clon limpio literal 2026-11-07T03:14:20+00:00 (daemon Docker nuevo, puertos por defecto) ==
+-- docker compose ps
+backend  Up 16 seconds  0.0.0.0:8000->8000/tcp, :::8000->8000/tcp
+db  Up About a minute (healthy)  0.0.0.0:5432->5432/tcp, :::5432->5432/tcp
+web  Up 13 seconds  0.0.0.0:8080->80/tcp, [::]:8080->80/tcp
+-- volúmenes: killbichos_db_data killbichos_uploads_data 
+-- login admin@killbichos.cl: {"access_token":"<oculto>","refresh_token":"<oculto>","token_type":"bearer","expires_in":28800} HTTP 200
+-- login tecnico1@killbichos.cl: {"access_token":"<oculto>","refresh_token":"<oculto>","token_type":"bearer","expires_in":28800} HTTP 200
+-- login clave mala: 401
+-- CORS desde http://localhost:8080:
+HTTP/1.1 200 OK
+access-control-allow-origin: http://localhost:8080
+-- panel http://localhost:8080/: 200  API /docs: 200  base 5432: accepting connections
+-- conteos:
+empresas|1
+usuarios|1
+operadores|1
+clientes|2
+visitas|3
+-- scripts de inicio ejecutados: 7  errores: 0

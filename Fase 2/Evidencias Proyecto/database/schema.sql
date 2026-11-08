@@ -153,6 +153,7 @@ CREATE TABLE dispositivos_trampa (
     sugerido_por_ia  BOOLEAN NOT NULL DEFAULT FALSE,
     confirmado       BOOLEAN NOT NULL DEFAULT FALSE,
     estado           VARCHAR(20) NOT NULL DEFAULT 'activo' CHECK (estado IN ('activo', 'retirado', 'revisar')),
+    foto_path        TEXT, -- ruta de la foto de referencia en el servidor (no la imagen)
     created_at       TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -164,3 +165,7 @@ CREATE INDEX idx_dispositivos_ubicacion  ON dispositivos_trampa USING GIST (ubic
 CREATE INDEX idx_visitas_operador_fecha  ON visitas (operador_id, fecha_hora);
 CREATE INDEX idx_visitas_cliente         ON visitas (cliente_id);
 CREATE INDEX idx_mensajes_conversacion   ON mensajes_whatsapp (conversacion_id, created_at);
+-- Una visita tiene a lo más un croquis y, dentro de un croquis, cada código
+-- de trampa es único (reintentos de la app no duplican nada).
+CREATE UNIQUE INDEX uq_croquis_visita ON croquis (visita_id) WHERE visita_id IS NOT NULL;
+CREATE UNIQUE INDEX uq_dispositivos_croquis_codigo ON dispositivos_trampa (croquis_id, codigo);

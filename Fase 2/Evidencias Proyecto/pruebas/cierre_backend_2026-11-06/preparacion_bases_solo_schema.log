@@ -1,0 +1,9 @@
+panel_regression <- solo schema.sql: exit 0
+croquis_regression <- solo schema.sql: exit 0
+orden_compose <- schema.sql: exit 0
+orden_compose <- seed.sql: exit 0
+orden_compose <- demo_historial.sql: exit 0
+orden_compose <- migracion_message_sid.sql: exit 0
+orden_compose <- migracion_croquis_terreno.sql: exit 0
+orden_compose <- migracion_whatsapp_saliente.sql: exit 0
+orden_compose <- migracion_sesion_tecnicos.sql: exit 0

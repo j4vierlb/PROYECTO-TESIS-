@@ -1,0 +1,42 @@
+# Caso 8 — 2026-11-06T01:06:12-03:00 — OPENAI_API_KEY vacía, firma de Twilio activa
+
+firmado | *********1111 | 'Hola, quiero agendar mañana a las 10'
+  -> HTTP 200: <?xml version="1.0" encoding="UTF-8"?><Response><Message action="http://localhost:18000/webhooks/whatsapp/estado?mensaje_id=37807c8b-b03f-41d4-8975-821c1543a496" method="POST">Gracias por escribirnos 😊 Un operador te contactará pronto para ayudarte.</Message></Response>
+firmado | *********0008 | 'Hola, ¿qué servicios tienen?'
+  -> HTTP 200: <?xml version="1.0" encoding="UTF-8"?><Response><Message action="http://localhost:18000/webhooks/whatsapp/estado?mensaje_id=3db93988-b98b-4915-97d9-4d6554a3eb6f" method="POST">Gracias por escribirnos 😊 Un operador te contactará pronto para ayudarte.</Message></Response>
+firmado | *********0008 | 'Quiero agendar hoy a las 17:00 en Av. Macul 1234, Macul'
+  -> HTTP 200: <?xml version="1.0" encoding="UTF-8"?><Response><Message action="http://localhost:18000/webhooks/whatsapp/estado?mensaje_id=0b2c6130-ab01-4ff1-858b-ade022efd32e" method="POST">Gracias por escribirnos 😊 Un operador te contactará pronto para ayudarte.</Message></Response>
+SIN firma | *********0008 | 'Mensaje sin firma'
+  -> HTTP 403: {"detail":"Firma de Twilio inválida"}
+
+# Visitas en la base: 3 antes, 3 después
+
+# mensajes_whatsapp (las 3 primeras filas son del seed.sql)
+   hora_chile   | tel  |  emisor   | message_sid  |     intencion     |                          contenido                          
+----------------+------+-----------+--------------+-------------------+-------------------------------------------------------------
+ 06/11 01:03:37 | 1111 | cliente   | -            | confirmar_horario | El jueves a las 10 está bien
+ 06/11 01:03:37 | 1111 | agente_ia | -            | -                 | Claro, tengo disponibilidad el jueves a las 10:00 o el vie
+ 06/11 01:03:37 | 1111 | cliente   | -            | agendar_visita    | Hola, necesito agendar una visita de control de plagas
+ 06/11 01:05:37 | 1111 | cliente   | SM-caso8-001 | -                 | Hola, quiero agendar mañana a las 10
+ 06/11 01:05:37 | 1111 | agente_ia | -            | -                 | Gracias por escribirnos 😊 Un operador te contactará pronto
+ 06/11 01:05:37 | 0008 | cliente   | SM-caso8-002 | -                 | Hola, ¿qué servicios tienen?
+ 06/11 01:05:37 | 0008 | agente_ia | -            | -                 | Gracias por escribirnos 😊 Un operador te contactará pronto
+ 06/11 01:05:37 | 0008 | cliente   | SM-caso8-003 | -                 | Quiero agendar hoy a las 17:00 en Av. Macul 1234, Macul
+ 06/11 01:05:37 | 0008 | agente_ia | -            | -                 | Gracias por escribirnos 😊 Un operador te contactará pronto
+(9 rows)
+
+
+# Log del backend
+ERROR:     app.routers.whatsapp - Falló el agente de IA (MessageSid=SM-caso8-001)
+--
+RuntimeError: OPENAI_API_KEY no está configurada
+INFO:     127.0.0.1:44322 - "POST /webhooks/whatsapp HTTP/1.1" 200 OK
+ERROR:     app.routers.whatsapp - Falló el agente de IA (MessageSid=SM-caso8-002)
+--
+RuntimeError: OPENAI_API_KEY no está configurada
+INFO:     127.0.0.1:44338 - "POST /webhooks/whatsapp HTTP/1.1" 200 OK
+ERROR:     app.routers.whatsapp - Falló el agente de IA (MessageSid=SM-caso8-003)
+--
+RuntimeError: OPENAI_API_KEY no está configurada
+INFO:     127.0.0.1:44354 - "POST /webhooks/whatsapp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44362 - "POST /webhooks/whatsapp HTTP/1.1" 403 Forbidden
