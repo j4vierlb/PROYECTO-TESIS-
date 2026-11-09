@@ -503,6 +503,8 @@ SUGGESTION_SEARCH_DAYS = 7
 _ACTIVE_VISIT_STATES = "('agendada', 'reagendada')"
 
 
+# Excepción propia: se lanza cuando no se puede agendar. Lleva, si existe, un
+# horario alternativo para ofrecérselo al cliente.
 class HorarioNoDisponible(Exception):
     """El horario pedido no se puede agendar. Si se encontró uno libre
     cercano, viene en `sugerencia` (UTC) para ofrecérselo al cliente."""
@@ -549,6 +551,25 @@ def fetch_or_create_whatsapp_client(
     )
     db.commit()
     return dict(db.execute(select_sql, {"phone": phone}).mappings().one())
+
+
+def count_client_visits(db: Connection, cliente_id: UUID) -> int:
+    """Cuántas visitas tiene el cliente en total (cualquier estado). Si es 0,
+    es su primer agendamiento y hay que pedirle su nombre real."""
+    return db.execute(
+        text("SELECT COUNT(*) FROM visitas WHERE cliente_id = :cliente_id"),
+        {"cliente_id": str(cliente_id)},
+    ).scalar_one()
+
+
+def update_whatsapp_client_name(db: Connection, cliente_id: UUID, nombre: str) -> None:
+    """Guarda el nombre real que el cliente entregó por WhatsApp (reemplaza al
+    nombre de perfil o a 'Cliente WhatsApp +569...')."""
+    db.execute(
+        text("UPDATE clientes SET nombre = :nombre WHERE id = :cliente_id"),
+        {"nombre": nombre[:150], "cliente_id": str(cliente_id)},
+    )
+    db.commit()
 
 
 def update_whatsapp_client_address(db: Connection, cliente_id: UUID, address: str) -> None:
@@ -848,6 +869,8 @@ def _is_within_business_hours(fecha_hora: datetime) -> bool:
     }
     open_time = time.fromisoformat(settings.killbichos_open_time)
     close_time = time.fromisoformat(settings.killbichos_close_time)
+    # weekday(): lunes = 0 ... domingo = 6. La hora de cierre NO se incluye
+    # (es 'menor que', no 'menor o igual').
     return local_dt.weekday() in operating_days and open_time <= local_dt.time() < close_time
 
 
@@ -872,6 +895,10 @@ def _configured_operator_id(db: Connection, empresa_id: UUID) -> str | None:
     return configured
 
 
+# La consulta SQL de abajo: toma los técnicos activos de la empresa, cuenta sus
+# visitas del día (LEFT JOIN + COUNT), descarta a los que ya tienen otra visita
+# a menos de VISIT_MARGIN (NOT EXISTS) y ordena por menos visitas primero
+# (ORDER BY COUNT). Así el trabajo se reparte parejo entre los técnicos.
 def _find_available_operator(
     db: Connection, empresa_id: UUID, fecha_hora: datetime, fixed_operator_id: str | None
 ) -> UUID | None:
@@ -920,6 +947,8 @@ def _find_next_available_slot(
     horario de atención y tenga un operador libre. Busca hasta
     SUGGESTION_SEARCH_DAYS días; devuelve None si no encuentra (en UTC)."""
     start = max(desde, datetime.now(UTC)).astimezone(SANTIAGO)
+    # Prueba hora en punto por hora (desde la siguiente) hasta encontrar una dentro
+    # del horario de atención y con un técnico libre.
     candidate = start.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
     limit = start + timedelta(days=SUGGESTION_SEARCH_DAYS)
     while candidate <= limit:
@@ -955,8 +984,12 @@ def create_whatsapp_visit(
         {"cliente_id": str(cliente_id), "fecha_hora": fecha_hora},
     ).mappings().first()
     if existing:
+        # Idempotencia: si el cliente repite la confirmación no se crea otra visita;
+        # se devuelve la que ya existía, con created=False.
         return {**dict(existing), "created": False}
 
+    # Dos filtros antes de insertar: 1) dentro del horario de atención y 2) que haya
+    # un técnico libre. Si falla alguno se lanza HorarioNoDisponible con una alternativa.
     fixed_operator_id = _configured_operator_id(db, empresa_id)
     if not _is_within_business_hours(fecha_hora):
         raise HorarioNoDisponible(

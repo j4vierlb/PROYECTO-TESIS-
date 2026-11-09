@@ -19,15 +19,24 @@ import httpx
 
 from app.config import settings
 
+# El logger deja avisos y errores escritos en la consola del backend
+# (se ven con: docker compose logs backend). Es mejor que usar print().
 logger = logging.getLogger(__name__)
+# Zona horaria de Chile. La IA necesita saber qué hora es allá para
+# convertir frases como 'mañana' o 'el viernes' en una fecha real.
 SANTIAGO = ZoneInfo("America/Santiago")
 
 OPENAI_URL = "https://api.openai.com/v1/chat/completions"
 MAX_WHATSAPP_CHARS = 1600  # máximo que acepta WhatsApp por mensaje
 MAX_INTENT_CHARS = 50      # largo de mensajes_whatsapp.intencion_detectada
+# Las únicas dos cosas que dejamos hacer a la IA: solo responder, o pedir
+# que se cree una visita. Cualquier otra acción se descarta más abajo.
 VALID_ACTIONS = {"reply", "create_appointment"}
 DIAS = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
 
+# El 'prompt del sistema' son las instrucciones fijas que se le dan a la IA
+# antes de cada conversación: quién es, qué reglas tiene y en qué formato
+# debe contestar. Aquí es donde se le ordena devolver siempre un JSON.
 SYSTEM_PROMPT = """
 Eres el agente conversacional de Kill Bichos, empresa chilena de control de plagas.
 Tu trabajo es atender clientes por WhatsApp de forma amable, breve y natural.
@@ -45,6 +54,10 @@ Reglas:
   tienes su dirección, usa action=create_appointment con esa fecha y hora: el sistema la valida
   y, si no se puede, le ofrece automáticamente el horario libre más cercano. Esto aplica aunque
   en mensajes anteriores de la conversación se haya respondido distinto.
+- Antes de crear la PRIMERA visita de un cliente (el contexto indica "Visitas previas: 0") necesitas su
+  nombre real. El nombre registrado puede ser solo su nombre de perfil de WhatsApp o "Cliente WhatsApp",
+  así que pregúntalo siempre ("¿Me indicas tu nombre completo?") y no agendes hasta que lo entregue.
+  Cuando lo dé, devuélvelo en client_name. Si el cliente ya tiene visitas previas no se lo vuelvas a pedir.
 - Antes de crear una visita, necesitas la dirección del cliente. Si no está registrada y el cliente quiere agendar, pregunta por ella.
 - Atendemos en cualquier lugar de Chile. Pide la dirección completa: calle, número y comuna o ciudad
   (por ejemplo "Av. Libertad 1000, Viña del Mar"). Si el cliente la da sin comuna o ciudad, vuelve a
@@ -53,12 +66,13 @@ Reglas:
 - Para consultas generales responde directamente sin inventar precios, horarios comerciales o servicios no indicados.
 - Si el cliente pide cancelar/reagendar, no ejecutes cambios todavía: indícale que un operador debe confirmar la modificación.
 - Devuelve SIEMPRE JSON válido con exactamente estas claves:
-  action, intent, reply, appointment_datetime, client_address, notes
+  action, intent, reply, appointment_datetime, client_address, client_name, notes
 
 Valores permitidos para action: reply, create_appointment.
 intent debe ser una cadena corta como consulta, agendar_visita, confirmar_horario, reagendar, cancelar.
 appointment_datetime debe ser ISO 8601 con zona horaria de Chile (ej: 2026-10-01T10:00:00-03:00) si action=create_appointment; en otro caso null.
 client_address debe contener la dirección entregada por el cliente si existe; si no, usa null.
+client_name debe contener el nombre real que el cliente entregó en la conversación; si no lo ha dado, usa null.
 notes debe ser texto breve o null.
 """
 
@@ -88,6 +102,8 @@ def _business_hours_text() -> str:
 
 def _extract_json(text: str) -> dict:
     """Obtiene el objeto JSON de la respuesta, aunque venga envuelto en ```."""
+    # Busca la primera '{' y la última '}'. A veces el modelo agrega texto o
+    # comillas ``` alrededor del JSON; así nos quedamos solo con el JSON.
     start, end = text.find("{"), text.rfind("}")
     if start == -1 or end == -1:
         raise ValueError("La IA no devolvió JSON")
@@ -105,6 +121,8 @@ def _validate_decision(result: dict) -> dict:
     """Asegura que la respuesta de la IA tenga la forma que el router espera:
     action válida, reply recortado al máximo de WhatsApp e intent acotado al
     largo de la columna en la base de datos."""
+    # Nunca se confía ciegamente en la IA. Si inventa una acción que no
+    # existe, la cambiamos por 'reply' (solo responder), que es lo más seguro.
     action = result.get("action")
     if action not in VALID_ACTIONS:
         logger.warning("La IA devolvió una action inválida: %r", action)
@@ -114,10 +132,13 @@ def _validate_decision(result: dict) -> dict:
     intent = _optional_text(result.get("intent")) or "consulta"
     return {
         "action": action,
+        # Los [:N] recortan el texto a un largo máximo, para no pasarnos del
+        # tamaño de la columna en la base ni del límite de caracteres de WhatsApp.
         "intent": intent[:MAX_INTENT_CHARS],
         "reply": reply[:MAX_WHATSAPP_CHARS],
         "appointment_datetime": _optional_text(result.get("appointment_datetime")),
         "client_address": _optional_text(result.get("client_address")),
+        "client_name": _optional_text(result.get("client_name")),
         "notes": _optional_text(result.get("notes")),
     }
 
@@ -126,6 +147,7 @@ def generate_agent_decision(
     history: list[dict],
     client_name: str,
     client_address: str | None,
+    previous_visits: int | None = None,
 ) -> dict:
     """Llama a OpenAI con el historial y devuelve la decisión ya validada.
 
@@ -137,6 +159,8 @@ def generate_agent_decision(
     if not settings.openai_api_key:
         raise RuntimeError("OPENAI_API_KEY no está configurada")
 
+    # Se le dice a la IA la fecha y hora actual en cada llamada, porque un
+    # modelo de lenguaje no sabe por sí solo qué día es hoy.
     now = datetime.now(SANTIAGO)
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
@@ -145,10 +169,13 @@ def generate_agent_decision(
             "content": (
                 f"Fecha y hora actual en Santiago de Chile: {now.isoformat()} ({DIAS[now.weekday()]}). "
                 f"{_business_hours_text()} "
-                f"Cliente: {client_name}. Dirección registrada: {client_address or 'no registrada'}."
+                f"Cliente: {client_name}. Dirección registrada: {client_address or 'no registrada'}. "
+                f"Visitas previas: {previous_visits if previous_visits is not None else 'desconocido'}."
             ),
         },
     ]
+    # El historial se traduce al formato de OpenAI: lo que escribió el cliente
+    # es 'user' y lo que respondió nuestro bot es 'assistant'.
     for item in history:
         messages.append({
             "role": "user" if item["emisor"] == "cliente" else "assistant",
@@ -162,7 +189,11 @@ def generate_agent_decision(
     payload = {
         "model": settings.openai_model,
         "messages": messages,
+        # temperature baja (0.2) = respuestas más predecibles y menos 'creativas'.
+        # Para agendar visitas queremos consistencia, no inventiva.
         "temperature": 0.2,
+        # Obliga al modelo a contestar con un JSON válido, para poder leerlo
+        # desde el código sin adivinar.
         "response_format": {"type": "json_object"},
     }
     headers = {
@@ -170,8 +201,12 @@ def generate_agent_decision(
         "Content-Type": "application/json",
     }
 
+    # timeout=30: si OpenAI no responde en 30 segundos se corta el intento y
+    # el router le manda al cliente el mensaje de contingencia.
     with httpx.Client(timeout=30) as client:
         response = client.post(OPENAI_URL, json=payload, headers=headers)
+        # Si OpenAI devolvió un error (401, 429, 500...), esto lanza una excepción
+        # en vez de seguir como si nada hubiera pasado.
         response.raise_for_status()
         data = response.json()
 

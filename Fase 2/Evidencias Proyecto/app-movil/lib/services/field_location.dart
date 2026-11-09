@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 
+// Configura cómo se pide el GPS. En Android se usa el GPS 'puro' del teléfono
+// (alta precisión, 20 s de límite) y, si falla, se puede probar por red (menos
+// precisa, 10 s). En iPhone se usa siempre alta precisión.
 LocationSettings fieldLocationSettings({bool networkFallback = false}) {
   // GPS nativo: no exige activar el servicio adicional Google Location Accuracy.
   if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
@@ -18,8 +21,11 @@ LocationSettings fieldLocationSettings({bool networkFallback = false}) {
   );
 }
 
+// A qué pantalla de ajustes mandar al técnico cuando falta algo: la del teléfono
+// (GPS apagado) o la de la app (permiso de ubicación negado).
 enum LocationSettingsTarget { device, application }
 
+// Error propio, con un mensaje en español listo para mostrarle al técnico.
 class FieldLocationException implements Exception {
   final String message;
   final LocationSettingsTarget? settings;
@@ -59,6 +65,8 @@ class FieldLocation {
              locationSettings: fieldLocationSettings(networkFallback: true),
            ));
 
+  // Pide la ubicación en pasos: 1) ¿el GPS está encendido? 2) ¿hay permiso? (si no,
+  // se pide) 3) leer la posición. Cada falla lanza un mensaje claro para el técnico.
   Future<Position> current({bool networkFallback = false}) async {
     if (!await serviceEnabled()) {
       throw const FieldLocationException(

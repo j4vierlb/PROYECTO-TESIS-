@@ -30,6 +30,8 @@ const statuses = {
 
 // Cancela cargas antiguas al navegar: una respuesta lenta no reemplaza el día actual.
 function useResource(paths) {
+  // Las rutas se convierten a texto para poder compararlas: así el efecto solo
+  // se vuelve a ejecutar si cambian de verdad (y no en cada repintado).
   const key = JSON.stringify(paths)
   const [data, setData] = useState([]), [loading, setLoading] = useState(true)
   const [error, setError] = useState(''), [revision, setRevision] = useState(0)
@@ -45,10 +47,15 @@ function useResource(paths) {
   return { data, loading, error, reload: () => setRevision(value => value + 1) }
 }
 
+// Muestra un mensaje de error (rojo) o de éxito (verde). role='alert' hace que
+// los lectores de pantalla lo anuncien a quien no ve la pantalla.
 function Feedback({ error, success }) {
   return <>{error && <div className="error" role="alert">{error}</div>}{success && <div className="success" role="status">{success}</div>}</>
 }
 
+// Ventana emergente reutilizable (la usan agenda, clientes, equipo y croquis).
+// Cuida la accesibilidad: el foco queda atrapado dentro con la tecla Tab, se
+// cierra con Escape y, al cerrarse, devuelve el foco al elemento anterior.
 function Modal({ title, busy, onClose, onSubmit = event => event.preventDefault(), children, wide = false }) {
   const form = useRef(null)
   useEffect(() => {
@@ -74,9 +81,14 @@ function Modal({ title, busy, onClose, onSubmit = event => event.preventDefault(
   </form></div>
 }
 
+// Pantalla de inicio de sesión. Manda usuario y clave a POST /auth/login y guarda
+// el token en localStorage. Después prueba GET /panel/operadores: si ese permiso
+// falla (por ejemplo, un técnico intentando entrar al panel), borra el token.
 function Login({ onLogin, notice, onForgot, onHome }) {
   const [form, setForm] = useState({ usuario: '', clave: '' }), [error, setError] = useState(''), [busy, setBusy] = useState(false)
   const submitting = useRef(false)
+  // Si el login se queda 5 minutos sin actividad, vuelve a la portada (hook
+  // useLoginIdle). Se pausa mientras se está enviando el formulario (busy).
   useLoginIdle(onHome, busy)
   async function submit(event) {
     event.preventDefault()
@@ -106,10 +118,17 @@ function Login({ onLogin, notice, onForgot, onHome }) {
   </div></main>
 }
 
+// Componente raíz del panel. Decide qué pantalla se muestra: recuperación de
+// contraseña, portada, login, o el panel con su menú (Agenda, Clientes,
+// WhatsApp y Equipo).
 export function App() {
+  // El enlace de recuperación trae el token en el fragmento de la URL
+  // (#restablecer=...). Se lee al cargar y luego se borra de la barra de direcciones.
   const [resetToken, setResetToken] = useState(() => new URLSearchParams(window.location.hash.slice(1)).get('restablecer') || '')
   const [recovering, setRecovering] = useState(false)
   const [entered, setEntered] = useState(() => Boolean(localStorage.token))
+  // Volver a la portada NO cierra la sesión: el token sigue guardado, así que
+  // al entrar de nuevo al panel no hace falta escribir la clave otra vez.
   const goHome = useCallback(() => { setEntered(false); setNotice('') }, [])
   useEffect(() => {
     function consumeLink() {
@@ -123,8 +142,12 @@ export function App() {
     window.addEventListener('hashchange', consumeLink)
     return () => window.removeEventListener('hashchange', consumeLink)
   }, [])
+  // Hay sesión si existe un token guardado en localStorage. Si ya venció, el
+  // primer 401 del servidor lo borra (ver api.js).
   const [logged, setLogged] = useState(Boolean(localStorage.token)), [view, setView] = useState('agenda'), [notice, setNotice] = useState('')
   useEffect(() => {
+    // Dos cosas cierran la sesión: el evento SESSION_EXPIRED (el backend respondió
+    // 401) y el evento 'storage' (se cerró sesión en otra pestaña del navegador).
     const expired = () => { setLogged(false); setEntered(true); setNotice('Tu sesión venció. Inicia sesión nuevamente para continuar.') }
     const changed = event => { if (event.key === 'token' && !event.newValue) { setLogged(false); setEntered(true); setNotice('La sesión se cerró en otra pestaña.') } }
     window.addEventListener(SESSION_EXPIRED, expired)
@@ -145,18 +168,29 @@ export function App() {
   </aside><main className="content">{{ agenda: <Agenda />, clientes: <Clientes />, whatsapp: <Bandeja />, equipo: <Equipo /> }[view]}</main></div>
 }
 
+// Tarjeta con un número (clientes registrados, visitas de hoy, pendientes).
 function Stat({ label, value, tone, icon }) { return <div className="stat"><span aria-hidden="true" className={`stat-icon ${tone}`}><Icon name={icon} /></span><div><small>{label}</small><strong>{value}</strong></div></div> }
 
+// Pantalla de agenda: lista las visitas del día elegido, agrupadas por hora, con
+// filtro por técnico. Permite crear, reagendar, cancelar y ver el croquis.
 function Agenda() {
   const [croquisVisit, setCroquisVisit] = useState(null)
   const [date, setDate] = useState(() => chileDate()), [operator, setOperator] = useState(''), [modal, setModal] = useState(null)
   const [error, setError] = useState(''), [success, setSuccess] = useState(''), [pending, setPending] = useState(null)
+  // useRef funciona como un candado: evita que un doble clic envíe dos veces
+  // la misma acción al servidor.
   const saving = useRef(false)
+  // Pide a la API, todo junto: las visitas del día, los técnicos, las estadísticas
+  // y los clientes.
   const resource = useResource([`/panel/visitas?fecha=${date}${operator && operator !== 'unassigned' ? `&operador_id=${operator}` : ''}`, '/panel/operadores', '/panel/stats', '/clientes'])
   const [visits = [], operators = [], stats = {}, clients = []] = resource.data
+  // Agrupa las visitas por hora (hora de Chile) para dibujar la agenda. useMemo
+  // evita recalcular si no cambió nada.
   const grouped = useMemo(() => visits.filter(v => operator !== 'unassigned' || !v.operador_id).reduce((acc, visit) => {
     const key = chileTime(visit.fecha_hora); (acc[key] ||= []).push(visit); return acc
   }, {}), [visits, operator])
+  // Cambia el estado de una visita (PATCH). Si es 'reagendada', abre el
+  // formulario para elegir la nueva fecha y hora.
   async function update(visit, estado) {
     if (estado === 'reagendada') { setModal({ visit }); return }
     if (saving.current) return
@@ -260,10 +294,14 @@ function VisitModal({ date, visit, clients, operators, onClose, onSaved }) {
 
 // Estado de entrega que informa Twilio para cada mensaje enviado al cliente.
 const DELIVERY = { accepted: ['🕓', 'En cola'], queued: ['🕓', 'En cola'], sending: ['🕓', 'Enviando'], sent: ['✓', 'Enviado'], delivered: ['✓✓', 'Entregado'], read: ['✓✓', 'Leído'], failed: ['⚠', 'No entregado'], undelivered: ['⚠', 'No entregado'], no_enviado: ['⚠', 'No enviado'] }
+// Nombre que se muestra según quién envió cada mensaje de la conversación.
 const SENDERS = { cliente: 'Cliente', agente_ia: 'Agente IA', sistema: 'Aviso automático', operador: 'Operador' }
 
 function Delivery({ message }) { const [icon, label] = DELIVERY[message.estado_entrega] || []; if (!icon) return null; return <span className={`delivery ${message.estado_entrega}`} title={message.error_entrega || label}>{icon} {label}{message.error_entrega ? ` · ${message.error_entrega}` : ''}</span> }
 
+// Bandeja de WhatsApp: lista de conversaciones a la izquierda y el chat a la
+// derecha. El operador puede tomar la conversación (la IA deja de responder),
+// escribir, y devolverla a la IA cuando termine.
 function Bandeja() {
   const [conversations, setConversations] = useState([]), [selected, setSelected] = useState(null), [detail, setDetail] = useState(null), [text, setText] = useState(''), [error, setError] = useState(''), [notice, setNotice] = useState(''), [sending, setSending] = useState(false)
   const loadList = () => request('/panel/conversaciones').then(list => { setConversations(list); setSelected(current => current ?? list[0]?.id ?? null) }).catch(e => setError(e.message))
@@ -271,8 +309,13 @@ function Bandeja() {
   // Se actualiza solo: los mensajes nuevos y los estados de entrega llegan por el webhook de Twilio.
   useEffect(() => { loadList(); const timer = setInterval(loadList, 10000); return () => clearInterval(timer) }, [])
   useEffect(() => { setDetail(null); loadDetail(selected); const timer = setInterval(() => loadDetail(selected), 5000); return () => clearInterval(timer) }, [selected])
+  // Envía un mensaje del operador al cliente. El cuadro de texto solo aparece si
+  // la ventana de 24 horas de WhatsApp está abierta (detail.ventana_abierta).
   async function send(e) { e.preventDefault(); if (!text.trim()) return; setSending(true); setError(''); try { await request(`/panel/conversaciones/${selected}/mensajes`, { method: 'POST', body: JSON.stringify({ contenido: text }) }); setText(''); await Promise.all([loadDetail(selected), loadList()]) } catch (err) { setError(err.message) } finally { setSending(false) } }
+  // Alterna entre 'atiende la IA' y 'atiende el operador' (campo atendida_por_humano).
   async function toggle() { try { setDetail(await request(`/panel/conversaciones/${selected}`, { method: 'PATCH', body: JSON.stringify({ atendida_por_humano: !detail.atendida_por_humano }) })); loadList() } catch (err) { setError(err.message) } }
+  // Dispara a mano el envío de los recordatorios de mañana (el sistema también
+  // los manda solo, a la hora configurada).
   async function reminders() { setError(''); try { const r = await request('/panel/whatsapp/recordatorios', { method: 'POST' }); setNotice(`Recordatorios de mañana enviados: ${r.enviados}${r.no_enviados ? ` · no enviados: ${r.no_enviados}` : ''}`) } catch (err) { setError(err.message) } }
   return <><header className="topbar"><div><p className="eyebrow">ATENCIÓN AL CLIENTE</p><h1>WhatsApp</h1><p className="muted">Revisa lo que conversa el agente IA y responde tú cuando haga falta.</p></div><button className="secondary" onClick={reminders}>Enviar recordatorios de mañana</button></header>{error && <div className="error banner">{error}</div>}{notice && <div className="notice banner">{notice}</div>}<section className="inbox"><div className="inbox-list">{conversations.map(c => <button key={c.id} className={`inbox-item ${c.id === selected ? 'active' : ''}`} onClick={() => setSelected(c.id)}><strong>{c.cliente.nombre}</strong><small>{c.cliente.telefono_whatsapp}</small><span>{c.ultimo_emisor && `${SENDERS[c.ultimo_emisor] || c.ultimo_emisor}: `}{c.ultimo_mensaje}</span><span className={`pill ${c.atendida_por_humano ? 'orange' : 'green'}`}>{c.atendida_por_humano ? 'Operador' : 'IA'}</span></button>)}{!conversations.length && <div className="empty">Todavía no hay conversaciones de WhatsApp.</div>}</div><div className="thread">{detail ? <><div className="thread-head"><div><strong>{detail.cliente.nombre}</strong><small>{detail.cliente.telefono_whatsapp}</small></div><button className={detail.atendida_por_humano ? 'primary' : 'secondary'} onClick={toggle}>{detail.atendida_por_humano ? 'Devolver a la IA' : 'Tomar conversación'}</button></div><div className="messages">{detail.mensajes.map(m => <div key={m.id} className={`bubble ${m.emisor}`}><small>{SENDERS[m.emisor] || m.emisor} · {chileDateTime(m.created_at)}</small><p>{m.contenido}</p><Delivery message={m} /></div>)}</div>{detail.ventana_abierta ? <form className="composer" onSubmit={send}><textarea rows="2" aria-label="Mensaje para el cliente" placeholder={detail.atendida_por_humano ? 'Escribe tu respuesta' : 'Al enviar, la IA deja de responder en esta conversación'} value={text} onChange={e => setText(e.target.value)} /><button className="primary" disabled={sending || !text.trim()}>Enviar</button></form> : <div className="composer closed">El cliente no escribe hace más de 24 h: WhatsApp solo permite responder cuando vuelva a escribir.</div>}</> : <div className="empty">Selecciona una conversación.</div>}</div></section></>
 }
@@ -351,12 +394,16 @@ function TecnicoModal({ tecnico, onClose, onSaved }) {
   </Modal>
 }
 
+// Pantalla de clientes: búsqueda, crear, editar y eliminar. Un cliente con
+// visitas asociadas no se puede eliminar, para conservar el historial.
 function Clientes() {
   const resource = useResource(['/clientes'])
   const [clients = []] = resource.data
   const [query, setQuery] = useState(''), [modal, setModal] = useState(null), [deleting, setDeleting] = useState(null), [busy, setBusy] = useState(false)
   const [error, setError] = useState(''), [success, setSuccess] = useState('')
   const removing = useRef(false)
+  // Búsqueda en el propio navegador: compara el texto escrito con el nombre, la
+  // dirección y el teléfono, sin distinguir mayúsculas de minúsculas.
   const filtered = clients.filter(c => `${c.nombre} ${c.direccion || ''} ${c.telefono_whatsapp}`.toLocaleLowerCase('es').includes(query.trim().toLocaleLowerCase('es')))
   async function remove(event) {
     event.preventDefault()
@@ -377,6 +424,8 @@ function Clientes() {
   </>
 }
 
+// Formulario para crear o editar un cliente. Pide nombre, teléfono y dirección;
+// las coordenadas las calcula el backend a partir de la dirección (geocoding.py).
 function ClientModal({ client, onClose, onSaved }) {
   const [form, setForm] = useState({ nombre: client?.nombre ?? '', telefono_whatsapp: client?.telefono_whatsapp ?? '', direccion: client?.direccion ?? '' })
   const [error, setError] = useState(''), [busy, setBusy] = useState(false)

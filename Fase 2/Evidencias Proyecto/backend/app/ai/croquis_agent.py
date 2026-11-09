@@ -83,6 +83,9 @@ Cada dispositivo: tipo, x, y, zona, motivo, confianza
 """
 
 
+# Un 'dataclass' es una clase simple para guardar datos. Sugerencia agrupa el
+# resultado de la IA (o del plan B): las trampas, las advertencias, un resumen
+# y de dónde salió la propuesta.
 @dataclass
 class Sugerencia:
     """Resultado ya validado, listo para guardar."""
@@ -96,6 +99,10 @@ class Sugerencia:
 # ---------------------------------------------------------------------------
 # Píxel de la imagen <-> lat/lng (proyección Web Mercator, la de Google Maps)
 # ---------------------------------------------------------------------------
+# Convierte lat/lng a 'píxel del mundo' de Google (proyección Web Mercator).
+# A mayor zoom el mundo tiene más píxeles. Las fórmulas son las estándar de
+# Google Maps; lo importante es que la ida (latlng_to_pixel) y la vuelta
+# (pixel_to_latlng) usan la misma base, así que se pueden usar en ambos sentidos.
 def _world_pixel(lat: float, lng: float, zoom: int) -> tuple[float, float]:
     scale = TILE_SIZE * 2 ** zoom
     sin_lat = math.sin(math.radians(lat))
@@ -132,6 +139,8 @@ def _offset(lat: float, lng: float, east_m: float, north_m: float) -> tuple[floa
 # ---------------------------------------------------------------------------
 def max_devices(superficie_m2: float | None) -> int:
     """Esquinas + 1 cada 15 m de perímetro, suponiendo un predio cuadrado."""
+    # Si el predio es un cuadrado de área A, cada lado mide raíz(A) y el
+    # perímetro mide 4 × raíz(A).
     perimeter = 4 * math.sqrt(superficie_m2 or DEFAULT_AREA_M2)
     return min(MAX_DEVICES, 4 + int(perimeter // METERS_PER_DEVICE))
 
@@ -193,15 +202,21 @@ def validate_devices(
     candidates = []
     for device in raw:
         tipo, x, y = device.get("tipo"), device.get("x"), device.get("y")
+        # Validación 1: el tipo de dispositivo debe ser uno de los permitidos.
         if tipo not in VALID_TYPES:
             continue
+        # Validación 2: el píxel tiene que caer dentro de la imagen (de 0 a 639).
         if not all(isinstance(v, (int, float)) and 0 <= v < IMAGE_SIZE for v in (x, y)):
             continue
+        # La IA responde en píxeles; aquí se convierten a latitud y longitud reales.
         d_lat, d_lng = pixel_to_latlng(x, y, lat, lng, zoom)
+        # Validación 3: si queda a más de 60 m del centro, no es de este predio y se descarta.
         if distance_meters(lat, lng, d_lat, d_lng) > MAX_DISTANCE_METERS:
             continue
         candidates.append({"tipo": tipo, "lat": d_lat, "lng": d_lng})
 
+    # Validaciones 4 y 5: se quitan las trampas a menos de 3 m de otra y se
+    # respeta el máximo permitido según la superficie.
     devices = _drop_close(candidates, existentes)[: max(0, max_devices(superficie_m2) - len(existentes))]
     if len(devices) < len(raw):
         logger.info("Croquis IA: %d de %d dispositivos pasaron las validaciones", len(devices), len(raw))
@@ -214,6 +229,8 @@ def validate_devices(
 # ---------------------------------------------------------------------------
 # Llamadas externas
 # ---------------------------------------------------------------------------
+# Alternativa de la foto: si no hay clave de Google se usa la imagen satelital
+# de Esri, que no pide clave. Sirve para desarrollo y pruebas.
 def esri_image_url(lat: float, lng: float, zoom: int = ESRI_ZOOM) -> str:
     """Foto de Esri equivalente a la de Google: mismo centro, zoom y tamaño.
     Se pide el rectángulo en metros de Web Mercator que cubre la imagen."""
@@ -291,6 +308,9 @@ def _ask_openai(
         f"Notas del operador: {contexto.get('notas') or 'sin notas'}. "
         f"Dispositivos ya instalados (no repetir): {json.dumps(existentes_px, ensure_ascii=False) if existentes_px else 'ninguno'}."
     )
+    # Mensaje a OpenAI. El usuario envía dos cosas: un texto con el contexto del
+    # predio y la FOTO codificada en base64 (la imagen convertida a texto para
+    # poder viajar dentro de la petición).
     payload = {
         "model": settings.openai_model,
         "messages": [
@@ -313,11 +333,17 @@ def _ask_openai(
     response = http.post(OPENAI_URL, json=payload, headers=headers, timeout=60)
     response.raise_for_status()
     data = response.json()
+    # usage informa cuántos tokens se gastaron; se anota en el log para controlar
+    # el costo de la IA.
     if usage := data.get("usage"):
         logger.info("Croquis IA: tokens entrada=%s salida=%s", usage.get("prompt_tokens"), usage.get("completion_tokens"))
     return _extract_json(data["choices"][0]["message"]["content"])
 
 
+# Función principal de la IA del croquis. Orden: 1) revisar el límite de
+# trampas, 2) descargar la foto, 3) preguntar a OpenAI, 4) validar la respuesta.
+# Si algo falla en el camino se usa el plan B por reglas, así el técnico
+# siempre recibe una propuesta.
 def sugerir_dispositivos(
     lat: float,
     lng: float,
@@ -340,6 +366,8 @@ def sugerir_dispositivos(
             origen="reglas",
         )
 
+    # Atajo para devolver el plan B explicando por qué no se usó la IA (queda
+    # como advertencia visible para el técnico).
     def fallback(reason: str, image_url: str | None = None) -> Sugerencia:
         devices = plan_b(lat, lng, contexto["plaga"], superficie, existentes)
         return Sugerencia(
@@ -387,6 +415,8 @@ def sugerir_dispositivos(
         if own_http:
             http.close()
 
+    # La respuesta de la IA nunca se guarda tal cual: antes pasa por las
+    # validaciones de más arriba.
     devices, warnings = validate_devices(result, lat, lng, superficie, existentes, zoom)
     if not devices:
         return fallback("la IA no propuso ninguna ubicación válida", image_url)

@@ -1,5 +1,7 @@
 import { importLibrary, setOptions } from '@googlemaps/js-api-loader'
 
+// Devuelve {lat, lng} si son números válidos, o null. Evita dibujar puntos
+// con coordenadas rotas.
 export function coordinates(item) {
   if (typeof item?.lat !== 'number' || typeof item?.lng !== 'number' ||
       !Number.isFinite(item.lat) || !Number.isFinite(item.lng) ||
@@ -7,6 +9,9 @@ export function coordinates(item) {
   return { lat: item.lat, lng: item.lng }
 }
 
+// Define cómo se ve cada trampa según su estado: retirada (gris), sugerida por
+// IA sin confirmar (amarilla), a revisar (naranja), confirmada (verde) o sin
+// confirmar (azul). El orden de los if importa: gana el primero que se cumple.
 export function trapAppearance(device) {
   if (device.estado === 'retirado') return { tone: 'retired', color: '#6b7280', opacity: 0.45, label: 'Retirada' }
   if (device.sugerido_por_ia && !device.confirmado) return { tone: 'suggested', color: '#ca8a04', opacity: 1, label: 'Sugerida por IA · sin confirmar' }
@@ -15,7 +20,10 @@ export function trapAppearance(device) {
   return { tone: 'unconfirmed', color: '#2563eb', opacity: 1, label: 'Sin confirmar' }
 }
 
+// Para cargar la API de Google Maps una sola vez.
 let loaderReady = false
+// Carga Google Maps bajo demanda (solo cuando se abre un croquis). Necesita la
+// clave pública VITE_GOOGLE_MAPS_API_KEY.
 export async function loadMaps() {
   const key = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
   if (!key) throw new Error('Falta configurar la clave web de Google Maps. Puedes consultar las trampas y sus fotos en el listado.')
@@ -29,10 +37,14 @@ export function drawCroquis(maps, element, devices, client, onSelect) {
   const located = devices.filter(coordinates)
   const center = coordinates(located[0]) || coordinates(client)
   if (!center) throw new Error('No hay coordenadas válidas para mostrar este croquis en el mapa.')
+  // Mapa 'hybrid' = satélite con nombres de calles; el zoom 19 deja ver el predio
+  // de cerca.
   const map = new maps.Map(element, {
     center, zoom: 19, mapTypeId: 'hybrid', streetViewControl: false,
     fullscreenControl: false, mapTypeControl: true, gestureHandling: 'cooperative',
   })
+  // Cada trampa se dibuja como un punto GeoJSON. GeoJSON usa el orden
+  // [longitud, latitud], al revés de lo que solemos escribir (lat, lng).
   const features = map.data.addGeoJson({ type: 'FeatureCollection', features: located.map(device => ({
     type: 'Feature', id: device.id, properties: { ...trapAppearance(device), codigo: device.codigo },
     geometry: { type: 'Point', coordinates: [device.lng, device.lat] },
@@ -47,8 +59,11 @@ export function drawCroquis(maps, element, devices, client, onSelect) {
   const click = map.data.addListener('click', event => onSelect(String(event.feature.getId())))
   const bounds = new maps.LatLngBounds()
   located.forEach(device => bounds.extend(coordinates(device)))
+  // Si hay varias trampas, se ajusta el zoom para que se vean todas.
   if (located.length > 1) map.fitBounds(bounds, 48)
   return {
+    // El mapa devuelve un 'control remoto': select(id) resalta una trampa y la
+    // centra; destroy() limpia todo al cerrar para no dejar memoria ocupada.
     select(id) {
       const device = located.find(item => item.id === id)
       map.data.revertStyle()

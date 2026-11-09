@@ -42,6 +42,9 @@ from app.zona_horaria import ZONA_CHILE, ahora_chile
 
 logger = logging.getLogger(__name__)
 UTC = timezone.utc
+# La 'ventana de sesión' de WhatsApp: 24 horas desde el último mensaje del
+# cliente. Dentro de ese tiempo se puede escribir texto libre; fuera, solo
+# con plantillas aprobadas por Meta.
 VENTANA_SESION = timedelta(hours=24)
 
 # Eventos de una visita que se le avisan al cliente.
@@ -50,6 +53,8 @@ AVISO_REAGENDADA = "reagendada"
 AVISO_CANCELADA = "cancelada"
 
 
+# True si están las tres cosas que Twilio necesita: SID de cuenta, token y
+# número. Si falta alguna, el sistema ni intenta enviar.
 def twilio_configurado() -> bool:
     return bool(settings.twilio_account_sid and settings.twilio_auth_token and settings.twilio_whatsapp_number)
 
@@ -75,6 +80,8 @@ def whatsapp_address(phone: str) -> str:
     """Número en el formato que pide Twilio: 'whatsapp:+56912345678'.
     Los clientes creados en el panel pueden traer espacios o venir sin el
     código de Chile (ej: '9 1234 5678')."""
+    # Normaliza el teléfono: Twilio exige el formato 'whatsapp:+56...'. Un cliente
+    # creado a mano en el panel puede venir con espacios o sin el +56.
     phone = phone.removeprefix("whatsapp:").strip()
     digits = re.sub(r"\D", "", phone)
     if phone.startswith("+"):
@@ -86,6 +93,8 @@ def whatsapp_address(phone: str) -> str:
     return f"whatsapp:{number}"
 
 
+# Arma un texto legible del error de Twilio (código + mensaje) para guardarlo
+# en la base y mostrarlo en el panel.
 def _describe_twilio_error(exc: Exception) -> str:
     code = getattr(exc, "code", None)
     message = getattr(exc, "msg", None) or str(exc)
@@ -96,6 +105,8 @@ def _error_pasajero(exc: Exception) -> bool:
     """True si vale la pena reintentar: Twilio caído (5xx), demasiadas
     solicitudes (429) o un error de red sin respuesta de Twilio. Un número
     inválido o una plantilla rechazada (4xx) fallaría igual al reintentar."""
+    # Reintentar solo sirve si el problema es pasajero (Twilio caído o muchas
+    # solicitudes juntas). Un número inválido fallaría igual la segunda vez.
     status = getattr(exc, "status", None)
     if status is None:
         return getattr(exc, "code", None) is None
@@ -108,6 +119,8 @@ def _twilio_client():
     return Client(settings.twilio_account_sid, settings.twilio_auth_token)
 
 
+# ¿El cliente escribió en las últimas 24 horas? Si sí, se le puede mandar
+# texto libre.
 def ventana_abierta(db: Connection, cliente_id: UUID) -> bool:
     return client_wrote_since(db, cliente_id, datetime.now(UTC) - VENTANA_SESION)
 
@@ -130,15 +143,20 @@ def enviar_whatsapp(
     client = fetch_whatsapp_client(db, cliente_id)
     if client is None:
         return None
+    # Se recorta por si el texto supera lo que WhatsApp acepta en un mensaje.
     texto = texto[:MAX_WHATSAPP_CHARS]
     abierta = ventana_abierta(db, cliente_id)
 
+    # Antes de llamar a Twilio se revisan los motivos por los que no tiene
+    # sentido enviar. Así no se gasta una llamada que se sabe que va a fallar.
     motivo_no_envio = None
     if not twilio_configurado():
         motivo_no_envio = "Twilio no está configurado"
     elif not abierta and not content_sid:
         motivo_no_envio = "El cliente no escribe hace más de 24 h y no hay plantilla aprobada configurada"
 
+    # El mensaje se guarda ANTES de enviarlo, para que el panel siempre lo
+    # muestre aunque el envío falle (con su estado: queued, failed o no_enviado).
     conversation = fetch_active_whatsapp_conversation(db, cliente_id)
     mensaje = insert_whatsapp_message(
         db, conversation["id"], emisor, texto, intencion,
@@ -149,6 +167,8 @@ def enviar_whatsapp(
         logger.warning("WhatsApp a %s no enviado (%s): %s", cliente_id, intencion, motivo_no_envio)
         return mensaje
 
+    # Parámetros del envío por la API de Twilio. 'from_' lleva guion bajo
+    # porque 'from' es una palabra reservada de Python.
     params: dict[str, Any] = {
         "from_": whatsapp_address(settings.twilio_whatsapp_number),
         "to": whatsapp_address(client["telefono_whatsapp"]),
@@ -156,6 +176,8 @@ def enviar_whatsapp(
     callback = status_callback_url(mensaje["id"])
     if callback:
         params["status_callback"] = callback
+    # Ventana abierta = texto libre (body). Ventana cerrada = plantilla
+    # aprobada (content_sid) con sus variables.
     if abierta:
         params["body"] = texto
     else:
@@ -164,6 +186,8 @@ def enviar_whatsapp(
 
     try:
         sent = _twilio_client().messages.create(**params)
+    # Si Twilio rechaza el envío no se lanza el error hacia afuera: se guarda
+    # el fallo en el mensaje y se informa si vale la pena reintentar.
     except Exception as exc:
         error = _describe_twilio_error(exc)
         logger.warning("Twilio rechazó el WhatsApp a %s (%s): %s", cliente_id, intencion, error)
@@ -230,6 +254,7 @@ def avisar_visita(db: Connection, visita: dict[str, Any], evento: str) -> dict[s
     """Le avisa al cliente un cambio en su visita. `visita` necesita
     cliente_id, cliente_nombre y fecha_hora. No avisa visitas que ya pasaron
     (ej: una visita antigua registrada o cancelada a posteriori)."""
+    # No tiene sentido avisar de una visita que ya pasó.
     if visita["fecha_hora"] <= datetime.now(UTC):
         return None
     texto = texto_aviso(evento, visita.get("cliente_nombre"), visita["fecha_hora"])
@@ -280,8 +305,12 @@ def enviar_recordatorios(
     ahora = (ahora or ahora_chile()).astimezone(ZONA_CHILE)
     if respetar_hora and ahora.time() < _hora_recordatorio():
         return []
+    # Los recordatorios se mandan el día anterior: se buscan las visitas de
+    # 'mañana' según el calendario de Chile.
     manana = ahora.date() + timedelta(days=1)
     enviados = []
+    # 'claim' = reservar: la visita se marca como recordada en la base antes de
+    # enviar, para que dos ciclos a la vez no manden el mismo recordatorio dos veces.
     for visita in claim_visits_for_reminder(db, manana, empresa_id):
         try:
             client = fetch_whatsapp_client(db, visita["cliente_id"])
