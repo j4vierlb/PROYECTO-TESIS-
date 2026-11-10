@@ -60,6 +60,7 @@ class SyncService with WidgetsBindingObserver {
   final ApiClient remote;
   final Future<String?> Function() ownerProvider;
   final OutboxFiles files;
+  // Cada cuánto el motor revisa si hay algo que enviar (20 segundos por defecto).
   final Duration pollInterval;
   late final OfflineCache cache = OfflineCache(store, ownerProvider);
 
@@ -78,6 +79,8 @@ class SyncService with WidgetsBindingObserver {
   static final SyncService shared = SyncService(store: SqliteLocalStore(), remote: ApiClient());
 
   DateTime? _offlineSince;
+  // Candado: si ya hay un envío en curso se reutiliza ese mismo, para no
+  // mandar la cola dos veces a la vez.
   Future<void>? _flushing;
   Future<void>? _prefetching;
   Timer? _timer;
@@ -188,6 +191,8 @@ class SyncService with WidgetsBindingObserver {
     }
 
     _set(syncing: true);
+    // Los cambios se envían uno por uno y en orden. Si uno falla por la conexión se
+    // detiene todo (para no desordenar); si es un conflicto, se descarta y se sigue.
     final conflicts = <String>[];
     for (final op in ops) {
       try {
@@ -243,6 +248,8 @@ class SyncService with WidgetsBindingObserver {
 
   Future<void> _apply(PendingOp op) async {
     final data = op.payload;
+    // Cada tipo de cambio se envía con su propia llamada al backend: actualizar la
+    // visita, mover/confirmar una trampa, agregar una trampa nueva o subir una foto.
     switch (op.kind) {
       case OpKind.visitaUpdate:
         final estado = data['estado'] as String?;
@@ -281,6 +288,7 @@ class SyncService with WidgetsBindingObserver {
         if (!await files.exists(path)) throw _Conflict('la foto ya no está guardada en el teléfono');
         final trampa = await remote.uploadFoto(data['deviceId'] as String, path);
         await cache.putDevice(op.visitId, trampa);
+        // Ya subida la foto, se borra la copia que se había guardado en el teléfono.
         await files.remove(path);
       default:
         throw _Conflict('tipo de cambio desconocido');
@@ -370,6 +378,8 @@ class SyncService with WidgetsBindingObserver {
   /// la app al abrirla). No pisa nada si hay cambios sin enviar.
   Future<void> prefetch(List<Visita> visitas) => _prefetching ??= _prefetch(visitas).whenComplete(() => _prefetching = null);
 
+  // 'Prefetch' = precarga: mientras hay señal se baja el croquis de cada visita
+  // del día, para poder trabajar aunque más tarde se pierda la conexión.
   Future<void> _prefetch(List<Visita> visitas) async {
     for (final visita in visitas) {
       if (visita.estado == 'cancelada') continue;

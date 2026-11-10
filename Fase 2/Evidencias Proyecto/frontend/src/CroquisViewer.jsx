@@ -2,11 +2,15 @@ import React, { useEffect, useRef, useState } from 'react'
 import { request, requestPhoto } from './api.js'
 import { coordinates, drawCroquis, loadMaps, trapAppearance } from './croquis-map.js'
 
+// Muestra la foto de una trampa. La foto es privada: se pide con el token y se
+// muestra como 'blob' (archivo en memoria), no con un enlace público.
 function TrapPhoto({ device }) {
   const [result, setResult] = useState(null), [retry, setRetry] = useState(0)
   useEffect(() => {
     if (!device.foto_url) return
     const controller = new AbortController()
+    // objectUrl es una dirección temporal que apunta al archivo en memoria; se
+    // libera al salir (revokeObjectURL) para no gastar memoria.
     let objectUrl
     setResult(null)
     requestPhoto(device.foto_url, { signal: controller.signal }).then(blob => {
@@ -24,6 +28,8 @@ function TrapPhoto({ device }) {
   return <img className="trap-photo" src={result.url} alt={`Foto de la trampa ${device.codigo}`} onError={() => setResult({ error: 'No se pudo mostrar la foto. Intenta nuevamente.' })} />
 }
 
+// Dibuja el mapa satelital con las trampas. Si Google Maps falla (clave, red o
+// tiempo), el listado y las fotos siguen funcionando.
 function CroquisMap({ devices, client, selected, onSelect }) {
   const element = useRef(null), instance = useRef(null), latestSelect = useRef(onSelect)
   latestSelect.current = onSelect
@@ -32,6 +38,8 @@ function CroquisMap({ devices, client, selected, onSelect }) {
     if (!devices.some(coordinates) && !coordinates(client)) return
     let disposed = false
     setError(''); setReady(false)
+    // Google avisa de una clave rechazada llamando a window.gm_authFailure. Se
+    // engancha esa función mientras el mapa está abierto y se restaura al salir.
     const previousAuthFailure = window.gm_authFailure
     const authFailure = () => { if (!disposed) setError('Google Maps rechazó la clave o sus restricciones. El listado y las fotos siguen disponibles.') }
     window.gm_authFailure = authFailure
@@ -56,6 +64,9 @@ function CroquisMap({ devices, client, selected, onSelect }) {
   </section>
 }
 
+// Pantalla de solo lectura del croquis de una visita (admin o coordinador).
+// Pide GET /croquis/{id}. El panel nunca crea ni modifica croquis: eso lo hace
+// el técnico desde la app.
 export function CroquisViewer({ visit }) {
   const [result, setResult] = useState(null), [revision, setRevision] = useState(0), [selected, setSelected] = useState(null)
   useEffect(() => {

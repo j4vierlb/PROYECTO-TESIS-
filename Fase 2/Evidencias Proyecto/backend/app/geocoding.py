@@ -24,6 +24,8 @@ from app.config import settings
 logger = logging.getLogger(__name__)
 
 GEOCODE_URL = "https://maps.googleapis.com/maps/api/geocode/json"
+# Si Google tarda más de 5 segundos se abandona: es mejor no ubicar al
+# cliente que dejar esperando al sistema.
 TIMEOUT_SECONDS = 5.0
 
 # Solo estos tipos apuntan al predio. GEOMETRIC_CENTER y APPROXIMATE
@@ -40,6 +42,8 @@ MAX_SPREAD_METERS = 100
 # pin podría quedar en otro lugar sin que nadie lo note.
 PLACE_TYPES = {"locality", "administrative_area_level_3"}
 
+# Tabla para quitar tildes y la ñ al comparar textos (así 'Viña' y 'Vina'
+# se consideran iguales).
 _ACCENTS = str.maketrans("áéíóúüñ", "aeiouun")
 
 
@@ -49,6 +53,8 @@ def _normalize(value: str) -> str:
 
 def distance_meters(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
     """Distancia aproximada (fórmula de haversine)."""
+    # 6.371.000 m es el radio promedio de la Tierra. Haversine mide la distancia
+    # sobre una esfera, más exacta que simplemente restar coordenadas.
     radius = 6_371_000
     phi1, phi2 = math.radians(lat1), math.radians(lat2)
     dphi = math.radians(lat2 - lat1)
@@ -104,6 +110,8 @@ def _pick_result(data: dict, address: str) -> tuple[float, float, str] | None:
     first = results[0]
     lat, lng = _location(first)
 
+    # Si Google devuelve varios lugares y alguno queda a 100 m o más del primero,
+    # la dirección es ambigua y no se guarda nada.
     if len(results) > 1:
         far = [r for r in results[1:] if distance_meters(lat, lng, *_location(r)) >= MAX_SPREAD_METERS]
         if far:
@@ -140,6 +148,8 @@ def geocodificar(direccion: str | None, http: httpx.Client | None = None) -> tup
     if not address or not settings.google_maps_api_key:
         return None
 
+    # 'components': country:CL restringe la búsqueda a Chile. 'region' y 'language'
+    # orientan el resultado a Chile y en español.
     params = {
         "address": address,
         "components": "country:CL",
@@ -175,6 +185,8 @@ def geocodificar_cliente(cliente_id: UUID, direccion: str) -> None:
     from app.database import engine  # import local: las pruebas sin BD no lo necesitan
 
     try:
+        # engine.begin() abre una transacción que se confirma sola si termina sin
+        # errores (y se deshace si hay una excepción).
         with engine.begin() as db:
             updated = db.execute(
                 text("""

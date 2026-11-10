@@ -11,6 +11,39 @@ El código está en `Fase 2/Evidencias Proyecto/`:
 | `frontend/` | Panel web para administradores | React + Vite |
 | `app-movil/` | App para los técnicos en terreno | Flutter |
 
+## Mapa del proyecto
+
+```
+PROYECTO-TESIS-/
+├── docker-compose.yml      # levanta base de datos, backend, panel (y ngrok, opcional)
+├── Fase 1/ · Fase 2/ · Fase 3/   # entregables del curso (informes, evidencias)
+├── pruebas/                # scripts y resultados de las pruebas del sistema
+└── Fase 2/Evidencias Proyecto/
+    ├── database/           # schema.sql, seed.sql y migraciones (se aplican en orden)
+    ├── backend/            # API FastAPI
+    │   └── app/
+    │       ├── main.py             # crea la app y monta los routers
+    │       ├── routers/            # endpoints: auth, visitas, croquis, panel, whatsapp...
+    │       ├── repositories/       # consultas SQL, una por tema (visitas, croquis, whatsapp...)
+    │       ├── ai/                 # agente de WhatsApp y sugerencia de trampas (OpenAI)
+    │       ├── schemas.py          # forma de los datos de la API
+    │       ├── security.py         # contraseñas y tokens JWT
+    │       └── geocoding.py · fotos.py · whatsapp_saliente.py ...
+    ├── frontend/           # panel web (React + Vite)
+    │   └── src/
+    │       ├── main.jsx            # punto de entrada
+    │       ├── App.jsx             # decide qué pantalla mostrar
+    │       ├── screens/            # Login, Agenda, Bandeja (WhatsApp), Equipo, Clientes
+    │       ├── components/ · hooks/  # piezas reutilizables
+    │       └── api.js · panel-utils.js · croquis-map.js
+    ├── app-movil/          # app de los técnicos (Flutter)
+    │   └── lib/
+    │       ├── screens/            # agenda, detalle de visita, croquis, historial...
+    │       ├── services/ · models/ # llamadas a la API, sesión, datos
+    │       └── offline/ · db/      # modo sin conexión (SQLite) y sincronización
+    └── docs/               # diseño y pruebas del agente de IA y del croquis
+```
+
 ## Levantar todo con Docker
 
 Requisito: [Docker Desktop](https://www.docker.com/products/docker-desktop/) abierto.

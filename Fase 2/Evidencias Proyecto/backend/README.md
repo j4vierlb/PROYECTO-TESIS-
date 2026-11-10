@@ -115,7 +115,13 @@ app/
 ├── security.py        # hashing de contraseñas (passlib/bcrypt) y JWT
 ├── schemas.py          # modelos Pydantic (request/response)
 ├── dependencies.py      # auth: get_current_user, require_operator
-├── repositories.py       # consultas SQL a Postgres/PostGIS
+├── repositories/         # consultas SQL a Postgres/PostGIS, divididas por tema
+│   ├── visitas.py        #   visitas del técnico (agenda, historial, edición)
+│   ├── croquis.py        #   croquis y dispositivos (trampas)
+│   ├── auth.py           #   cuentas de técnicos y de usuarios del panel
+│   ├── whatsapp.py       #   clientes, conversaciones, mensajes y recordatorios
+│   ├── agendamiento.py   #   horarios, técnicos y creación de la visita pedida por la IA
+│   └── _comun.py         #   constantes compartidas (zona horaria, margen entre visitas)
 ├── geocoding.py          # dirección → lat/lng (Google Geocoding API)
 ├── fotos.py              # guardar/leer fotos de trampas (validación de imagen y tamaño)
 ├── whatsapp_saliente.py  # avisos, recordatorios y mensajes del operador (API REST de Twilio)

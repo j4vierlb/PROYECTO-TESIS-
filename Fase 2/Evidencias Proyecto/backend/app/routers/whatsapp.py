@@ -40,6 +40,8 @@ from app.geocoding import geocodificar_cliente
 from app.whatsapp_saliente import status_callback_base, status_callback_url
 from app.repositories import (
     HorarioNoDisponible,
+    count_client_visits,
+    update_whatsapp_client_name,
     update_whatsapp_delivery,
     create_whatsapp_visit,
     fetch_active_whatsapp_conversation,
@@ -56,11 +58,15 @@ SANTIAGO = ZoneInfo("America/Santiago")
 UTC = timezone.utc
 MAX_DAYS_AHEAD = 60  # no se agendan visitas a más de 60 días
 
+# Mensaje de contingencia: el cliente siempre recibe una respuesta,
+# aunque algo falle por dentro (la IA, la base de datos, etc.).
 FALLBACK_REPLY = (
     "Gracias por escribirnos 😊 Tuvimos un inconveniente procesando tu mensaje. "
     "Un operador te contactará pronto."
 )
 
+# prefix='/webhooks' hace que las rutas queden como /webhooks/whatsapp y
+# /webhooks/whatsapp/estado.
 router = APIRouter(prefix="/webhooks", tags=["whatsapp"])
 
 
@@ -130,6 +136,8 @@ def _parse_appointment_datetime(value: str) -> datetime:
     return parsed_utc
 
 
+# Convierte una fecha guardada en UTC a la hora de Chile, con el formato que
+# se le muestra al cliente (ej: 07/11/2026 a las 10:00).
 def _format_local(fecha_hora: datetime) -> str:
     return fecha_hora.astimezone(SANTIAGO).strftime("%d/%m/%Y a las %H:%M")
 
@@ -143,6 +151,7 @@ def _schedule_visit(
 ) -> str:
     """Intenta agendar la visita que pidió la IA y devuelve el texto que se
     le responde al cliente (confirmación, pedido de datos o alternativa)."""
+    first_visit = count_client_visits(db, client["id"]) == 0
     new_address = decision["client_address"]
     address = new_address or client.get("direccion")
     if not address:
@@ -151,6 +160,15 @@ def _schedule_visit(
         update_whatsapp_client_address(db, client["id"], new_address)
         # Las coordenadas se buscan después de responder, para no demorar a Twilio.
         background_tasks.add_task(geocodificar_cliente, client["id"], new_address)
+
+    # Primer agendamiento: se pide el nombre real. Lo decide el backend (no solo
+    # la IA), igual que con la dirección, para que nunca se agende sin nombre.
+    if first_visit:
+        new_name = decision.get("client_name")
+        if not new_name:
+            return "Claro 😊 Antes de agendar tu primera visita, ¿me indicas tu nombre completo?"
+        if new_name != (client.get("nombre") or "").strip():
+            update_whatsapp_client_name(db, client["id"], new_name)
 
     if not decision["appointment_datetime"]:
         return "Claro 😊 Para agendar necesito que me indiques una fecha y una hora concreta."
@@ -172,6 +190,9 @@ def _schedule_visit(
             appointment_utc,
             decision["notes"],
         )
+    # Si el horario está ocupado o fuera de atención, el repositorio lanza esta
+    # excepción. Aquí se convierte en una respuesta amable con una alternativa.
+    # db.rollback() deshace lo que alcanzó a escribirse, para no dejar datos a medias.
     except HorarioNoDisponible as exc:
         db.rollback()
         logger.info("Horario no disponible (MessageSid=%s): %s", message_sid, exc)
@@ -210,6 +231,8 @@ def whatsapp_webhook(
         return _twiml()
 
     try:
+        # Idempotencia: si Twilio reenvía el mismo mensaje (mismo MessageSid) lo
+        # ignoramos, para no agendar dos veces la misma visita.
         if whatsapp_message_exists(db, message_sid):
             logger.info("Mensaje duplicado de Twilio ignorado: %s", message_sid)
             return _twiml()
@@ -242,7 +265,12 @@ def whatsapp_webhook(
         return _twiml(FALLBACK_REPLY)
 
     try:
-        decision = generate_agent_decision(history, client["nombre"], client.get("direccion"))
+        # Se le pasa a la IA el historial (últimos 20 mensajes), el nombre del
+        # cliente y su dirección. Devuelve la decisión ya validada.
+        decision = generate_agent_decision(
+            history, client["nombre"], client.get("direccion"),
+            count_client_visits(db, client["id"]),
+        )
     except Exception:
         logger.exception("Falló el agente de IA (MessageSid=%s)", message_sid)
         reply = "Gracias por escribirnos 😊 Un operador te contactará pronto para ayudarte."
@@ -261,6 +289,8 @@ def whatsapp_webhook(
                     "Un operador te contactará pronto."
                 )
 
+    # Se guarda la respuesta del bot en el historial, para que el panel la
+    # muestre y para que la IA la recuerde en el próximo mensaje.
     saved = None
     try:
         # Sin URL pública Twilio no informará el estado: se deja vacío en vez de "queued" para siempre.
