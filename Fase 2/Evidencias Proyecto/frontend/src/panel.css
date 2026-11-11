@@ -108,11 +108,12 @@
 .client-initial{width:40px;height:40px;border-radius:50%;background:var(--brand-soft);color:#6b5400;display:grid;place-items:center;font-weight:700;font-size:15px;flex-shrink:0}
 
 /* ----- Bandeja de WhatsApp ----- */
-.app-shell .inbox{border-radius:var(--radius);box-shadow:var(--shadow);grid-template-columns:340px 1fr;height:calc(100dvh - 270px);min-height:480px}
+.app-shell .inbox{border-radius:var(--radius);box-shadow:var(--shadow);grid-template-columns:340px minmax(0,1fr);height:calc(100dvh - 270px);min-height:480px}
 .app-shell .inbox-item{padding:16px 20px;transition:background-color 160ms ease}
 .app-shell .inbox-item.active{background:var(--brand-soft);box-shadow:inset 4px 0 0 var(--brand-yellow)}
-.app-shell .thread-head{padding:16px 24px}
-.app-shell .messages{padding:22px 24px;background:#FAF9F3}
+.app-shell .thread{min-height:0}
+.app-shell .thread-head{padding:16px 24px;gap:12px}
+.app-shell .messages{min-height:0;padding:22px 24px;background:#FAF9F3;overflow-wrap:anywhere}
 .app-shell .bubble{border-radius:16px;padding:11px 14px;border-color:var(--border);max-width:min(75%,520px)}
 .app-shell .bubble.agente_ia,.app-shell .bubble.sistema{background:var(--brand-soft);border-color:#f1e2a2;border-bottom-right-radius:5px}
 .app-shell .bubble.operador{background:var(--brand-black);border-color:var(--brand-black);border-bottom-right-radius:5px}
