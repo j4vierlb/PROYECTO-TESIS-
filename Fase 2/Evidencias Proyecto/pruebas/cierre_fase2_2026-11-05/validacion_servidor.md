@@ -22,9 +22,9 @@ servidor se debe compilar con su URL de API. Registrar firma y versión para
 instalarlo como actualización y revisar los pendientes de sincronización antes
 de cambiar de entorno. Usar las cuentas y los registros de prueba del servidor.
 
-## Casos por ejecutar
+## Casos del plan original
 
-| ID | Acción | Resultado esperado | Resultado en servidor |
+| ID | Acción | Resultado esperado | Estado al preparar el plan |
 | --- | --- | --- | --- |
 | SRV-01 | Abrir portada y `/health` en las URL confirmadas. | Servicios accesibles y versión identificada. | Pendiente de URL |
 | SRV-02 | Iniciar sesión en el panel, recargar, volver a portada y entrar de nuevo. | Acceso correcto y sesión conservada. | Pendiente de URL |
@@ -38,6 +38,23 @@ de cambiar de entorno. Usar las cuentas y los registros de prueba del servidor.
 | SRV-10 | Precargar agenda/croquis, cortar red, registrar cambio y reconectar. | Cola visible y sincronización de una sola operación por cambio. | Pendiente de URL |
 | SRV-11 | Recuperar contraseña de una cuenta de prueba con correo accesible. | Enlace al panel público y nueva clave confirmada, si SMTP está habilitado. | Pendiente de URL |
 | SRV-12 | Abrir QR y revisar conversación y avisos aplicables de WhatsApp. | Webhook del servidor, conversación y estado de entrega registrados. | Pendiente de URL |
+
+## Prueba en Redmi 15C del 13 de noviembre de 2026
+
+Juan Francisco Bórquez probó el APK de desarrollo `1.0.0+6` en su Redmi 15C
+con Google Maps habilitado y la [API HTTPS](https://killbichos-api.duckdns.org/health)
+de Kill Bichos. Confirmó que completó el recorrido de Android y que todos los
+pasos funcionaron. El SHA-256 del APK entregado es
+`5cb5af8e8effd88ccb60dc5be16e390f81aebdf10776b01d0301970fc50a6b8b`.
+
+| Caso | Comprobación | Resultado reportado por Juan |
+| --- | --- | --- |
+| SRV-08 | Inicio de sesión desde el APK contra el servidor | Aprobado. Pudo iniciar sesión. |
+| SRV-08 | Abrir una visita desde la agenda | Aprobado. Pudo abrir la visita desde la app. |
+| SRV-09 | Carga del mapa en Android | Aprobado. El mapa se visualizó correctamente. |
+| SRV-09 | Verificar el pin del cliente en el croquis | Aprobado. El pin se mostró en el mapa. |
+| SRV-09 | Registrar una trampa con una foto | Aprobado. Pudo guardar la trampa y su foto. |
+| SRV-10 | Registrar un cambio sin conexión y recuperar la conexión | Aprobado. El cambio se sincronizó al restablecer la conexión. |
 
 ## Comparación con el entorno local
 
