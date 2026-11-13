@@ -2,7 +2,7 @@
 
 **Responsable:** Pedro Vergiu · **Fecha:** 06/11/2026
 
-Esta sección resume cómo funciona el canal de WhatsApp de Kill Bichos IA, cuánto cuesta operarlo, qué límites tiene la demostración actual y qué debe hacer la empresa para usarlo con clientes reales. Las fuentes internas son [`costo_ia_whatsapp.md`](../Fase%202/Evidencias%20Proyecto/docs/costo_ia_whatsapp.md), la prueba [`HU-18_prueba_whatsapp_real.md`](../Fase%202/Evidencias%20Proyecto/docs/HU-18_prueba_whatsapp_real.md) y la sección "Limitaciones conocidas y pasos a producción" del [`README.md`](../README.md) de la raíz.
+Esta sección resume cómo funciona el canal de WhatsApp de Kill Bichos IA, cuánto cuesta operarlo, qué límites tiene la demostración actual y qué debe hacer la empresa para usarlo con clientes reales. Las fuentes internas son [`costo_ia_whatsapp.md`](../Evidencias%20Proyecto/docs/costo_ia_whatsapp.md), la prueba [`HU-18_prueba_whatsapp_real.md`](../Evidencias%20Proyecto/docs/HU-18_prueba_whatsapp_real.md) y la sección "Limitaciones conocidas y pasos a producción" del [`README.md`](../../README.md) de la raíz.
 
 ## 1. Qué hace el agente
 

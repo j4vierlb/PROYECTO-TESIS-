@@ -91,5 +91,5 @@ el [recorrido físico](recorrido_redmi.md) y la
 La sesión con Rodrigo dispone de un
 [guion de nueve escenarios y cuentas de prueba](../../Evidencias%20de%20documentacion/Guion_sesion_Rodrigo_Quiroga.md)
 y del acta preparada. La solicitud se gestiona por Juan. Su aporte al informe
-final cubre panel, Android, documentación y pruebas en la
-[sección de Fase 3](../../../../Fase%203/Informe_final_Panel_Android_Pruebas_Borquez_Juan.md).
+final cubre panel, Android, documentación y pruebas en su
+[aporte al informe 2.6](../../../Evidencias%20Individuales/Informe_final_Panel_Android_Pruebas_Borquez_Juan.md).

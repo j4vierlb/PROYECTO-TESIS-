@@ -192,10 +192,10 @@ de Juan al integrar el informe grupal.
 
 ## Referencias internas
 
-- [Bitácora del cierre y resultados](../Fase%202/Evidencias%20Proyecto/pruebas/cierre_fase2_2026-11-05/README.md).
-- [Recorrido pendiente del Redmi](../Fase%202/Evidencias%20Proyecto/pruebas/cierre_fase2_2026-11-05/recorrido_redmi.md).
-- [Plan de comprobación en servidor](../Fase%202/Evidencias%20Proyecto/pruebas/cierre_fase2_2026-11-05/validacion_servidor.md).
-- [Documentación del panel](../Fase%202/Evidencias%20Proyecto/frontend/README.md).
-- [Preparación y cortes de Android](../Fase%202/Evidencias%20Proyecto/app-movil/ANDROID.md).
-- [Entregables Word de Fase 2](../Fase%202/Evidencias%20Proyecto/Evidencias%20de%20documentacion/).
+- [Bitácora del cierre y resultados](../Evidencias%20Proyecto/pruebas/cierre_fase2_2026-11-05/README.md).
+- [Recorrido pendiente del Redmi](../Evidencias%20Proyecto/pruebas/cierre_fase2_2026-11-05/recorrido_redmi.md).
+- [Plan de comprobación en servidor](../Evidencias%20Proyecto/pruebas/cierre_fase2_2026-11-05/validacion_servidor.md).
+- [Documentación del panel](../Evidencias%20Proyecto/frontend/README.md).
+- [Preparación y cortes de Android](../Evidencias%20Proyecto/app-movil/ANDROID.md).
+- [Entregables Word de Fase 2](../Evidencias%20Proyecto/Evidencias%20de%20documentacion/).
 - [PR #38](https://github.com/j4vierlb/PROYECTO-TESIS-/pull/38).
