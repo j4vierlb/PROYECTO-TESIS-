@@ -12,11 +12,13 @@ Kill Bichos IA es una plataforma web y móvil para apoyar el contacto con client
 - `Evidencias Proyecto/database`: PostgreSQL/PostGIS, esquema, datos de prueba y migraciones. Docker Compose está en la raíz del repositorio.
 - `Evidencias Proyecto/Evidencias de documentacion`: entregables de gestión, diseño, pruebas, manual y cierre.
 - `Evidencias Grupales`: guías del estudiante de la fase (2.4 Desarrollo del Proyecto APT y 2.6 Informe Final).
-- `Evidencias Individuales`: diarios de reflexión de cada integrante (2.1).
+- `Evidencias Individuales`: diarios de reflexión (2.1) y aportes por integrante al informe final (2.6).
 
 ## Aportes individuales y evidencias
 
 - [Informe de Juan Bórquez: panel, pruebas, documentación y Android](Evidencias%20Individuales/Borquez_Juan_Informe_Evidencias_Fase2.md).
+- [Aporte de Juan Bórquez al informe 2.6 sobre el panel, Android y las pruebas](Evidencias%20Individuales/Informe_final_Panel_Android_Pruebas_Borquez_Juan.md).
+- [Aporte de Pedro Vergiu al informe 2.6 sobre WhatsApp e IA](Evidencias%20Individuales/Informe_final_WhatsApp_IA_Vergiu_Pedro.md).
 - [Evidencias Android del 21/10/2026](Evidencias%20Proyecto/pruebas/android_2026-10-21/README.md): siete capturas originales, hashes y alcance de la comprobación.
 - [Android con Maps real, 22/10/2026](Evidencias%20Proyecto/pruebas/android_2026-10-22/README.md): APK debug actualizado, mapa y marcadores comprobados, 18 pruebas Flutter y 12 comprobaciones HTTP separadas, con logs y límites.
 
