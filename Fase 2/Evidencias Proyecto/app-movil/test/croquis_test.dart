@@ -8,6 +8,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:app_movil/models/croquis.dart';
+import 'package:app_movil/screens/croquis_screen.dart';
 
 Map<String, dynamic> _trampaJson({String id = 'd1', String codigo = 'T-01', String? fotoUrl}) => {
   'id': id,
@@ -102,5 +103,13 @@ void main() {
     });
     expect(sugerencia.resumen, isNull);
     expect(sugerencia.advertencias, isEmpty);
+  });
+  test('Cada tipo de dispositivo indica las plagas de la empresa para las que sirve', () {
+    expect(plagasDelTipo('cebadero'), 'Roedores');
+    expect(plagasDelTipo('trampa_pegamento'), contains('Cucarachas'));
+    expect(plagasDelTipo('trampa_pegamento'), contains('arañas'));
+    expect(plagasDelTipo('trampa_luz'), contains('mosquitos'));
+    expect(plagasDelTipo('otro'), 'Otro dispositivo o plaga');
+    expect(plagasDelTipo('desconocido'), 'Otro dispositivo o plaga');
   });
 }
