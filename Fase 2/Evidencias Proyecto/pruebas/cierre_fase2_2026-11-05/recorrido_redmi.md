@@ -53,7 +53,9 @@ La comprobación contra el servidor tiene su
 
 Juan usó el Redmi 15C con el APK `1.0.0+6` y la cuenta de prueba
 `tecnico1@killbichos.cl`. La aplicación apuntaba a la API HTTPS de Kill Bichos.
-El inicio de sesión y la agenda del 13/11 quedaron corroborados por Javier.
+El 13/11, Juan declaró que pudo iniciar sesión en el Redmi. En el servidor se
+registró actividad de inicio de sesión y de agenda ese día. No se pudo asociar
+esa actividad a un dispositivo concreto.
 El 14/11, Juan creó una visita de prueba y abrió su croquis.
 
 | Hora de Chile | Qué se observó | Evidencia |

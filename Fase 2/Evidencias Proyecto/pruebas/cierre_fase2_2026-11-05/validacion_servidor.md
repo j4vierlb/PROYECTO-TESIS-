@@ -49,7 +49,7 @@ El SHA-256 del APK entregado es
 
 | Caso | Fecha | Resultado y evidencia |
 | --- | --- | --- |
-| SRV-08 | 13/11 | Juan confirmó que pudo iniciar sesión. Javier corroboró el login y la agenda en su revisión del servidor. |
+| SRV-08 | 13/11 | Juan declaró que pudo iniciar sesión en el Redmi. En el servidor se registró actividad de inicio de sesión y de agenda ese día. No se pudo asociar esa actividad a un dispositivo concreto. |
 | SRV-09 | 13/11 | Juan confirmó que cargaron el mapa y el pin rojo del cliente. El croquis volvió a mostrar ambos en la prueba del 14/11. |
 | SRV-09 | 14/11 | Juan creó una visita de prueba y registró un cebadero (T-01) y una trampa de pegamento (T-02). A la 01:07, el Redmi mostraba ambas confirmadas y con foto. [Captura del Redmi](redmi_2026-11-14/01_trampas_confirmadas_con_fotos.jpeg). |
 | SRV-09 | 14/11 | A la 01:13, el Redmi mostraba ambas trampas retiradas y con sus fotos. Se abrió el croquis de esa visita en el panel desplegado y se corroboró que ambas seguían registradas como retiradas. Las dos fotos cargaron desde el servidor. [Captura del Redmi](redmi_2026-11-14/02_trampas_retiradas_con_fotos.jpeg). |
