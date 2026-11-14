@@ -53,11 +53,27 @@ El SHA-256 del APK entregado es
 | SRV-09 | 13/11 | Juan confirmó que cargaron el mapa y el pin rojo del cliente. El croquis volvió a mostrar ambos en la prueba del 14/11. |
 | SRV-09 | 14/11 | Juan creó una visita de prueba y registró un cebadero (T-01) y una trampa de pegamento (T-02). A la 01:07, el Redmi mostraba ambas confirmadas y con foto. [Captura del Redmi](redmi_2026-11-14/01_trampas_confirmadas_con_fotos.jpeg). |
 | SRV-09 | 14/11 | A la 01:13, el Redmi mostraba ambas trampas retiradas y con sus fotos. Se abrió el croquis de esa visita en el panel desplegado y se corroboró que ambas seguían registradas como retiradas. Las dos fotos cargaron desde el servidor. [Captura del Redmi](redmi_2026-11-14/02_trampas_retiradas_con_fotos.jpeg). |
-| SRV-10 | 14/11 | Juan reportó que agregó una de las trampas sin conexión y luego se reconectó. A la 01:06, el Redmi mostraba «Sin conexión · 2 cambios por enviar». A la 01:07, ambas trampas aparecían confirmadas con foto y la franja de pendientes ya no se mostraba. El estado final se corroboró en el panel. Queda pendiente identificar qué operaciones llegaron desde la cola y comprobar su ejecución única en los registros del servidor. |
+| SRV-10 | 14/11 | Juan declaró que agregó una trampa sin conexión y después se reconectó. La captura de la 01:06 muestra «Sin conexión · 2 cambios por enviar». A la 01:07, ambas trampas aparecían confirmadas con foto y la franja de pendientes ya no se mostraba. El estado final se corroboró en el panel y en el servidor. La ejecución única de los cambios de la cola quedó sin verificar. |
 
 Las horas son las que muestra el teléfono, en hora de Chile. El detalle del
 recorrido y las referencias a las capturas del mapa se conservan en la
 [bitácora del Redmi](recorrido_redmi.md#prueba-con-el-servidor-del-14-de-noviembre-de-2026).
+
+### Registros corroborados por Javier el 14 de noviembre
+
+Javier consultó la base de datos y los archivos de la visita de prueba
+`b77a660d-7eb1-4025-ba53-d21277f8087f`. Las horas de Chile corresponden a UTC−03:00.
+
+| Trampa | UUID | Alta en la base · Chile (UTC) | Foto guardada · Chile (UTC) | Estado final |
+| --- | --- | --- | --- | --- |
+| T-01 | `79691a36-6846-4cf9-a888-3764f9b1a1be` | 01:05:23 (04:05:23) | 01:05:40 (04:05:40) | Retirada |
+| T-02 | `2c4b83b3-2b02-4f09-a656-8a88cc87b4d0` | 01:06:47 (04:06:47) | 01:06:49 (04:06:49) | Retirada |
+
+Según Javier, los logs de peticiones de la prueba se perdieron tras reiniciar el
+backend a la 01:24 de Chile (04:24 UTC). Los registros conservados acreditan el alta
+de ambas trampas, los archivos de sus fotos y su estado final. Los códigos HTTP,
+los reintentos, las horas de los `PATCH` y la identificación de los dos cambios
+enviados desde la cola offline quedaron sin verificar.
 
 ## Comparación con el entorno local
 

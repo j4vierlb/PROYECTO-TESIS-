@@ -155,8 +155,8 @@ contiene nueve escenarios para completar durante la sesión de la empresa.
 | Frontend | 191/191 el 05/11/2026 | Interacción, navegación, recuperación, croquis y casos con HTTP simulado. |
 | Flutter | 204/204 el 05/11/2026 | Modelos, sesiones, fotos, ubicación, persistencia y cola offline. |
 | Navegador | 8/8 el 05/11/2026 | Edge con API real y base aislada a 1440 y 390 px. Alta, edición, desactivación y reactivación de técnicos. |
-| Redmi físico | Prueba reportada el 13 y 14/11/2026 con el APK 1.0.0+6 | Inicio de sesión, agenda, croquis con pin, dos trampas con fotos y retiro. El Redmi mostró dos cambios en cola antes de recuperar la conexión. |
-| Servidor | Login y agenda del 13/11. Trampas y fotos verificadas el 14/11 | El croquis del panel mostró T-01 y T-02 retiradas y cargó ambas fotos desde el servidor. Queda por cotejar la ejecución de las operaciones de la cola offline con los registros del servidor. |
+| Redmi físico | Prueba reportada el 13 y 14/11/2026 con el APK 1.0.0+6 | Inicio de sesión, agenda, croquis con pin, dos trampas con fotos y retiro. Juan declaró haber agregado una trampa sin conexión y luego haberse reconectado. El Redmi mostró dos cambios pendientes. |
+| Servidor | Login y agenda del 13/11. Trampas y fotos verificadas el 14/11 | El panel mostró T-01 y T-02 retiradas y cargó ambas fotos. Javier corroboró las altas, los archivos de las fotos y el estado final en el servidor. La ejecución única de los cambios offline quedó sin verificar tras perderse los logs de peticiones durante un reinicio del backend. |
 
 Las suites evolucionaron y comparten casos. Los cortes históricos se consultan
 por separado y los resultados de laboratorio se relacionan con el entorno y la

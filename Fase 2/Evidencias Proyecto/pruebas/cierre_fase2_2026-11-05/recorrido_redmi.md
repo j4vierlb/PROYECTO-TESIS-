@@ -64,11 +64,15 @@ El 14/11, Juan creó una visita de prueba y abrió su croquis.
 | 01:14 | El mapa muestra el pin rojo del cliente y los dos marcadores morados de las trampas retiradas. | Captura original del mapa, conservada localmente. |
 
 El croquis del panel desplegado mostró T-01 y T-02 en estado **Retirada**.
-Se abrió y cargó la foto de cada una desde el servidor. El registro online
-corrobora la persistencia del estado final. La captura de la 01:06 y el relato
-de Juan documentan el paso sin conexión. La atribución de las operaciones a
-la cola offline y su ejecución única quedan por cotejar con los registros del
-servidor. [Validación del servidor](validacion_servidor.md#validación-en-redmi-15c-del-13-y-14-de-noviembre-de-2026).
+Se abrió y cargó la foto de cada una desde el servidor. Javier corroboró en la
+base y en los archivos las altas, las fotos y el estado retirado de ambas
+trampas. [UUID y horas del servidor](validacion_servidor.md#registros-corroborados-por-javier-el-14-de-noviembre).
+
+Juan declaró que agregó una trampa sin conexión y después se reconectó. La
+captura de la 01:06 acredita los dos cambios pendientes en el Redmi. Tras el
+reinicio del backend se perdieron los logs de peticiones de esa ventana. Quedó
+sin verificar cuáles fueron las dos operaciones de la cola y si se aplicaron
+una sola vez.
 
 Las dos capturas del mapa muestran una ubicación precisa y se conservan
 fuera del repositorio. Estas huellas identifican los originales recibidos.
