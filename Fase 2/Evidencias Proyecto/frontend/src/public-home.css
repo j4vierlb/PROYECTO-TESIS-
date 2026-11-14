@@ -167,4 +167,4 @@
   .public-home .public-pest-grid,.public-home .public-assurance{grid-template-columns:1fr}
   .public-home .public-assurance{padding:24px 20px}
 }
-@media (max-width:900px){.public-home .public-pest-grid article img{width:100%;height:220px;object-fit:cover;border-radius:16px;display:block;margin-bottom:18px;background:#EFE9D2}
+@media (max-width:900px){.public-home .public-pest-grid article img{width:160px;height:160px;object-fit:cover;border-radius:16px;display:block;margin-bottom:18px;background:#EFE9D2}
