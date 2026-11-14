@@ -73,6 +73,23 @@ class AgenteNombreTest(unittest.TestCase):
         self.assertIsNone(agent._validate_decision(dict(action='reply', reply='x'))['client_name'])
         self.assertIsNone(agent._validate_decision(dict(action='reply', reply='x', client_name=7))['client_name'])
 
+    def test_el_nombre_en_minuscula_o_mayuscula_se_corrige(self):
+        formato = agent._format_person_name
+        self.assertEqual(formato('ayline correa pino'), 'Ayline Correa Pino')
+        self.assertEqual(formato('AYLINE CORREA'), 'Ayline Correa')
+        self.assertEqual(formato('maría de los ángeles soto'), 'María de los Ángeles Soto')
+        self.assertEqual(formato('  juan   pérez '.strip()), 'Juan Pérez')
+
+    def test_el_nombre_con_mayusculas_mezcladas_se_respeta(self):
+        self.assertEqual(agent._format_person_name('Ana McKay'), 'Ana McKay')
+        self.assertIsNone(agent._format_person_name(None))
+        validada = agent._validate_decision(dict(action='reply', reply='x', client_name='ayline correa pino'))
+        self.assertEqual(validada['client_name'], 'Ayline Correa Pino')
+
+    def test_el_prompt_explica_el_horario_de_atencion(self):
+        self.assertIn('Horario de atención', agent.SYSTEM_PROMPT)
+        self.assertIn('por qué un horario no está disponible', agent.SYSTEM_PROMPT)
+
     def test_el_prompt_pide_el_nombre_en_la_primera_visita(self):
         self.assertIn('PRIMERA visita', agent.SYSTEM_PROMPT)
         self.assertIn('client_name', agent.SYSTEM_PROMPT)
