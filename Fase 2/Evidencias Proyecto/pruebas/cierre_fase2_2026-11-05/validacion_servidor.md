@@ -39,22 +39,25 @@ de cambiar de entorno. Usar las cuentas y los registros de prueba del servidor.
 | SRV-11 | Recuperar contraseña de una cuenta de prueba con correo accesible. | Enlace al panel público y nueva clave confirmada, si SMTP está habilitado. | Pendiente de URL |
 | SRV-12 | Abrir QR y revisar conversación y avisos aplicables de WhatsApp. | Webhook del servidor, conversación y estado de entrega registrados. | Pendiente de URL |
 
-## Prueba en Redmi 15C del 13 de noviembre de 2026
+## Validación en Redmi 15C del 13 y 14 de noviembre de 2026
 
-Juan Francisco Bórquez probó el APK de desarrollo `1.0.0+6` en su Redmi 15C
-con Google Maps habilitado y la [API HTTPS](https://killbichos-api.duckdns.org/health)
-de Kill Bichos. Confirmó que completó el recorrido de Android y que todos los
-pasos funcionaron. El SHA-256 del APK entregado es
+Juan Francisco Bórquez usó un Redmi 15C y confirmó la cuenta de prueba
+`tecnico1@killbichos.cl`. Se verificó que el APK de desarrollo `1.0.0+6`
+se compiló con Google Maps y la API `https://killbichos-api.duckdns.org`.
+El SHA-256 del APK entregado es
 `5cb5af8e8effd88ccb60dc5be16e390f81aebdf10776b01d0301970fc50a6b8b`.
 
-| Caso | Comprobación | Resultado reportado por Juan |
+| Caso | Fecha | Resultado y evidencia |
 | --- | --- | --- |
-| SRV-08 | Inicio de sesión desde el APK contra el servidor | Aprobado. Pudo iniciar sesión. |
-| SRV-08 | Abrir una visita desde la agenda | Aprobado. Pudo abrir la visita desde la app. |
-| SRV-09 | Carga del mapa en Android | Aprobado. El mapa se visualizó correctamente. |
-| SRV-09 | Verificar el pin del cliente en el croquis | Aprobado. El pin se mostró en el mapa. |
-| SRV-09 | Registrar una trampa con una foto | Aprobado. Pudo guardar la trampa y su foto. |
-| SRV-10 | Registrar un cambio sin conexión y recuperar la conexión | Aprobado. El cambio se sincronizó al restablecer la conexión. |
+| SRV-08 | 13/11 | Juan confirmó que pudo iniciar sesión. Javier corroboró el login y la agenda en su revisión del servidor. |
+| SRV-09 | 13/11 | Juan confirmó que cargaron el mapa y el pin rojo del cliente. El croquis volvió a mostrar ambos en la prueba del 14/11. |
+| SRV-09 | 14/11 | Juan creó una visita de prueba y registró un cebadero (T-01) y una trampa de pegamento (T-02). A la 01:07, el Redmi mostraba ambas confirmadas y con foto. [Captura del Redmi](redmi_2026-11-14/01_trampas_confirmadas_con_fotos.jpeg). |
+| SRV-09 | 14/11 | A la 01:13, el Redmi mostraba ambas trampas retiradas y con sus fotos. Se abrió el croquis de esa visita en el panel desplegado y se corroboró que ambas seguían registradas como retiradas. Las dos fotos cargaron desde el servidor. [Captura del Redmi](redmi_2026-11-14/02_trampas_retiradas_con_fotos.jpeg). |
+| SRV-10 | 14/11 | Juan reportó que agregó una de las trampas sin conexión y luego se reconectó. A la 01:06, el Redmi mostraba «Sin conexión · 2 cambios por enviar». A la 01:07, ambas trampas aparecían confirmadas con foto y la franja de pendientes ya no se mostraba. El estado final se corroboró en el panel. Queda pendiente identificar qué operaciones llegaron desde la cola y comprobar su ejecución única en los registros del servidor. |
+
+Las horas son las que muestra el teléfono, en hora de Chile. El detalle del
+recorrido y las referencias a las capturas del mapa se conservan en la
+[bitácora del Redmi](recorrido_redmi.md#prueba-con-el-servidor-del-14-de-noviembre-de-2026).
 
 ## Comparación con el entorno local
 

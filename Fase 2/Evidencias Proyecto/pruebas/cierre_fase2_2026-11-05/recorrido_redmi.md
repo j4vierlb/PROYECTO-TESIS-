@@ -48,3 +48,32 @@ Falló o Bloqueado según lo observado. Mantener Por registrar hasta ejecutar.
 
 La comprobación contra el servidor tiene su
 [plan y registro propios](validacion_servidor.md).
+
+## Prueba con el servidor del 14 de noviembre de 2026
+
+Juan usó el Redmi 15C con el APK `1.0.0+6` y la cuenta de prueba
+`tecnico1@killbichos.cl`. La aplicación apuntaba a la API HTTPS de Kill Bichos.
+El inicio de sesión y la agenda del 13/11 quedaron corroborados por Javier.
+El 14/11, Juan creó una visita de prueba y abrió su croquis.
+
+| Hora de Chile | Qué se observó | Evidencia |
+| --- | --- | --- |
+| 01:06 | El mapa muestra el pin rojo del cliente y dos marcadores de trampa. La franja dice «Sin conexión · 2 cambios por enviar». | Captura original del mapa, conservada localmente. |
+| 01:07 | T-01 (cebadero) y T-02 (trampa de pegamento) aparecen confirmadas y con una foto de prueba cada una. Juan reportó haber recuperado la conexión. | [Trampas confirmadas con fotos](redmi_2026-11-14/01_trampas_confirmadas_con_fotos.jpeg). |
+| 01:13 | Las dos trampas aparecen retiradas, conservan sus fotos y se ve el aviso «T-02 retirada». | [Trampas retiradas con fotos](redmi_2026-11-14/02_trampas_retiradas_con_fotos.jpeg). |
+| 01:14 | El mapa muestra el pin rojo del cliente y los dos marcadores morados de las trampas retiradas. | Captura original del mapa, conservada localmente. |
+
+El croquis del panel desplegado mostró T-01 y T-02 en estado **Retirada**.
+Se abrió y cargó la foto de cada una desde el servidor. El registro online
+corrobora la persistencia del estado final. La captura de la 01:06 y el relato
+de Juan documentan el paso sin conexión. La atribución de las operaciones a
+la cola offline y su ejecución única quedan por cotejar con los registros del
+servidor. [Validación del servidor](validacion_servidor.md#validación-en-redmi-15c-del-13-y-14-de-noviembre-de-2026).
+
+Las dos capturas del mapa muestran una ubicación precisa y se conservan
+fuera del repositorio. Estas huellas identifican los originales recibidos.
+
+| Captura | SHA-256 |
+| --- | --- |
+| 01:06 · Mapa y cola offline | `b581bbc995ead90f273d97dec0876677d031ef5e18951577763760f3129ad67f` |
+| 01:14 · Mapa y trampas retiradas | `b1b9b37a49755ec22d3bbd393aa1438d71ed201fe8197a3341864075aaff42ff` |
