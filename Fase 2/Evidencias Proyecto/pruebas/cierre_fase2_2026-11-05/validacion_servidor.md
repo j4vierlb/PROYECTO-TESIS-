@@ -22,9 +22,9 @@ servidor se debe compilar con su URL de API. Registrar firma y versión para
 instalarlo como actualización y revisar los pendientes de sincronización antes
 de cambiar de entorno. Usar las cuentas y los registros de prueba del servidor.
 
-## Casos por ejecutar
+## Casos del plan original
 
-| ID | Acción | Resultado esperado | Resultado en servidor |
+| ID | Acción | Resultado esperado | Estado al preparar el plan |
 | --- | --- | --- | --- |
 | SRV-01 | Abrir portada y `/health` en las URL confirmadas. | Servicios accesibles y versión identificada. | Pendiente de URL |
 | SRV-02 | Iniciar sesión en el panel, recargar, volver a portada y entrar de nuevo. | Acceso correcto y sesión conservada. | Pendiente de URL |
@@ -38,6 +38,42 @@ de cambiar de entorno. Usar las cuentas y los registros de prueba del servidor.
 | SRV-10 | Precargar agenda/croquis, cortar red, registrar cambio y reconectar. | Cola visible y sincronización de una sola operación por cambio. | Pendiente de URL |
 | SRV-11 | Recuperar contraseña de una cuenta de prueba con correo accesible. | Enlace al panel público y nueva clave confirmada, si SMTP está habilitado. | Pendiente de URL |
 | SRV-12 | Abrir QR y revisar conversación y avisos aplicables de WhatsApp. | Webhook del servidor, conversación y estado de entrega registrados. | Pendiente de URL |
+
+## Validación en Redmi 15C del 13 y 14 de noviembre de 2026
+
+Juan Francisco Bórquez usó un Redmi 15C y confirmó la cuenta de prueba
+`tecnico1@killbichos.cl`. Se verificó que el APK de desarrollo `1.0.0+6`
+se compiló con Google Maps y la API `https://killbichos-api.duckdns.org`.
+El SHA-256 del APK entregado es
+`5cb5af8e8effd88ccb60dc5be16e390f81aebdf10776b01d0301970fc50a6b8b`.
+
+| Caso | Fecha | Resultado y evidencia |
+| --- | --- | --- |
+| SRV-08 | 13/11 | Juan confirmó que pudo iniciar sesión. Javier corroboró el login y la agenda en su revisión del servidor. |
+| SRV-09 | 13/11 | Juan confirmó que cargaron el mapa y el pin rojo del cliente. El croquis volvió a mostrar ambos en la prueba del 14/11. |
+| SRV-09 | 14/11 | Juan creó una visita de prueba y registró un cebadero (T-01) y una trampa de pegamento (T-02). A la 01:07, el Redmi mostraba ambas confirmadas y con foto. [Captura del Redmi](redmi_2026-11-14/01_trampas_confirmadas_con_fotos.jpeg). |
+| SRV-09 | 14/11 | A la 01:13, el Redmi mostraba ambas trampas retiradas y con sus fotos. Se abrió el croquis de esa visita en el panel desplegado y se corroboró que ambas seguían registradas como retiradas. Las dos fotos cargaron desde el servidor. [Captura del Redmi](redmi_2026-11-14/02_trampas_retiradas_con_fotos.jpeg). |
+| SRV-10 | 14/11 | Juan declaró que agregó una trampa sin conexión y después se reconectó. La captura de la 01:06 muestra «Sin conexión · 2 cambios por enviar». A la 01:07, ambas trampas aparecían confirmadas con foto y la franja de pendientes ya no se mostraba. El estado final se corroboró en el panel y en el servidor. La ejecución única de los cambios de la cola quedó sin verificar. |
+
+Las horas son las que muestra el teléfono, en hora de Chile. El detalle del
+recorrido y las referencias a las capturas del mapa se conservan en la
+[bitácora del Redmi](recorrido_redmi.md#prueba-con-el-servidor-del-14-de-noviembre-de-2026).
+
+### Registros corroborados por Javier el 14 de noviembre
+
+Javier consultó la base de datos y los archivos de la visita de prueba
+`b77a660d-7eb1-4025-ba53-d21277f8087f`. Las horas de Chile corresponden a UTC−03:00.
+
+| Trampa | UUID | Alta en la base · Chile (UTC) | Foto guardada · Chile (UTC) | Estado final |
+| --- | --- | --- | --- | --- |
+| T-01 | `79691a36-6846-4cf9-a888-3764f9b1a1be` | 01:05:23 (04:05:23) | 01:05:40 (04:05:40) | Retirada |
+| T-02 | `2c4b83b3-2b02-4f09-a656-8a88cc87b4d0` | 01:06:47 (04:06:47) | 01:06:49 (04:06:49) | Retirada |
+
+Según Javier, los logs de peticiones de la prueba se perdieron tras reiniciar el
+backend a la 01:24 de Chile (04:24 UTC). Los registros conservados acreditan el alta
+de ambas trampas, los archivos de sus fotos y su estado final. Los códigos HTTP,
+los reintentos, las horas de los `PATCH` y la identificación de los dos cambios
+enviados desde la cola offline quedaron sin verificar.
 
 ## Comparación con el entorno local
 

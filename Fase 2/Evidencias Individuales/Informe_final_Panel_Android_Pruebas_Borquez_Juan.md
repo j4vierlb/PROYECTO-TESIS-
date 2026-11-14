@@ -1,17 +1,17 @@
 # Informe final del panel web Android documentación y pruebas
 
-**Responsable del aporte** Juan Francisco Bórquez. **Corte** 8 de noviembre de 2026.
+**Responsable del aporte** Juan Francisco Bórquez. **Actualizado** 14 de noviembre de 2026.
 
 Este aporte describe el panel administrativo y el agendamiento, la preparación
 y las mejoras de Android, la documentación y las comprobaciones de calidad de
 Kill Bichos IA. Se incorpora al informe del equipo junto con las secciones de
 arquitectura, datos, aplicación móvil y WhatsApp e IA de los demás integrantes.
 
-La PR #38 quedó fusionada en `main` mediante `38a02a6`. El último corte de
-pruebas registrado para este aporte es el 05/11/2026, con **251 pruebas de
+La PR #38 quedó fusionada en `main` mediante `38a02a6`. El corte de
+pruebas automatizadas citado en este aporte es del 05/11/2026, con **251 pruebas de
 backend, 191 de frontend y 204 de Flutter aprobadas**, y ocho comprobaciones de
-navegador en una base aislada. El recorrido completo en el Redmi 15C y la
-comprobación contra el servidor quedan sujetos a sus registros de ejecución.
+navegador en una base aislada. El 13 y 14 de noviembre se registraron pruebas
+en el Redmi 15C contra el servidor HTTPS.
 
 ## 1 Relevancia del proyecto
 
@@ -131,9 +131,9 @@ evitan duplicar trampas. La primera descarga y las sugerencias de IA requieren
 conexión. El bloqueo de cierre por una foto pendiente tiene alcance local en el
 teléfono, según la decisión de entrega registrada.
 
-El APK `1.0.0+5` se compiló para `http://192.168.1.12:8000`, con Maps activo y
-la misma firma que el anterior. La dirección del backend queda fijada al compilar.
-La prueba contra el servidor requerirá su URL y una compilación destinada a ella.
+El APK `1.0.0+5` se compiló para las pruebas en la red local. Para el Redmi se
+generó el APK de desarrollo `1.0.0+6` con Maps activo, la misma firma y la API
+HTTPS de Kill Bichos como destino. La bitácora registra la huella del archivo.
 
 ### 4 5 Documentación
 
@@ -155,8 +155,8 @@ contiene nueve escenarios para completar durante la sesión de la empresa.
 | Frontend | 191/191 el 05/11/2026 | Interacción, navegación, recuperación, croquis y casos con HTTP simulado. |
 | Flutter | 204/204 el 05/11/2026 | Modelos, sesiones, fotos, ubicación, persistencia y cola offline. |
 | Navegador | 8/8 el 05/11/2026 | Edge con API real y base aislada a 1440 y 390 px. Alta, edición, desactivación y reactivación de técnicos. |
-| Redmi físico | Recorrido integral por registrar | Pin rojo observado por Juan en una compilación anterior. El recorrido de la versión 1.0.0+5 se completará con su bitácora. |
-| Servidor | URL pendiente al 08/11/2026 | Comprobaciones de panel y app preparadas para ejecutar cuando el servidor esté disponible. |
+| Redmi físico | Prueba reportada el 13 y 14/11/2026 con el APK 1.0.0+6 | Inicio de sesión, agenda, croquis con pin, dos trampas con fotos y retiro. Juan declaró haber agregado una trampa sin conexión y luego haberse reconectado. El Redmi mostró dos cambios pendientes. |
+| Servidor | Login y agenda del 13/11. Trampas y fotos verificadas el 14/11 | El panel mostró T-01 y T-02 retiradas y cargó ambas fotos. Javier corroboró las altas, los archivos de las fotos y el estado final en el servidor. La ejecución única de los cambios offline quedó sin verificar tras perderse los logs de peticiones durante un reinicio del backend. |
 
 Las suites evolucionaron y comparten casos. Los cortes históricos se consultan
 por separado y los resultados de laboratorio se relacionan con el entorno y la
@@ -168,9 +168,7 @@ completó las 251 pruebas. Los cambios de red también requirieron recompilar el
 APK para mantener su dirección de backend coherente con la del computador.
 
 La validación del cliente se completará mediante la sesión con Rodrigo Quiroga,
-los resultados por escenario y el acta correspondiente. La bitácora del Redmi y
-la comprobación remota permitirán evaluar cámara, permisos, conectividad y
-sincronización en esos entornos.
+los resultados por escenario y el acta correspondiente.
 
 ## 6 Aprendizajes y proyección profesional
 
@@ -193,8 +191,8 @@ de Juan al integrar el informe grupal.
 ## Referencias internas
 
 - [Bitácora del cierre y resultados](../Evidencias%20Proyecto/pruebas/cierre_fase2_2026-11-05/README.md).
-- [Recorrido pendiente del Redmi](../Evidencias%20Proyecto/pruebas/cierre_fase2_2026-11-05/recorrido_redmi.md).
-- [Plan de comprobación en servidor](../Evidencias%20Proyecto/pruebas/cierre_fase2_2026-11-05/validacion_servidor.md).
+- [Recorrido del Redmi y capturas](../Evidencias%20Proyecto/pruebas/cierre_fase2_2026-11-05/recorrido_redmi.md).
+- [Validación contra el servidor](../Evidencias%20Proyecto/pruebas/cierre_fase2_2026-11-05/validacion_servidor.md).
 - [Documentación del panel](../Evidencias%20Proyecto/frontend/README.md).
 - [Preparación y cortes de Android](../Evidencias%20Proyecto/app-movil/ANDROID.md).
 - [Entregables Word de Fase 2](../Evidencias%20Proyecto/Evidencias%20de%20documentacion/).
