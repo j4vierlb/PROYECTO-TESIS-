@@ -85,6 +85,7 @@ from app.repositories.agendamiento import (  # noqa: F401
     _find_available_operator,
     _find_next_available_slot,
     create_whatsapp_visit,
+    list_available_slots,
 )
 from app.repositories._comun import (  # noqa: F401
     SANTIAGO,
