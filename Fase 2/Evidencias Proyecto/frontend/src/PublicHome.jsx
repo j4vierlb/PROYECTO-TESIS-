@@ -84,7 +84,7 @@ function SpiderFrame() {
 const archivo = {
   Desinsectación: { src: '/archivo/cucaracha.jpg', alt: 'Grabado antiguo de una cucaracha americana', fit: 'center' },
   Desratización: { src: '/archivo/rata.jpg', alt: 'Aguafuerte de 1823 con una cacería de ratas', fit: 'center 62%' },
-  Sanitización: { src: '/archivo/microbios.jpg', alt: 'Afiche francés de 1897 con el lema «Plus de microbes»', fit: 'center 12%' },
+  Sanitización: { src: '/archivo/sanitizacion.jpg', alt: 'Técnico con traje azul y casco rojo aplicando desinfectante con una mochila rociadora', fit: 'center 60%' },
 }
 
 const creditos = [
@@ -93,7 +93,7 @@ const creditos = [
   ['Araña de casa', 'Judy Gallagher, CC BY 2.0', 'https://commons.wikimedia.org/wiki/File:Giant_House_Spider_-_Tegenaria_atrica%3F,_Drymen,_Stirlingshire.jpg'],
   ['Cucaracha americana', 'ilustrador desconocido, dominio público', 'https://commons.wikimedia.org/wiki/File:American_cockroach_(Blatta_Americana).jpg'],
   ['Cacería de ratas', 'Edwin Landseer, 1823, dominio público', 'https://commons.wikimedia.org/wiki/File:Rat_catching_etching_E_Landseer_SLNSW.jpg'],
-  ['Plus de microbes', 'Firmin Bouisset, 1897, dominio público', 'https://commons.wikimedia.org/wiki/File:Plus_de_microbes._Toutes_les_eaux_min%C3%A9rales._Entrep%C3%B4t_d%27Ivry_affiche,_Firmin_Bouisset.jpg'],
+  ['Técnico desinfectando una reja', 'Indrayadith, CC BY-SA 4.0 (recortada)', 'https://commons.wikimedia.org/wiki/File:Penyemprotan_Disinfektan_Cegah_Penularan_COVID19.jpg'],
   ['Una araña, ampliada y en tamaño real', 'grabado coloreado, Wellcome Collection, CC BY 4.0', 'https://commons.wikimedia.org/wiki/File:A_spider,_both_enlarged_and_life_size._Coloured_engraving._Wellcome_V0022389.jpg'],
 ]
 
