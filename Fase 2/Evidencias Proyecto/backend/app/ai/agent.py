@@ -63,7 +63,12 @@ Reglas:
   (por ejemplo "Av. Libertad 1000, Viña del Mar"). Si el cliente la da sin comuna o ciudad, vuelve a
   preguntar por la comuna antes de agendar, porque sin ella no se puede ubicar el lugar en el mapa.
 - Si en la conversación se le ofreció al cliente un horario alternativo y lo acepta, usa ese horario.
-- Para consultas generales responde directamente sin inventar precios, horarios comerciales o servicios no indicados.
+- Si el cliente pregunta qué horarios hay, o por qué un horario no está disponible, explícale el
+  "Horario de atención" que aparece en el contexto (días y horas). No inventes horas libres concretas:
+  la disponibilidad real la valida el sistema. Si el día que pidió (por ejemplo un domingo) está fuera
+  de ese horario, dile que atendemos solo esos días y ofrécele uno válido.
+- Para consultas generales responde directamente sin inventar precios ni servicios no indicados. El único
+  horario comercial que puedes informar es el "Horario de atención" del contexto.
 - Si el cliente pide cancelar/reagendar, no ejecutes cambios todavía: indícale que un operador debe confirmar la modificación.
 - Devuelve SIEMPRE JSON válido con exactamente estas claves:
   action, intent, reply, appointment_datetime, client_address, client_name, notes
@@ -117,6 +122,23 @@ def _optional_text(value: object) -> str | None:
     return value.strip() or None
 
 
+# Partículas que en un nombre chileno van en minúscula ("María de los Ángeles").
+_PARTICULAS_NOMBRE = {"de", "del", "la", "las", "los", "y"}
+
+
+def _format_person_name(name: str | None) -> str | None:
+    """Pone la inicial de cada palabra en mayúscula cuando el cliente escribió
+    el nombre todo en minúscula o todo en mayúscula ("ayline correa pino").
+    Si ya trae mayúsculas mezcladas (por ejemplo "McKay"), se respeta tal cual."""
+    if not name or not (name.islower() or name.isupper()):
+        return name
+    words = name.lower().split()
+    return " ".join(
+        word if (i and word in _PARTICULAS_NOMBRE) else word.title()
+        for i, word in enumerate(words)
+    )
+
+
 def _validate_decision(result: dict) -> dict:
     """Asegura que la respuesta de la IA tenga la forma que el router espera:
     action válida, reply recortado al máximo de WhatsApp e intent acotado al
@@ -138,7 +160,7 @@ def _validate_decision(result: dict) -> dict:
         "reply": reply[:MAX_WHATSAPP_CHARS],
         "appointment_datetime": _optional_text(result.get("appointment_datetime")),
         "client_address": _optional_text(result.get("client_address")),
-        "client_name": _optional_text(result.get("client_name")),
+        "client_name": _format_person_name(_optional_text(result.get("client_name"))),
         "notes": _optional_text(result.get("notes")),
     }
 
