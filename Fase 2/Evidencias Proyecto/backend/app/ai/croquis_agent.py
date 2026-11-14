@@ -47,10 +47,17 @@ DEFAULT_AREA_M2 = 200       # si nadie indicó la superficie, una casa típica
 VALID_TYPES = {"cebadero", "trampa_pegamento", "trampa_luz", "otro"}
 
 # Qué dispositivo usa el plan B según la plaga.
+# Roedores: cebaderos. Voladores: trampas de luz. Rastreros y arácnidos: pegamento.
 PLAN_B_TYPE = {
     "roedores": "cebadero",
     "cucarachas": "trampa_pegamento",
+    "hormigas": "trampa_pegamento",
+    "pulgas": "trampa_pegamento",
     "moscas": "trampa_luz",
+    "polillas": "trampa_luz",
+    "avispas": "trampa_luz",
+    "aranas": "trampa_pegamento",
+    "garrapatas": "trampa_pegamento",
     "otra": "trampa_pegamento",
 }
 
@@ -64,7 +71,12 @@ Criterios:
 - Roedores: cebaderos en el perímetro, junto a muros, rejas, vegetación densa,
   zonas de basura y accesos. Separación de 10 a 15 m entre cebaderos.
 - Cucarachas: trampas de pegamento cerca de cocinas, desagües y bodegas.
-- Moscas: trampas de luz cerca de accesos y zonas de basura, lejos de ventanas.
+- Moscas y mosquitos, polillas y avispas (voladores): trampas de luz cerca de accesos
+  y zonas de basura, lejos de ventanas.
+- Hormigas y pulgas (rastreros): trampas de pegamento junto a muros, grietas, accesos
+  y zonas de paso.
+- Arañas y garrapatas (arácnidos): trampas de pegamento en rincones, bodegas, bajo
+  muebles y zonas con vegetación o mascotas.
 - El predio del cliente está en el CENTRO de la imagen (píxel 320, 320). Se te indica
   un radio aproximado en píxeles según su superficie: ubica todo dentro de ese radio.
 - Coloca los dispositivos en bordes y rincones: junto a muros, rejas, cercos,

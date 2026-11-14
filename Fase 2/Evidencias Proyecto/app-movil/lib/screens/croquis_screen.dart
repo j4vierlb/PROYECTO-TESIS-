@@ -1246,10 +1246,17 @@ class _SugerenciaDialogState extends State<_SugerenciaDialog> {
     'local_comercial': 'Local comercial',
     'industria': 'Industria',
   };
+  // Plagas que controla Kill Bichos. Las claves deben coincidir con el enum Plaga del backend.
   static const _plagas = {
     'roedores': 'Roedores',
     'cucarachas': 'Cucarachas',
-    'moscas': 'Moscas',
+    'hormigas': 'Hormigas',
+    'pulgas': 'Pulgas',
+    'moscas': 'Moscas y mosquitos',
+    'polillas': 'Polillas',
+    'avispas': 'Avispas',
+    'aranas': 'Arañas',
+    'garrapatas': 'Garrapatas y ácaros',
     'otra': 'Otra',
   };
 
