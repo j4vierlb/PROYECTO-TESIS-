@@ -167,7 +167,4 @@
   .public-home .public-pest-grid,.public-home .public-assurance{grid-template-columns:1fr}
   .public-home .public-assurance{padding:24px 20px}
 }
-.public-home .public-work{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:40px;align-items:stretch}
-.public-home .public-work img{width:100%;height:340px;object-fit:cover;border-radius:16px;display:block;background:#EFE9D2}
-@media (max-width:900px){.public-home .public-work{grid-template-columns:1fr}.public-home .public-work img{height:240px}}
-.public-home .public-pest-grid article img{width:100%;height:220px;object-fit:cover;border-radius:16px;display:block;margin-bottom:18px;background:#EFE9D2}
+@media (max-width:900px){.public-home .public-pest-grid article img{width:100%;height:220px;object-fit:cover;border-radius:16px;display:block;margin-bottom:18px;background:#EFE9D2}

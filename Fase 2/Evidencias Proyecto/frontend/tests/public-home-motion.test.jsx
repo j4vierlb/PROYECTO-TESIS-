@@ -40,7 +40,7 @@ it('sin IntersectionObserver todo el contenido se muestra de inmediato', () => {
   const { container } = render(<PublicHome onEnter={() => {}} />)
   expect(container.querySelector('.public-home')).not.toHaveClass('reveal-ready')
   const items = bloques(container)
-  expect(items.length).toBe(16)
+  expect(items.length).toBe(15)
   items.forEach(el => expect(el).toHaveClass('is-visible'))
 })
 

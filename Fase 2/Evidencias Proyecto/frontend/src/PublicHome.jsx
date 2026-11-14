@@ -88,7 +88,6 @@ const archivo = {
 }
 
 const creditos = [
-  ['Fotos del trabajo de los técnicos', 'Kill Bichos, tomadas de su sitio web', 'https://killbichos.cl/'],
   ['Mosquito Aedes aegypti', 'John Ragai, CC BY 2.0', 'https://commons.wikimedia.org/wiki/File:Aedes_aegypti_mosquito.jpg'],
   ['Cucaracha americana (recortada)', 'Alex Wild, Insects Unlocked, dominio público (CC0)', 'https://commons.wikimedia.org/wiki/File:Periplaneta_americana_(25585111140).jpg'],
   ['Araña de casa', 'Judy Gallagher, CC BY 2.0', 'https://commons.wikimedia.org/wiki/File:Giant_House_Spider_-_Tegenaria_atrica%3F,_Drymen,_Stirlingshire.jpg'],
@@ -96,13 +95,6 @@ const creditos = [
   ['Cacería de ratas', 'Edwin Landseer, 1823, dominio público', 'https://commons.wikimedia.org/wiki/File:Rat_catching_etching_E_Landseer_SLNSW.jpg'],
   ['Plus de microbes', 'Firmin Bouisset, 1897, dominio público', 'https://commons.wikimedia.org/wiki/File:Plus_de_microbes._Toutes_les_eaux_min%C3%A9rales._Entrep%C3%B4t_d%27Ivry_affiche,_Firmin_Bouisset.jpg'],
   ['Una araña, ampliada y en tamaño real', 'grabado coloreado, Wellcome Collection, CC BY 4.0', 'https://commons.wikimedia.org/wiki/File:A_spider,_both_enlarged_and_life_size._Coloured_engraving._Wellcome_V0022389.jpg'],
-]
-
-// Fotos del trabajo de los técnicos, tomadas del sitio de la empresa (killbichos.cl).
-const trabajo = [
-  { src: '/trabajo/jardin.jpg', alt: 'Técnico con traje blanco aplicando producto con mochila en los jardines de un edificio', width: 825, height: 1100 },
-  { src: '/trabajo/planta.jpg', alt: 'Técnico con traje blanco y máscara aplicando producto en una nave industrial', width: 1100, height: 825 },
-  { src: '/trabajo/equipo.jpg', alt: 'Técnico con traje, guantes y máscara preparando el equipo de aplicación', width: 1100, height: 1100 },
 ]
 
 export function PublicHome({ onEnter, sandbox = whatsappSandbox }) {
@@ -169,9 +161,6 @@ export function PublicHome({ onEnter, sandbox = whatsappSandbox }) {
         <div className="public-assurance" data-reveal style={{ '--i': 3 }}>
           <div><h3>{serviceAssurance.guaranteeTitle}</h3><p>{serviceAssurance.guaranteeText}</p></div>
           <div><h3>{serviceAssurance.safetyTitle}</h3><p>{serviceAssurance.safetyText}</p></div>
-        </div>
-        <div className="public-work" data-reveal style={{ '--i': 4 }}>
-          {trabajo.map(foto => <img key={foto.src} src={foto.src} alt={foto.alt} width={foto.width} height={foto.height} loading="lazy" />)}
         </div>
       </section>
       <section className="public-guide public-section" aria-labelledby="public-guide-title">
