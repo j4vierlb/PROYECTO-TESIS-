@@ -33,7 +33,7 @@ from sqlalchemy.engine import Connection
 from twilio.request_validator import RequestValidator
 from twilio.twiml.messaging_response import MessagingResponse
 
-from app.ai.agent import MAX_WHATSAPP_CHARS, generate_agent_decision
+from app.ai.agent import DIAS, MAX_WHATSAPP_CHARS, business_hours_text, generate_agent_decision
 from app.config import settings
 from app.database import get_db
 from app.geocoding import geocodificar_cliente
@@ -48,6 +48,7 @@ from app.repositories import (
     fetch_or_create_whatsapp_client,
     fetch_whatsapp_history,
     insert_whatsapp_message,
+    list_available_slots,
     set_conversation_human,
     update_whatsapp_client_address,
     whatsapp_message_exists,
@@ -213,6 +214,57 @@ def _schedule_visit(
     )
 
 
+def _availability_reply(db: Connection, decision: dict) -> str:
+    """Responde qué horas hay libres. Las calcula el backend con la misma regla con
+    que se agenda (horario de atención y técnico libre): la IA no las inventa."""
+    day = None
+    raw = decision.get("appointment_datetime")
+    if raw:
+        try:
+            parsed = datetime.fromisoformat(raw)
+            day = (parsed.astimezone(SANTIAGO) if parsed.tzinfo else parsed).date()
+        except ValueError:
+            day = None
+    empresa_id = UUID(settings.killbichos_empresa_id)
+    now = datetime.now(UTC)
+    by_day = _group_slots(list_available_slots(db, empresa_id, now, dia=day)) if day else {}
+    if by_day:
+        (only_day, hours), = by_day.items()
+        return (
+            f"Para el {_day_label(only_day)} tengo estas horas libres: {_join_hours(hours)} "
+            "(hora de Chile). ¿Cuál te acomoda?"
+        )
+    upcoming = _group_slots(list_available_slots(db, empresa_id, now))
+    if not upcoming:
+        return (
+            "No encontré horarios disponibles en los próximos días. "
+            "Un operador te contactará pronto para coordinar la visita."
+        )
+    lines = "; ".join(f"{_day_label(d)} a las {_join_hours(h)}" for d, h in upcoming.items())
+    prefix = "Ese día no tengo horas libres. " if day else ""
+    return (
+        f"{prefix}{business_hours_text()} Las próximas horas libres son: {lines} "
+        "(hora de Chile). ¿Cuál te acomoda?"
+    )
+
+
+def _group_slots(slots: list[datetime]) -> dict:
+    """Agrupa las horas libres por día de Chile: {fecha: ['08:00', '09:00']}."""
+    grouped: dict = {}
+    for slot in slots:
+        local = slot.astimezone(SANTIAGO)
+        grouped.setdefault(local.date(), []).append(local.strftime("%H:%M"))
+    return grouped
+
+
+def _day_label(day) -> str:
+    return f"{DIAS[day.weekday()]} {day.strftime('%d/%m')}"
+
+
+def _join_hours(hours: list[str]) -> str:
+    return hours[0] if len(hours) == 1 else ", ".join(hours[:-1]) + " y " + hours[-1]
+
+
 @router.post("/whatsapp")
 def whatsapp_webhook(
     request: Request,
@@ -278,7 +330,13 @@ def whatsapp_webhook(
     else:
         intent = decision["intent"]
         reply = decision["reply"]
-        if decision["action"] == "create_appointment":
+        if decision["action"] == "list_availability":
+            try:
+                reply = _availability_reply(db, decision)
+            except Exception:
+                db.rollback()
+                logger.exception("Error calculando los horarios libres (MessageSid=%s)", message_sid)
+        elif decision["action"] == "create_appointment":
             try:
                 reply = _schedule_visit(db, client, decision, message_sid, background_tasks)
             except Exception:

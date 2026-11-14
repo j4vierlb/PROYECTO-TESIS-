@@ -4,7 +4,7 @@
 # =============================================================================
 
 import logging
-from datetime import datetime, time, timedelta
+from datetime import date, datetime, time, timedelta
 from typing import Any
 from uuid import UUID
 
@@ -128,6 +128,35 @@ def _find_next_available_slot(
             return candidate.astimezone(UTC)
         candidate += timedelta(hours=1)
     return None
+
+
+def list_available_slots(
+    db: Connection,
+    empresa_id: UUID,
+    desde: datetime,
+    dia: date | None = None,
+    limite: int = 6,
+) -> list[datetime]:
+    """Horas en punto libres, de la más próxima a la más lejana (en UTC): dentro del
+    horario de atención y con un técnico libre. Si se indica `dia` (fecha de Chile),
+    solo busca en ese día; si no, desde `desde` hasta SUGGESTION_SEARCH_DAYS días.
+    Devuelve como máximo `limite` horas. Es la misma regla con la que se agenda."""
+    fixed_operator_id = _configured_operator_id(db, empresa_id)
+    start = max(desde, datetime.now(UTC)).astimezone(SANTIAGO)
+    candidate = start.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
+    if dia is not None:
+        candidate = max(candidate, datetime.combine(dia, time(0, 0), tzinfo=SANTIAGO))
+        end = datetime.combine(dia, time(23, 59), tzinfo=SANTIAGO)
+    else:
+        end = start + timedelta(days=SUGGESTION_SEARCH_DAYS)
+    slots: list[datetime] = []
+    while candidate <= end and len(slots) < limite:
+        if _is_within_business_hours(candidate) and _find_available_operator(
+            db, empresa_id, candidate, fixed_operator_id
+        ):
+            slots.append(candidate.astimezone(UTC))
+        candidate += timedelta(hours=1)
+    return slots
 
 
 def create_whatsapp_visit(

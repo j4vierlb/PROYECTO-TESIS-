@@ -31,7 +31,7 @@ MAX_WHATSAPP_CHARS = 1600  # máximo que acepta WhatsApp por mensaje
 MAX_INTENT_CHARS = 50      # largo de mensajes_whatsapp.intencion_detectada
 # Las únicas dos cosas que dejamos hacer a la IA: solo responder, o pedir
 # que se cree una visita. Cualquier otra acción se descarta más abajo.
-VALID_ACTIONS = {"reply", "create_appointment"}
+VALID_ACTIONS = {"reply", "create_appointment", "list_availability"}
 DIAS = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
 
 # El 'prompt del sistema' son las instrucciones fijas que se le dan a la IA
@@ -63,19 +63,21 @@ Reglas:
   (por ejemplo "Av. Libertad 1000, Viña del Mar"). Si el cliente la da sin comuna o ciudad, vuelve a
   preguntar por la comuna antes de agendar, porque sin ella no se puede ubicar el lugar en el mapa.
 - Si en la conversación se le ofreció al cliente un horario alternativo y lo acepta, usa ese horario.
-- Si el cliente pregunta qué horarios hay, o por qué un horario no está disponible, explícale el
-  "Horario de atención" que aparece en el contexto (días y horas). No inventes horas libres concretas:
-  la disponibilidad real la valida el sistema. Si el día que pidió (por ejemplo un domingo) está fuera
-  de ese horario, dile que atendemos solo esos días y ofrécele uno válido.
+- Si el cliente pregunta qué horarios u horas hay disponibles (por ejemplo "qué horarios tienes" o
+  "para hoy qué hora hay"), usa action=list_availability. En appointment_datetime pon el día por el que
+  preguntó (ISO 8601 con hora 00:00 y zona de Chile) o null si no dijo un día. No contestes tú las horas
+  ni digas que no puedes mostrarlas: el sistema calcula las horas libres reales y se las envía.
+- Si pregunta por qué un horario no está disponible, explícale el "Horario de atención" del contexto
+  (días y horas) y ofrécele ver las horas libres.
 - Para consultas generales responde directamente sin inventar precios ni servicios no indicados. El único
   horario comercial que puedes informar es el "Horario de atención" del contexto.
 - Si el cliente pide cancelar/reagendar, no ejecutes cambios todavía: indícale que un operador debe confirmar la modificación.
 - Devuelve SIEMPRE JSON válido con exactamente estas claves:
   action, intent, reply, appointment_datetime, client_address, client_name, notes
 
-Valores permitidos para action: reply, create_appointment.
+Valores permitidos para action: reply, create_appointment, list_availability.
 intent debe ser una cadena corta como consulta, agendar_visita, confirmar_horario, reagendar, cancelar.
-appointment_datetime debe ser ISO 8601 con zona horaria de Chile (ej: 2026-10-01T10:00:00-03:00) si action=create_appointment; en otro caso null.
+appointment_datetime debe ser ISO 8601 con zona horaria de Chile (ej: 2026-10-01T10:00:00-03:00) si action=create_appointment; si action=list_availability, el día consultado (00:00) o null; en otro caso null.
 client_address debe contener la dirección entregada por el cliente si existe; si no, usa null.
 client_name debe contener el nombre real que el cliente entregó en la conversación; si no lo ha dado, usa null.
 notes debe ser texto breve o null.
@@ -87,11 +89,12 @@ SCHEDULING_REMINDER = (
     "visita en una fecha y hora concretas (o acepta un horario que se le ofreció) y hay dirección, "
     "usa action=create_appointment con esa fecha y hora aunque esté fuera del horario de atención: "
     "no la rechaces tú, el sistema ofrece la alternativa. Si el último mensaje es una consulta, "
-    "un saludo, una cancelación o un cambio de una visita, usa action=reply."
+    "un saludo, una cancelación o un cambio de una visita, usa action=reply. Si pregunta qué horarios "
+    "u horas hay disponibles, usa action=list_availability."
 )
 
 
-def _business_hours_text() -> str:
+def business_hours_text() -> str:
     """Describe el horario de atención configurado en el .env, para que la IA
     no proponga horarios que el backend después va a rechazar."""
     days = [
@@ -190,7 +193,7 @@ def generate_agent_decision(
             "role": "system",
             "content": (
                 f"Fecha y hora actual en Santiago de Chile: {now.isoformat()} ({DIAS[now.weekday()]}). "
-                f"{_business_hours_text()} "
+                f"{business_hours_text()} "
                 f"Cliente: {client_name}. Dirección registrada: {client_address or 'no registrada'}. "
                 f"Visitas previas: {previous_visits if previous_visits is not None else 'desconocido'}."
             ),
