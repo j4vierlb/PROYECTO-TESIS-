@@ -115,7 +115,7 @@ def _client_data_text(client_address: str | None, previous_visits: int | None) -
     if previous_visits:
         name = (
             f"Visitas previas: {previous_visits}. Su nombre ya está confirmado: "
-            "no se lo pidas de nuevo."
+            "NO le pidas el nombre en tu respuesta."
         )
     else:
         name = (
@@ -125,7 +125,7 @@ def _client_data_text(client_address: str | None, previous_visits: int | None) -
     if client_address:
         address = (
             f"Dirección registrada: {client_address}. No se la pidas de nuevo: úsala para "
-            "agendar, salvo que el cliente diga que quiere otra."
+            "agendar, salvo que el cliente diga que quiere otra. NO le pidas la dirección en tu respuesta."
         )
     else:
         address = "Dirección registrada: ninguna. Pídele la dirección completa."
@@ -233,7 +233,13 @@ def generate_agent_decision(
     # Recordatorio al final, después del historial: es lo último que lee el
     # modelo. Sin esto, si antes rechazó un horario, tiende a repetir esa
     # respuesta en vez de dejar que el backend ofrezca el siguiente libre.
-    messages.append({"role": "system", "content": SCHEDULING_REMINDER})
+    # También se repite aquí el estado de los datos del cliente: si solo está al
+    # principio, el modelo lo ignora y vuelve a pedir un nombre o una dirección que
+    # ya están guardados.
+    messages.append({
+        "role": "system",
+        "content": f"{SCHEDULING_REMINDER} Datos del cliente: {_client_data_text(client_address, previous_visits)}",
+    })
 
     payload = {
         "model": settings.openai_model,
