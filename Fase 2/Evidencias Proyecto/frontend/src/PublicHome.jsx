@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef } from 'react'
 import QRCode from 'qrcode'
 import { BrandLogo } from './BrandLogo.jsx'
-import { companyInfo, whatsappSandbox } from './public-site-config.js'
+import { companyInfo, pestGroups, serviceAssurance, whatsappSandbox } from './public-site-config.js'
 import { sandboxLink } from './whatsapp-sandbox.js'
 import './public-home.css'
 
@@ -88,6 +88,9 @@ const archivo = {
 }
 
 const creditos = [
+  ['Mosquito Aedes aegypti', 'John Ragai, CC BY 2.0', 'https://commons.wikimedia.org/wiki/File:Aedes_aegypti_mosquito.jpg'],
+  ['Cucaracha americana (recortada)', 'Alex Wild, Insects Unlocked, dominio público (CC0)', 'https://commons.wikimedia.org/wiki/File:Periplaneta_americana_(25585111140).jpg'],
+  ['Araña de casa', 'Judy Gallagher, CC BY 2.0', 'https://commons.wikimedia.org/wiki/File:Giant_House_Spider_-_Tegenaria_atrica%3F,_Drymen,_Stirlingshire.jpg'],
   ['Cucaracha americana', 'ilustrador desconocido, dominio público', 'https://commons.wikimedia.org/wiki/File:American_cockroach_(Blatta_Americana).jpg'],
   ['Cacería de ratas', 'Edwin Landseer, 1823, dominio público', 'https://commons.wikimedia.org/wiki/File:Rat_catching_etching_E_Landseer_SLNSW.jpg'],
   ['Plus de microbes', 'Firmin Bouisset, 1897, dominio público', 'https://commons.wikimedia.org/wiki/File:Plus_de_microbes._Toutes_les_eaux_min%C3%A9rales._Entrep%C3%B4t_d%27Ivry_affiche,_Firmin_Bouisset.jpg'],
@@ -152,13 +155,21 @@ export function PublicHome({ onEnter, sandbox = whatsappSandbox }) {
           </article>
         })}</div>
       </section>
+      <section className="public-pests public-section" id="plagas" aria-labelledby="public-pests-title">
+        <div className="public-section-heading" data-reveal><p className="public-kicker">PLAGAS</p><h2 id="public-pests-title">Qué plagas controlamos</h2></div>
+        <div className="public-pest-grid">{pestGroups.map((group, index) => <article key={group.name} data-reveal style={{ '--i': index }}>{group.photo && <img src={group.photo.src} alt={group.photo.alt} style={{ objectPosition: group.photo.position }} width="900" height="600" loading="lazy" />}<h3>{group.name}</h3><p>{group.examples}</p></article>)}</div>
+        <div className="public-assurance" data-reveal style={{ '--i': 3 }}>
+          <div><h3>{serviceAssurance.guaranteeTitle}</h3><p>{serviceAssurance.guaranteeText}</p></div>
+          <div><h3>{serviceAssurance.safetyTitle}</h3><p>{serviceAssurance.safetyText}</p></div>
+        </div>
+      </section>
       <section className="public-guide public-section" aria-labelledby="public-guide-title">
         <div className="public-section-heading" data-reveal><p className="public-kicker">GUÍA DE PRUEBA</p><h2 id="public-guide-title">Tres pasos para conversar</h2></div>
         <ol><li data-reveal style={{ '--i': 0 }}><span aria-hidden="true">1</span><div><h3>Escanea o toca el botón</h3><p>Abre el chat del Sandbox de Twilio desde el QR o «Hablemos por WhatsApp».</p></div></li><li data-reveal style={{ '--i': 1 }}><span aria-hidden="true">2</span><div><h3>Envía el mensaje de unión</h3><p>Envía el mensaje que aparecerá escrito en WhatsApp. Espera la confirmación de unión.</p></div></li><li data-reveal style={{ '--i': 2 }}><span aria-hidden="true">3</span><div><h3>Escribe qué necesitas</h3><p>Por ejemplo: «quiero agendar una visita».</p></div></li></ol>
       </section>
       <section className="public-contact public-section" id="contacto" aria-labelledby="public-contact-title">
         <div className="public-section-heading" data-reveal><p className="public-kicker">CONTACTO DE LA EMPRESA</p><h2 id="public-contact-title">Conversemos</h2><p>Para contactar a Kill Bichos, utiliza estos datos.</p></div>
-        <dl data-reveal style={{ '--i': 1 }}><div><dt>Dirección · {companyInfo.district}</dt><dd>{companyInfo.address}</dd></div><div><dt>Teléfono</dt><dd><a href={companyInfo.phoneHref}>{companyInfo.phone}</a></dd></div><div><dt>Correo</dt><dd><a href={`mailto:${companyInfo.email}`}>{companyInfo.email}</a></dd></div><div><dt>Horarios</dt><dd>{companyInfo.hours || 'Consulta los horarios por teléfono o correo.'}</dd></div></dl>
+        <dl data-reveal style={{ '--i': 1 }}><div><dt>Dirección · {companyInfo.district}</dt><dd>{companyInfo.address}</dd></div><div><dt>Teléfono</dt><dd><a href={companyInfo.phoneHref}>{companyInfo.phone}</a></dd></div><div><dt>Correo</dt><dd><a href={`mailto:${companyInfo.email}`}>{companyInfo.email}</a></dd></div><div><dt>Horarios</dt><dd>{companyInfo.hours || 'Consulta los horarios por teléfono o correo.'}</dd></div><div><dt>Instagram</dt><dd><a href={companyInfo.instagram} target="_blank" rel="noopener noreferrer">@killbichos</a></dd></div></dl>
       </section>
     </main>
     <footer className="public-footer">
