@@ -108,6 +108,30 @@ def business_hours_text() -> str:
     )
 
 
+def _client_data_text(client_address: str | None, previous_visits: int | None) -> str:
+    """Dice con claridad qué datos del cliente ya están guardados, para que la IA no
+    se los vuelva a pedir. Un modelo ignora a veces un dato suelto, pero sigue una
+    instrucción explícita."""
+    if previous_visits:
+        name = (
+            f"Visitas previas: {previous_visits}. Su nombre ya está confirmado: "
+            "no se lo pidas de nuevo."
+        )
+    else:
+        name = (
+            "Visitas previas: 0 (o desconocido). Es su primera visita: debes pedirle su nombre "
+            "completo antes de agendar."
+        )
+    if client_address:
+        address = (
+            f"Dirección registrada: {client_address}. No se la pidas de nuevo: úsala para "
+            "agendar, salvo que el cliente diga que quiere otra."
+        )
+    else:
+        address = "Dirección registrada: ninguna. Pídele la dirección completa."
+    return f"{name} {address}"
+
+
 def _extract_json(text: str) -> dict:
     """Obtiene el objeto JSON de la respuesta, aunque venga envuelto en ```."""
     # Busca la primera '{' y la última '}'. A veces el modelo agrega texto o
@@ -194,8 +218,8 @@ def generate_agent_decision(
             "content": (
                 f"Fecha y hora actual en Santiago de Chile: {now.isoformat()} ({DIAS[now.weekday()]}). "
                 f"{business_hours_text()} "
-                f"Cliente: {client_name}. Dirección registrada: {client_address or 'no registrada'}. "
-                f"Visitas previas: {previous_visits if previous_visits is not None else 'desconocido'}."
+                f"Cliente: {client_name}. "
+                f"{_client_data_text(client_address, previous_visits)}"
             ),
         },
     ]

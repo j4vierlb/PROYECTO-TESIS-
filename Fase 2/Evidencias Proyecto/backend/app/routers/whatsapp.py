@@ -227,7 +227,7 @@ def _availability_reply(db: Connection, decision: dict) -> str:
             day = None
     empresa_id = UUID(settings.killbichos_empresa_id)
     now = datetime.now(UTC)
-    by_day = _group_slots(list_available_slots(db, empresa_id, now, dia=day)) if day else {}
+    by_day = _group_slots(list_available_slots(db, empresa_id, now, dia=day, limite=12)) if day else {}
     if by_day:
         (only_day, hours), = by_day.items()
         return (
