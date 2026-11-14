@@ -59,4 +59,22 @@ void main() {
     expect(find.text('Historial de visitas'), findsOneWidget);
     expect(find.text('Agenda del día'), findsNothing);
   });
+  testWidgets('La pestaña Plagas muestra las plagas, la garantía y la seguridad sin usar el servidor', (tester) async {
+    await tester.pumpWidget(MaterialApp(theme: AppTheme.light, home: const HomeScreen()));
+
+    await tester.tap(find.text('Plagas'));
+    await tester.pump();
+
+    expect(find.text('Qué plagas controlamos'), findsOneWidget);
+    for (final grupo in ['Voladores', 'Rastreros', 'Arácnidos']) {
+      expect(find.text(grupo), findsOneWidget);
+    }
+    expect(find.textContaining('Cucarachas, pulgas, hormigas'), findsOneWidget);
+    // La lista solo dibuja lo que cabe en pantalla: se baja hasta cada tarjeta.
+    await tester.scrollUntilVisible(find.text('Garantía de 30 días'), 200);
+    expect(find.text('Garantía de 30 días'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Productos seguros'), 200);
+    expect(find.text('Productos seguros'), findsOneWidget);
+    expect(find.text('Agenda del día'), findsNothing);
+  });
 }

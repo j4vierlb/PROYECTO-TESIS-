@@ -154,3 +154,20 @@
   .public-home.reveal-ready [data-reveal]:not(.is-visible){opacity:1;transform:none}
   .public-home .public-chat-badge::before{display:none}
 }
+
+/* ----- Plagas, garantía y seguridad ----- */
+.public-home .public-pest-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;border-top:2px solid var(--ink);padding-top:32px}
+.public-home .public-pest-grid article{padding:8px 0}
+.public-home .public-pest-grid h3{font-size:clamp(28px,3.2vw,44px);letter-spacing:-.04em;line-height:1;font-weight:900;margin:0 0 14px}
+.public-home .public-pest-grid p{font-size:18px;line-height:1.6;margin:0;max-width:340px}
+.public-home .public-assurance{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:48px;padding:32px;border-radius:20px;background:#EFE9D2}
+.public-home .public-assurance h3{font-size:22px;font-weight:800;margin:0 0 10px}
+.public-home .public-assurance p{font-size:17px;line-height:1.6;margin:0}
+@media (max-width:900px){
+  .public-home .public-pest-grid,.public-home .public-assurance{grid-template-columns:1fr}
+  .public-home .public-assurance{padding:24px 20px}
+}
+.public-home .public-work{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:40px;align-items:stretch}
+.public-home .public-work img{width:100%;height:340px;object-fit:cover;border-radius:16px;display:block;background:#EFE9D2}
+@media (max-width:900px){.public-home .public-work{grid-template-columns:1fr}.public-home .public-work img{height:240px}}
+.public-home .public-pest-grid article img{width:100%;height:220px;object-fit:cover;border-radius:16px;display:block;margin-bottom:18px;background:#EFE9D2}

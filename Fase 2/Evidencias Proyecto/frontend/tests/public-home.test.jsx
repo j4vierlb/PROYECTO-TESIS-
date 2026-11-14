@@ -222,3 +222,14 @@ it.each([
 ])('rechaza datos inválidos sin enlaces externos arbitrarios: %j', config => {
   expect(sandboxLink(config)).toBeNull()
 })
+
+it('muestra las plagas, la garantía, la seguridad y el Instagram de la empresa', () => {
+  render(<PublicHome onEnter={vi.fn()} sandbox={sandbox} />)
+  expect(screen.getByRole('heading', { name: 'Qué plagas controlamos' })).toBeVisible()
+  for (const name of ['Voladores', 'Rastreros', 'Arácnidos']) expect(screen.getByRole('heading', { name })).toBeVisible()
+  expect(screen.getByText(/Cucarachas, pulgas, hormigas/)).toBeVisible()
+  for (const alt of ['Mosquito Aedes aegypti posado sobre la piel', 'Cucaracha americana sobre fondo blanco', 'Araña de casa sobre una pared blanca']) expect(screen.getByAltText(alt)).toBeInTheDocument()
+  expect(screen.getByRole('heading', { name: 'Garantía de 30 días' })).toBeVisible()
+  expect(screen.getByText(/no manchan los muros/)).toBeVisible()
+  expect(screen.getByRole('link', { name: '@killbichos' })).toHaveAttribute('href', 'https://www.instagram.com/killbichos/')
+})
