@@ -1,16 +1,15 @@
 // =============================================================================
 // screens/home_screen.dart — Pantalla principal (después del login)
 // -----------------------------------------------------------------------------
-// Solo contiene la barra inferior con cuatro pestañas y muestra la pantalla que
+// Solo contiene la barra inferior con tres pestañas y muestra la pantalla que
 // corresponde: "Hoy" (AgendaScreen), "Próximas" (ProximasScreen) o
-// "Historial" (HistorialScreen) o "Plagas" (PlagasScreen, informativa).
+// "Historial" (HistorialScreen).
 // =============================================================================
 
 import 'package:flutter/material.dart';
 
 import 'agenda_screen.dart';
 import 'historial_screen.dart';
-import 'plagas_screen.dart';
 import 'proximas_screen.dart';
 
 /// Pantalla principal después del login, con barra inferior para cambiar
@@ -25,7 +24,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Pestaña seleccionada: 0 = Hoy, 1 = Próximas, 2 = Historial, 3 = Plagas.
+  // Pestaña seleccionada: 0 = Hoy, 1 = Próximas, 2 = Historial.
   int _index = 0;
 
   @override
@@ -35,8 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: switch (_index) {
         0 => const AgendaScreen(),
         1 => const ProximasScreen(),
-        2 => const HistorialScreen(),
-        _ => const PlagasScreen(),
+        _ => const HistorialScreen(),
       },
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
@@ -56,11 +54,6 @@ class _HomeScreenState extends State<HomeScreen> {
           NavigationDestination(
             icon: Icon(Icons.history),
             label: 'Historial',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.bug_report_outlined),
-            selectedIcon: Icon(Icons.bug_report),
-            label: 'Plagas',
           ),
         ],
       ),

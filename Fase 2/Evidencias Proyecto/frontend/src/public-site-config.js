@@ -26,8 +26,8 @@ export const companyInfo = {
 // El enlace coincide con el QR proporcionado por Javier a través de Juan.
 export const whatsappSandbox = { phone: '+14155238886', joinMessage: 'join example-primitive' }
 
-// Plagas que controla la empresa, agrupadas como en su sitio. La app móvil muestra
-// la misma lista en app-movil/lib/models/plagas.dart: si cambia aquí, cambiarla allá.
+// Plagas que controla la empresa, agrupadas como en su sitio. La app móvil usa una lista
+// más detallada en el cuadro de sugerencia de croquis (croquis_screen.dart).
 export const pestGroups = [
   { name: 'Voladores', examples: 'Moscas, mosquitos, polillas y otros insectos voladores.', photo: { src: '/plagas/mosquito.jpg', alt: 'Mosquito Aedes aegypti posado sobre la piel', position: 'center' } },
   { name: 'Rastreros', examples: 'Cucarachas, pulgas, hormigas, tijeretas y similares.', photo: { src: '/plagas/cucaracha.jpg', alt: 'Cucaracha americana sobre fondo blanco', position: 'center' } },

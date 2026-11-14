@@ -87,6 +87,34 @@ class ReglasTest(unittest.TestCase):
         self.assertEqual(plan_b(LAT, LNG, "moscas", 200, [])[0]["tipo"], "trampa_luz")
         self.assertEqual(plan_b(LAT, LNG, "cucarachas", 200, [])[0]["tipo"], "trampa_pegamento")
 
+    def test_plan_b_cubre_todas_las_plagas_de_la_empresa(self):
+        """Cada plaga del enum tiene un tipo de trampa: roedores con cebadero, voladores
+        con luz y rastreros y arácnidos con pegamento."""
+        from app.schemas import Plaga
+        from app.ai.croquis_agent import PLAN_B_TYPE
+
+        self.assertEqual(set(PLAN_B_TYPE), {plaga.value for plaga in Plaga})
+        for plaga in ("roedores",):
+            self.assertEqual(PLAN_B_TYPE[plaga], "cebadero")
+        for plaga in ("moscas", "polillas", "avispas"):
+            self.assertEqual(PLAN_B_TYPE[plaga], "trampa_luz")
+        for plaga in ("cucarachas", "hormigas", "pulgas", "aranas", "garrapatas", "otra"):
+            self.assertEqual(PLAN_B_TYPE[plaga], "trampa_pegamento")
+
+    def test_plan_b_funciona_con_las_plagas_nuevas(self):
+        for plaga in ("hormigas", "pulgas", "polillas", "avispas", "aranas", "garrapatas"):
+            devices = plan_b(LAT, LNG, plaga, 200, [])
+            self.assertTrue(devices, plaga)
+
+    def test_la_peticion_acepta_las_plagas_nuevas_y_rechaza_otras(self):
+        from pydantic import ValidationError
+        from app.schemas import CroquisSuggestionRequest
+
+        for plaga in ("hormigas", "aranas", "garrapatas", "moscas"):
+            CroquisSuggestionRequest(tipo_recinto="casa", plaga=plaga)
+        with self.assertRaises(ValidationError):
+            CroquisSuggestionRequest(tipo_recinto="casa", plaga="dinosaurios")
+
     def test_plan_b_no_repite_trampas_instaladas(self):
         first = plan_b(LAT, LNG, "roedores", 200, [])
         again = plan_b(LAT, LNG, "roedores", 200, first[:2])
