@@ -247,6 +247,8 @@ La URL de ngrok cambia cada vez que lo reinicias: actualízala en Twilio y en el
 
 Además de contestar lo que escribe el cliente (TwiML en el webhook), el backend le escribe por iniciativa propia con la API REST de Twilio (`app/whatsapp_saliente.py`):
 
+> **Bloqueo actual (14/11/2026):** estos envíos fallan con el error **20003** hasta que la cuenta de Twilio tenga aprobado su perfil de cumplimiento (Primary Customer Profile en Trust Hub). Ver [`../docs/twilio_perfil_cumplimiento.md`](../docs/twilio_perfil_cumplimiento.md).
+
 | Qué | Cuándo |
 |---|---|
 | **Aviso de visita** | El panel crea una visita, cambia su fecha (Reagendar), la cancela o reactiva una cancelada. Cambiar solo notas, operador o avance (en curso, completada) no se avisa. Tampoco se avisan visitas que ya pasaron. |
