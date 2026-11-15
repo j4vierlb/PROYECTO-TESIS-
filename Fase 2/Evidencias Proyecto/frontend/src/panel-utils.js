@@ -1,7 +1,13 @@
+// Todas las fechas del panel se muestran en hora de Chile, sin importar en qué
+// país o zona horaria esté el navegador.
 const CHILE_ZONE = 'America/Santiago'
 
+// Devuelve el día en formato AAAA-MM-DD. Se usa el formato sueco ('sv-SE')
+// porque ya viene escrito en ese orden.
 export const chileDate = (value = new Date()) => value.toLocaleDateString('sv-SE', { timeZone: CHILE_ZONE })
 
+// Suma o resta días a una fecha AAAA-MM-DD. Se calcula en UTC para que el
+// cambio de horario no la corra un día por error.
 export function addDays(value, days) {
   const [year, month, day] = value.split('-').map(Number)
   return new Date(Date.UTC(year, month - 1, day + days)).toLocaleDateString('sv-SE', { timeZone: 'UTC' })
@@ -23,17 +29,22 @@ export function chileDateTimeInput(value) {
   return `${chileDate(new Date(value))}T${chileTime(value)}`
 }
 
+// ¿El cliente tiene coordenadas válidas? La latitud va de -90 a 90 y la
+// longitud de -180 a 180.
 export function hasClientLocation(client) {
   return Number.isFinite(client.lat) && Number.isFinite(client.lng)
     && client.lat >= -90 && client.lat <= 90 && client.lng >= -180 && client.lng <= 180
 }
 
+// Texto para mostrar la ubicación en el panel; si no hay, avisa que está pendiente.
 export function clientLocation(client) {
   return hasClientLocation(client)
     ? `${client.lat.toFixed(4)}, ${client.lng.toFixed(4)}`
     : 'Ubicación pendiente de confirmar'
 }
 
+// Prepara los datos de una visita para enviarlos a la API: la hora que escribió
+// el usuario (hora de Chile) se convierte a UTC, que es como se guarda.
 export function visitPayload(form) {
   return { ...form, operador_id: form.operador_id || null, fecha_hora: chileDateTimeToUtc(form.fecha_hora) }
 }
@@ -54,6 +65,8 @@ export function chileDateTimeToUtc(value) {
     const parts = Object.fromEntries(formatter.formatToParts(new Date(timestamp)).map(p => [p.type, p.value]))
     return Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour, +parts.minute, +parts.second)
   }
+  // Aproximación sucesiva: se ajusta el instante hasta que la hora de Chile
+  // coincida con la pedida (máximo 3 intentos, por el cambio de horario).
   let instant = desired
   for (let attempt = 0; attempt < 3; attempt++) {
     const difference = desired - wallTime(instant)
@@ -64,6 +77,8 @@ export function chileDateTimeToUtc(value) {
   throw new Error('Esta hora no existe en Chile por el cambio de horario. Elige otra hora.')
 }
 
+// Valida y limpia el formulario de un cliente: las coordenadas van las dos o
+// ninguna, y los textos vacíos pasan a null.
 export function clientPayload(form) {
   const missingLat = form.lat === '' || form.lat == null
   const missingLng = form.lng === '' || form.lng == null

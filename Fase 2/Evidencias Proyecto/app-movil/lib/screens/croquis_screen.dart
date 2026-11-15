@@ -390,6 +390,8 @@ class _CroquisScreenState extends State<CroquisScreen> {
               ListTile(
                 leading: const Icon(Icons.pest_control_outlined),
                 title: Text(_tipoLabel(tipo)),
+                // Para qué plagas sirve cada dispositivo (las que controla la empresa).
+                subtitle: Text(plagasDelTipo(tipo)),
                 onTap: () => Navigator.of(context).pop(tipo),
               ),
           ],
@@ -1246,10 +1248,17 @@ class _SugerenciaDialogState extends State<_SugerenciaDialog> {
     'local_comercial': 'Local comercial',
     'industria': 'Industria',
   };
+  // Plagas que controla Kill Bichos. Las claves deben coincidir con el enum Plaga del backend.
   static const _plagas = {
     'roedores': 'Roedores',
     'cucarachas': 'Cucarachas',
-    'moscas': 'Moscas',
+    'hormigas': 'Hormigas',
+    'pulgas': 'Pulgas',
+    'moscas': 'Moscas y mosquitos',
+    'polillas': 'Polillas',
+    'avispas': 'Avispas',
+    'aranas': 'Arañas',
+    'garrapatas': 'Garrapatas y ácaros',
     'otra': 'Otra',
   };
 
@@ -1353,3 +1362,13 @@ class _Aviso extends StatelessWidget {
     );
   }
 }
+
+/// Plagas para las que se usa cada tipo de dispositivo. El tipo es lo único que se
+/// guarda (la base solo admite estos cuatro): la plaga se muestra como ayuda al elegir.
+@visibleForTesting
+String plagasDelTipo(String tipo) => switch (tipo) {
+      'cebadero' => 'Roedores',
+      'trampa_pegamento' => 'Cucarachas, hormigas, pulgas, arañas y garrapatas',
+      'trampa_luz' => 'Moscas, mosquitos, polillas y avispas',
+      _ => 'Otro dispositivo o plaga',
+    };

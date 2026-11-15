@@ -33,19 +33,22 @@ from sqlalchemy.engine import Connection
 from twilio.request_validator import RequestValidator
 from twilio.twiml.messaging_response import MessagingResponse
 
-from app.ai.agent import MAX_WHATSAPP_CHARS, generate_agent_decision
+from app.ai.agent import DIAS, MAX_WHATSAPP_CHARS, business_hours_text, generate_agent_decision
 from app.config import settings
 from app.database import get_db
 from app.geocoding import geocodificar_cliente
 from app.whatsapp_saliente import status_callback_base, status_callback_url
 from app.repositories import (
     HorarioNoDisponible,
+    count_client_visits,
+    update_whatsapp_client_name,
     update_whatsapp_delivery,
     create_whatsapp_visit,
     fetch_active_whatsapp_conversation,
     fetch_or_create_whatsapp_client,
     fetch_whatsapp_history,
     insert_whatsapp_message,
+    list_available_slots,
     set_conversation_human,
     update_whatsapp_client_address,
     whatsapp_message_exists,
@@ -56,11 +59,15 @@ SANTIAGO = ZoneInfo("America/Santiago")
 UTC = timezone.utc
 MAX_DAYS_AHEAD = 60  # no se agendan visitas a más de 60 días
 
+# Mensaje de contingencia: el cliente siempre recibe una respuesta,
+# aunque algo falle por dentro (la IA, la base de datos, etc.).
 FALLBACK_REPLY = (
     "Gracias por escribirnos 😊 Tuvimos un inconveniente procesando tu mensaje. "
     "Un operador te contactará pronto."
 )
 
+# prefix='/webhooks' hace que las rutas queden como /webhooks/whatsapp y
+# /webhooks/whatsapp/estado.
 router = APIRouter(prefix="/webhooks", tags=["whatsapp"])
 
 
@@ -130,6 +137,8 @@ def _parse_appointment_datetime(value: str) -> datetime:
     return parsed_utc
 
 
+# Convierte una fecha guardada en UTC a la hora de Chile, con el formato que
+# se le muestra al cliente (ej: 07/11/2026 a las 10:00).
 def _format_local(fecha_hora: datetime) -> str:
     return fecha_hora.astimezone(SANTIAGO).strftime("%d/%m/%Y a las %H:%M")
 
@@ -143,6 +152,7 @@ def _schedule_visit(
 ) -> str:
     """Intenta agendar la visita que pidió la IA y devuelve el texto que se
     le responde al cliente (confirmación, pedido de datos o alternativa)."""
+    first_visit = count_client_visits(db, client["id"]) == 0
     new_address = decision["client_address"]
     address = new_address or client.get("direccion")
     if not address:
@@ -151,6 +161,15 @@ def _schedule_visit(
         update_whatsapp_client_address(db, client["id"], new_address)
         # Las coordenadas se buscan después de responder, para no demorar a Twilio.
         background_tasks.add_task(geocodificar_cliente, client["id"], new_address)
+
+    # Primer agendamiento: se pide el nombre real. Lo decide el backend (no solo
+    # la IA), igual que con la dirección, para que nunca se agende sin nombre.
+    if first_visit:
+        new_name = decision.get("client_name")
+        if not new_name:
+            return "Claro 😊 Antes de agendar tu primera visita, ¿me indicas tu nombre completo?"
+        if new_name != (client.get("nombre") or "").strip():
+            update_whatsapp_client_name(db, client["id"], new_name)
 
     if not decision["appointment_datetime"]:
         return "Claro 😊 Para agendar necesito que me indiques una fecha y una hora concreta."
@@ -172,6 +191,9 @@ def _schedule_visit(
             appointment_utc,
             decision["notes"],
         )
+    # Si el horario está ocupado o fuera de atención, el repositorio lanza esta
+    # excepción. Aquí se convierte en una respuesta amable con una alternativa.
+    # db.rollback() deshace lo que alcanzó a escribirse, para no dejar datos a medias.
     except HorarioNoDisponible as exc:
         db.rollback()
         logger.info("Horario no disponible (MessageSid=%s): %s", message_sid, exc)
@@ -192,6 +214,57 @@ def _schedule_visit(
     )
 
 
+def _availability_reply(db: Connection, decision: dict) -> str:
+    """Responde qué horas hay libres. Las calcula el backend con la misma regla con
+    que se agenda (horario de atención y técnico libre): la IA no las inventa."""
+    day = None
+    raw = decision.get("appointment_datetime")
+    if raw:
+        try:
+            parsed = datetime.fromisoformat(raw)
+            day = (parsed.astimezone(SANTIAGO) if parsed.tzinfo else parsed).date()
+        except ValueError:
+            day = None
+    empresa_id = UUID(settings.killbichos_empresa_id)
+    now = datetime.now(UTC)
+    by_day = _group_slots(list_available_slots(db, empresa_id, now, dia=day, limite=12)) if day else {}
+    if by_day:
+        (only_day, hours), = by_day.items()
+        return (
+            f"Para el {_day_label(only_day)} tengo estas horas libres: {_join_hours(hours)} "
+            "(hora de Chile). ¿Cuál te acomoda?"
+        )
+    upcoming = _group_slots(list_available_slots(db, empresa_id, now))
+    if not upcoming:
+        return (
+            "No encontré horarios disponibles en los próximos días. "
+            "Un operador te contactará pronto para coordinar la visita."
+        )
+    lines = "; ".join(f"{_day_label(d)} a las {_join_hours(h)}" for d, h in upcoming.items())
+    prefix = "Ese día no tengo horas libres. " if day else ""
+    return (
+        f"{prefix}{business_hours_text()} Las próximas horas libres son: {lines} "
+        "(hora de Chile). ¿Cuál te acomoda?"
+    )
+
+
+def _group_slots(slots: list[datetime]) -> dict:
+    """Agrupa las horas libres por día de Chile: {fecha: ['08:00', '09:00']}."""
+    grouped: dict = {}
+    for slot in slots:
+        local = slot.astimezone(SANTIAGO)
+        grouped.setdefault(local.date(), []).append(local.strftime("%H:%M"))
+    return grouped
+
+
+def _day_label(day) -> str:
+    return f"{DIAS[day.weekday()]} {day.strftime('%d/%m')}"
+
+
+def _join_hours(hours: list[str]) -> str:
+    return hours[0] if len(hours) == 1 else ", ".join(hours[:-1]) + " y " + hours[-1]
+
+
 @router.post("/whatsapp")
 def whatsapp_webhook(
     request: Request,
@@ -210,6 +283,8 @@ def whatsapp_webhook(
         return _twiml()
 
     try:
+        # Idempotencia: si Twilio reenvía el mismo mensaje (mismo MessageSid) lo
+        # ignoramos, para no agendar dos veces la misma visita.
         if whatsapp_message_exists(db, message_sid):
             logger.info("Mensaje duplicado de Twilio ignorado: %s", message_sid)
             return _twiml()
@@ -242,7 +317,12 @@ def whatsapp_webhook(
         return _twiml(FALLBACK_REPLY)
 
     try:
-        decision = generate_agent_decision(history, client["nombre"], client.get("direccion"))
+        # Se le pasa a la IA el historial (últimos 20 mensajes), el nombre del
+        # cliente y su dirección. Devuelve la decisión ya validada.
+        decision = generate_agent_decision(
+            history, client["nombre"], client.get("direccion"),
+            count_client_visits(db, client["id"]),
+        )
     except Exception:
         logger.exception("Falló el agente de IA (MessageSid=%s)", message_sid)
         reply = "Gracias por escribirnos 😊 Un operador te contactará pronto para ayudarte."
@@ -250,7 +330,13 @@ def whatsapp_webhook(
     else:
         intent = decision["intent"]
         reply = decision["reply"]
-        if decision["action"] == "create_appointment":
+        if decision["action"] == "list_availability":
+            try:
+                reply = _availability_reply(db, decision)
+            except Exception:
+                db.rollback()
+                logger.exception("Error calculando los horarios libres (MessageSid=%s)", message_sid)
+        elif decision["action"] == "create_appointment":
             try:
                 reply = _schedule_visit(db, client, decision, message_sid, background_tasks)
             except Exception:
@@ -261,6 +347,8 @@ def whatsapp_webhook(
                     "Un operador te contactará pronto."
                 )
 
+    # Se guarda la respuesta del bot en el historial, para que el panel la
+    # muestre y para que la IA la recuerde en el próximo mensaje.
     saved = None
     try:
         # Sin URL pública Twilio no informará el estado: se deja vacío en vez de "queued" para siempre.

@@ -17,7 +17,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.config import settings
+from app.config import jwt_secret_inseguro, settings
 from app.routers import auth, conversaciones, croquis, dispositivos, panel, password_reset, visitas, whatsapp
 from app.whatsapp_saliente import ejecutar_recordatorios
 
@@ -52,6 +52,13 @@ async def _reminder_loop() -> None:
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    # No se detiene el arranque (un clon limpio debe poder levantarse para
+    # probarlo), pero queda escrito en el log que esa clave no es segura.
+    if jwt_secret_inseguro(settings.jwt_secret):
+        logger.warning(
+            "JWT_SECRET es una clave de ejemplo o muy corta (menos de 32 caracteres): "
+            "cualquiera podría fabricar sesiones. Genera una con: openssl rand -hex 32"
+        )
     task = asyncio.create_task(_reminder_loop())
     yield
     task.cancel()

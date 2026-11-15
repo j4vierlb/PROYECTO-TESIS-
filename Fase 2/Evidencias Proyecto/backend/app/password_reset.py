@@ -15,7 +15,10 @@ from sqlalchemy import text
 from app.config import settings
 from app.security import hash_password
 
+# El enlace de recuperación dura 15 minutos.
 RESET_MINUTES = 15
+# Siempre se responde lo mismo, exista o no el correo. Así nadie puede
+# descubrir qué correos tienen cuenta (se llama 'enumeración de usuarios').
 GENERIC_MESSAGE = "Si el correo corresponde a una cuenta activa del panel, recibirás un enlace para restablecer tu contraseña."
 INVALID_LINK = "El enlace no es válido o ya venció. Solicita uno nuevo."
 logger = logging.getLogger(__name__)
@@ -44,6 +47,8 @@ def mail_ready() -> bool:
         return False
 
 
+# Hash SHA-256 del token. En la base se guarda solo este hash, nunca el token:
+# si alguien lee la base de datos no puede usar los enlaces.
 def digest(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
 
@@ -51,7 +56,10 @@ def digest(token: str) -> str:
 def enforce_limit(db, scope: str, maximum: int) -> None:
     # No usar X-Forwarded-For suministrado por el cliente. Un proxy de confianza
     # debe configurar la IP real del ASGI server; documentado en README.
+    # La clave del límite se arma con HMAC usando el JWT_SECRET, para no guardar
+    # el correo ni la IP en texto plano.
     key = hmac.new(settings.jwt_secret.encode(), scope.encode(), hashlib.sha256).hexdigest()
+    # De paso se limpian los límites que ya vencieron.
     db.execute(text("DELETE FROM password_reset_limits WHERE expires_at < now()"))
     count = db.execute(text("""
         INSERT INTO password_reset_limits(scope_hash, attempts, expires_at)
@@ -61,6 +69,8 @@ def enforce_limit(db, scope: str, maximum: int) -> None:
         RETURNING attempts
     """), {"key": key, "ceiling": maximum + 1}).scalar_one()
     db.commit()
+    # Si superó el máximo de intentos responde 429 (Too Many Requests) y le
+    # indica esperar 900 segundos (15 minutos).
     if count > maximum:
         raise HTTPException(429, "Demasiados intentos. Espera 15 minutos antes de volver a intentar.",
                             headers={"Retry-After": "900"})
@@ -76,6 +86,8 @@ def issue_token(db, email: str) -> tuple[str, str] | None:
     if not user:
         db.commit()
         return None
+    # secrets genera 32 bytes realmente aleatorios (aptos para seguridad).
+    # El módulo 'random' normal no serviría para esto.
     token = secrets.token_urlsafe(32)
     db.execute(text("""
         INSERT INTO password_reset_tokens(token_hash, usuario_id, session_version, expires_at)
@@ -103,6 +115,7 @@ def send_reset_email(delivery: tuple[str, str] | None) -> None:
         "Después del cambio se cerrarán tus sesiones anteriores del panel.\n"
     )
     try:
+        # Contexto TLS para que el correo viaje cifrado hasta el servidor SMTP.
         context = ssl.create_default_context()
         if settings.smtp_security == "ssl":
             client = smtplib.SMTP_SSL(settings.smtp_host, settings.smtp_port, timeout=10, context=context)
@@ -135,6 +148,8 @@ def redeem_token(db, token: str, password: str) -> None:
         SELECT session_version FROM password_reset_tokens
         WHERE token_hash = :hash AND expires_at > clock_timestamp()
     """), {"hash": token_hash}).scalar_one_or_none()
+    # El token solo vale si existe, no venció y la cuenta no cambió desde que
+    # se pidió (misma session_version).
     if not user or valid is None or valid != user["session_version"]:
         db.rollback()
         raise HTTPException(400, INVALID_LINK)
@@ -143,6 +158,9 @@ def redeem_token(db, token: str, password: str) -> None:
             UPDATE usuarios SET password_hash = :password, session_version = session_version + 1
             WHERE id = :id
         """), {"password": hash_password(password), "id": owner})
+        # El UPDATE de arriba subió session_version (eso cierra las sesiones abiertas).
+        # Aquí se borran todos los enlaces pendientes de la cuenta: cada uno sirve
+        # una sola vez.
         db.execute(text("DELETE FROM password_reset_tokens WHERE usuario_id = :id"), {"id": owner})
         db.commit()
     except Exception:

@@ -1,5 +1,5 @@
 import React from 'react'
-import { fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { renderAccess } from './support/render-access.jsx'
@@ -267,10 +267,12 @@ describe('Regresión del panel: interacción con el formulario y respuestas API'
     }))
     renderAccess()
     await waitFor(() => expect(resolveFirst).toBeDefined())
-    fireEvent.change(screen.getByLabelText('Fecha de la agenda'), { target: { value: '2026-11-03' } })
+    const initialDate = screen.getByLabelText('Fecha de la agenda').value
+    fireEvent.click(screen.getByRole('button', { name: 'Día siguiente' }))
+    expect(screen.getByLabelText('Fecha de la agenda').value).not.toBe(initialDate)
     expect(await screen.findByText('Día nuevo')).toBeVisible()
-    resolveFirst(new Response(JSON.stringify([existingVisit({ cliente: { ...client, nombre: 'Día anterior' } })]), { status: 200 }))
-    await waitFor(() => expect(screen.queryByText('Día anterior')).not.toBeInTheDocument())
+    await act(async () => resolveFirst(new Response(JSON.stringify([existingVisit({ cliente: { ...client, nombre: 'Día anterior' } })]), { status: 200 })))
+    expect(screen.queryByText('Día anterior')).not.toBeInTheDocument()
     expect(screen.getByText('Día nuevo')).toBeVisible()
   })
 
@@ -485,6 +487,30 @@ describe('Bandeja de WhatsApp y reagendamiento', () => {
     await user.click(screen.getByRole('button', { name: /WhatsApp/ }))
     expect(await screen.findByText(/no escribe hace más de 24 h/)).toBeVisible()
     expect(screen.queryByLabelText('Mensaje para el cliente')).not.toBeInTheDocument()
+  })
+
+  it('mantiene el control manual si llega un historial anterior después del cambio', async () => {
+    vi.useFakeTimers()
+    try {
+      renderAccess()
+      await act(async () => fireEvent.click(screen.getByRole('button', { name: 'WhatsApp' })))
+      const staleResponse = new Response(JSON.stringify(detail), { status: 200 })
+      const delayed = Promise.withResolvers()
+      fetch.mockImplementationOnce(() => delayed.promise)
+      await act(async () => vi.advanceTimersByTimeAsync(5000))
+      const [url, options] = fetch.mock.lastCall
+      expect(new URL(url).pathname).toBe(`/panel/conversaciones/${conversationId}`)
+
+      await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Tomar conversación' })))
+      expect(options.signal.aborted).toBe(true)
+      await act(async () => delayed.resolve(staleResponse))
+
+      expect(writes.at(-1).body).toEqual({ atendida_por_humano: true })
+      expect(screen.getByRole('button', { name: 'Devolver a la IA' })).toBeEnabled()
+      expect(within(screen.getByRole('button', { name: /Cliente WhatsApp/ })).getByText('Operador')).toBeVisible()
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   it('al editar una visita avisa que el cambio de fecha se le informa al cliente', async () => {

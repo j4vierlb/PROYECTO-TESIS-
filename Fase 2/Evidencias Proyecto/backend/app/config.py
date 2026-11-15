@@ -8,6 +8,11 @@
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# Claves de ejemplo que no sirven en un servidor real: la del código y la
+# que trae el .env.example. Cualquiera que lea el repositorio las conoce.
+JWT_SECRETS_DE_EJEMPLO = {"desarrollo-cambia-esta-clave", "REEMPLAZAR_CON_UN_SECRETO_ALEATORIO"}
+JWT_SECRET_LARGO_MINIMO = 32
+
 
 # Settings lee JWT_SECRET, DATABASE_URL y ALLOWED_ORIGINS desde el archivo .env
 # (o desde variables de entorno reales en producción). Así ningún secreto
@@ -91,6 +96,11 @@ class Settings(BaseSettings):
     # env_file=".env": busca los valores en ese archivo.
     # extra="ignore": si el .env trae variables que no se usan aquí, no falla.
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+
+def jwt_secret_inseguro(secreto: str) -> bool:
+    """true si la clave de los tokens es una de ejemplo o es demasiado corta."""
+    return secreto in JWT_SECRETS_DE_EJEMPLO or len(secreto) < JWT_SECRET_LARGO_MINIMO
 
 
 # Instancia única que el resto del backend importa (from app.config import settings).

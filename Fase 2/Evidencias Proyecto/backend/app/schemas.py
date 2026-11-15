@@ -310,9 +310,17 @@ class TipoRecinto(str, Enum):
 
 
 class Plaga(str, Enum):
+    """Plagas que controla Kill Bichos (voladores, rastreros, arácnidos y roedores).
+    `moscas` se conserva con ese nombre por compatibilidad con apps ya instaladas."""
     roedores = "roedores"
     cucarachas = "cucarachas"
+    hormigas = "hormigas"
+    pulgas = "pulgas"
     moscas = "moscas"
+    polillas = "polillas"
+    avispas = "avispas"
+    aranas = "aranas"
+    garrapatas = "garrapatas"
     otra = "otra"
 
 

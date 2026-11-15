@@ -7,11 +7,18 @@ import 'package:sqflite/sqflite.dart';
 import '../db/local_database.dart';
 import 'local_store.dart';
 
+// Implementación REAL de LocalStore: guarda todo en una base SQLite dentro del
+// teléfono (paquete sqflite). Usa dos tablas:
+//   - 'cache'  = la última copia de lo que se vio con señal.
+//   - 'outbox' = la cola de cambios hechos sin señal, pendientes de enviar.
+// Las pruebas usan otra implementación en memoria, por eso existe LocalStore.
 class SqliteLocalStore implements LocalStore {
   final LocalDatabase _database;
 
   SqliteLocalStore([LocalDatabase? database]) : _database = database ?? LocalDatabase.instance;
 
+  // Guarda la copia de un dato. 'replace' significa que si ya había una con la
+  // misma llave (owner + key) se pisa, en vez de dar error por duplicado.
   @override
   Future<void> putCache(String owner, String key, String json) async {
     final db = await _database.database;
@@ -22,6 +29,8 @@ class SqliteLocalStore implements LocalStore {
     );
   }
 
+  // Devuelve el JSON guardado, o null si no hay copia. Los '?' con whereArgs
+  // evitan la inyección SQL: los valores nunca se pegan al texto de la consulta.
   @override
   Future<String?> getCache(String owner, String key) async {
     final db = await _database.database;
@@ -41,6 +50,8 @@ class SqliteLocalStore implements LocalStore {
     await db.delete('cache', where: 'owner = ? AND key = ?', whereArgs: [owner, key]);
   }
 
+  // Agrega un cambio a la cola (tabla outbox) con su fecha y su contador de
+  // intentos en cero.
   @override
   Future<int> enqueue(PendingOp op) async {
     final db = await _database.database;
@@ -55,6 +66,8 @@ class SqliteLocalStore implements LocalStore {
     });
   }
 
+  // Lee la cola del técnico en orden de llegada (id ascendente): los cambios
+  // se envían en el mismo orden en que se hicieron.
   @override
   Future<List<PendingOp>> pending(String owner) async {
     final db = await _database.database;
@@ -74,6 +87,8 @@ class SqliteLocalStore implements LocalStore {
     ];
   }
 
+  // Cuenta cuántos cambios esperan. Es el número que muestra la franja
+  // 'Sin conexión' de arriba.
   @override
   Future<int> pendingCount(String owner) async {
     final db = await _database.database;
@@ -81,12 +96,15 @@ class SqliteLocalStore implements LocalStore {
     return Sqflite.firstIntValue(result) ?? 0;
   }
 
+  // Quita un cambio de la cola (porque ya se envió o se descartó por conflicto).
   @override
   Future<void> removeOp(int id) async {
     final db = await _database.database;
     await db.delete('outbox', where: 'id = ?', whereArgs: [id]);
   }
 
+  // Suma un intento fallido y guarda el último error, para saber por qué no
+  // se ha podido enviar.
   @override
   Future<void> markAttempt(int id, String? error) async {
     final db = await _database.database;
