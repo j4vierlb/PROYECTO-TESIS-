@@ -1,0 +1,7 @@
+killbichos-panel.duckdns.org {
+	reverse_proxy web:80
+}
+
+killbichos-api.duckdns.org {
+	reverse_proxy backend:8000
+}

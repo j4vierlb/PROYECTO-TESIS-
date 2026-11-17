@@ -12,6 +12,7 @@ La dirección del backend se pasa **al compilar** con `--dart-define=API_BASE_UR
 
 | Dónde corre la app | `API_BASE_URL` |
 |---|---|
+| Servidor en la nube (iPhone o Android, cualquier red) | `https://killbichos-api.duckdns.org` |
 | iPhone real (misma WiFi que el computador) | `http://IP-DEL-COMPUTADOR:8000` (en macOS: `ipconfig getifaddr en0`) |
 | Simulador de iPhone | `http://127.0.0.1:8000` |
 | Emulador de Android | `http://10.0.2.2:8000` |
@@ -33,7 +34,23 @@ flutter run --release --dart-define=API_BASE_URL=http://$(ipconfig getifaddr en0
 flutter run --dart-define=API_BASE_URL=http://127.0.0.1:8000
 ```
 
-Usuario de prueba: `tecnico1@killbichos.cl` / `demo1234`.
+Usuario de prueba (Docker local): `tecnico1@killbichos.cl` / `demo1234`. En el servidor en la nube las claves son otras.
+
+## Instalar en un iPhone contra el servidor en la nube
+
+```bash
+cd "Fase 2/Evidencias Proyecto/app-movil"
+flutter build ios --release \
+  --dart-define=API_BASE_URL=https://killbichos-api.duckdns.org \
+  --dart-define=MAPS_ENABLED=true
+
+xcrun devicectl list devices                      # muestra el identificador del iPhone
+xcrun devicectl device install app --device <ID-DEL-IPHONE> build/ios/iphoneos/Runner.app
+```
+
+- El iPhone debe estar conectado por cable y **desbloqueado**; si no, la instalación falla.
+- Tras instalar, toca el ícono de la app una vez en el teléfono y confía en el certificado en Ajustes, General, VPN y gestión de dispositivos. Sin eso, iOS no la abre.
+- **La firma gratuita de Apple dura 7 días.** Pasado ese plazo la app deja de abrir aunque el ícono siga en pantalla, y hay que repetir estos pasos. La fecha exacta de vencimiento queda dentro de la app compilada: `security cms -D -i build/ios/iphoneos/Runner.app/embedded.mobileprovision` y revisar `ExpirationDate`.
 
 ## Mapa del croquis
 

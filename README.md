@@ -16,9 +16,19 @@ El código está en `Fase 2/Evidencias Proyecto/`:
 ```
 PROYECTO-TESIS-/
 ├── docker-compose.yml      # levanta base de datos, backend, panel (y ngrok, opcional)
-├── Fase 1/ · Fase 2/ · Fase 3/   # entregables del curso (informes, evidencias)
 ├── pruebas/                # scripts y resultados de las pruebas del sistema
+├── Fase 1/                 # inicio y planificación
+│   ├── Evidencias Grupales/        # entregables del grupo
+│   └── Evidencias Individuales/    # autoevaluaciones y diarios de cada integrante
+├── Fase 2/                 # desarrollo del proyecto
+│   ├── Evidencias Grupales/        # informes 2.4 (desarrollo) y 2.6 (final), en español e inglés
+│   ├── Evidencias Individuales/    # diarios y aportes de cada integrante
+│   └── Evidencias Proyecto/        # el código y la documentación técnica (detalle más abajo)
+├── Fase 3/                 # cierre y presentación final
+│   ├── Evidencias Grupales/        # presentación final (español e inglés) y video de la demostración
+│   └── Evidencias Individuales/    # diarios de reflexión de la fase
 └── Fase 2/Evidencias Proyecto/
+    ├── Evidencias de documentacion/  # sprints, diseño, plan de pruebas, manual técnico, trazabilidad
     ├── database/           # schema.sql, seed.sql y migraciones (se aplican en orden)
     ├── backend/            # API FastAPI
     │   └── app/
@@ -61,6 +71,8 @@ La primera vez tarda unos minutos (descarga imágenes, instala dependencias y cr
 | API (documentación) | http://localhost:8000/docs | `tecnico1@killbichos.cl` / `demo1234` |
 | Base de datos | `localhost:5432` | los de `.env` |
 
+Esos usuarios son los de demostración del Docker local (vienen de `seed.sql`). En el servidor desplegado las claves son otras y no se publican.
+
 Comandos útiles:
 
 ```bash
@@ -91,6 +103,17 @@ Esa misma URL se pega en el Sandbox de Twilio ("When a message comes in"). Sin e
 - Las claves reales se escriben **solo en `.env`**.
 - Si cambias `VITE_API_URL`, reconstruye el panel con `docker compose up --build`: esa dirección se fija al compilar.
 
+## Despliegue en la nube
+
+El sistema corre en un servidor en la nube (Hetzner, con Docker Compose) y se sirve por HTTPS:
+
+| Qué | Dirección |
+|---|---|
+| Panel web | https://killbichos-panel.duckdns.org |
+| API (documentación) | https://killbichos-api.duckdns.org/docs |
+
+La configuración de HTTPS (Caddy) y cómo actualizar el servidor están en [`deploy/README.md`](deploy/README.md). El webhook de Twilio llega al servidor por un túnel ngrok. Las claves del servidor van solo en su `.env`.
+
 ## App móvil (Flutter): no va en Docker
 
 La app de los técnicos **no corre en Docker**: es una app que se compila e instala en el teléfono (o en el simulador). Docker levanta el backend al que la app se conecta.
@@ -99,6 +122,7 @@ La app necesita saber **en qué dirección está el backend**, y se le indica al
 
 | Dónde corre la app | Qué dirección usar | Por qué |
 |---|---|---|
+| **Servidor en la nube** (iPhone o Android, cualquier red) | `https://killbichos-api.duckdns.org` | Es la dirección pública con HTTPS: no depende de la red ni de la IP del computador |
 | **iPhone real** (misma WiFi que el computador) | `http://IP-DEL-COMPUTADOR:8000` | El teléfono es otro equipo de la red: `localhost` sería el propio teléfono |
 | **Simulador de iPhone** | `http://127.0.0.1:8000` | El simulador comparte la red del computador |
 | **Emulador de Android** | `http://10.0.2.2:8000` | Así ve el emulador al computador |
@@ -111,7 +135,15 @@ cd "Fase 2/Evidencias Proyecto/app-movil"
 flutter run --release --dart-define=API_BASE_URL=http://$(ipconfig getifaddr en0):8000
 ```
 
-El backend de Docker ya escucha en la red (puerto 8000), así que el teléfono lo alcanza sin configurar nada más. Detalles en el README de `app-movil`.
+El backend de Docker ya escucha en la red (puerto 8000), así que el teléfono lo alcanza sin configurar nada más.
+
+Para instalar en un iPhone la versión que usa el servidor en la nube, con el mapa activado (la clave de Google Maps va en `ios/Flutter/Secrets.xcconfig`, que no se sube a git):
+
+```bash
+flutter build ios --release --dart-define=API_BASE_URL=https://killbichos-api.duckdns.org --dart-define=MAPS_ENABLED=true
+```
+
+**La firma gratuita de Apple dura 7 días.** Pasado ese plazo la app deja de abrir y hay que volver a instalarla, y luego confiar de nuevo en el certificado (Ajustes, General, VPN y gestión de dispositivos). Detalles en el README de `app-movil`.
 
 ## Limitaciones conocidas y pasos a producción
 
