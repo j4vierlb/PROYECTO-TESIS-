@@ -4,6 +4,8 @@
 
 Kill Bichos IA es una plataforma web y móvil para apoyar el contacto con clientes, el agendamiento de visitas y la generación asistida de croquis para una empresa de control de plagas.
 
+> **Nota:** las secciones de este archivo que llevan fecha (por ejemplo, las actualizaciones de Android de octubre) son un registro histórico de cada corte y no reflejan el estado actual. El estado vigente al cierre del proyecto, con las cifras de pruebas, la prueba del modo offline contra el servidor y los pendientes, está en los informes 2.4 y 2.6 de `Evidencias Grupales/`. El mapa de carpetas está en el `README.md` de la raíz.
+
 ## Estructura de Fase 2
 
 - `Evidencias Proyecto/backend`: API FastAPI, autenticación, panel web, visitas y croquis.

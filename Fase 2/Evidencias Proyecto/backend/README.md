@@ -65,6 +65,8 @@ Deshabilitado por defecto: no envía correos ni cambia claves sin configuración
 - Operador: `tecnico1@killbichos.cl` / `demo1234`
 - Administrador: `admin@killbichos.cl` / `demo1234`
 
+Son los usuarios de demostración que crea `seed.sql` en el Docker local. En el servidor en la nube las claves se cambiaron y no se publican.
+
 El login recibe JSON con `usuario` y `clave`, y entrega un `access_token` de 8 horas y un `refresh_token` de 30 días.
 
 `POST /auth/refresh` recibe `{"refresh_token": "..."}` y entrega un par nuevo de tokens, sin pedir la clave. Responde 401 si el token es falso, venció, es un `access_token` o la cuenta fue desactivada. La app lo usa para no pedir el login cada vez que se abre: mientras el técnico la use al menos una vez cada 30 días, no vuelve a escribir su clave.
@@ -177,6 +179,9 @@ Las coordenadas se guardan en PostgreSQL como `GEOGRAPHY(Point, 4326)` (PostGIS)
 
 - La IA devuelve la fecha en ISO 8601 con zona horaria. El backend valida que tenga zona horaria, que esté en el futuro y a no más de 60 días, y la guarda en UTC.
 - A un cliente nuevo se le pide la dirección antes de agendar; se guarda en `clientes.direccion` (la ubicación `lat`/`lng` queda vacía).
+- En la **primera visita** de un cliente (sin visitas previas) también se le pide el nombre completo, porque el que figura puede ser solo su nombre de perfil de WhatsApp. Es una regla del backend y no solo de la IA: sin nombre no se agenda. Si lo escribe todo en minúscula o mayúscula, se guarda con la inicial en mayúscula ("ayline correa pino" queda "Ayline Correa Pino").
+- Con un cliente que ya tiene nombre y dirección registrados, la IA recibe ese estado de forma explícita, al final del contexto, y no se los vuelve a pedir.
+- **Horas disponibles:** si el cliente pregunta qué horarios hay, la IA responde con la acción `list_availability` y es el **backend** quien calcula las horas libres reales (`list_available_slots`), con la misma regla con la que agenda: horario de atención, operador libre, sin horas pasadas ni la hora de cierre. La IA no inventa horas. Si el día consultado no tiene horas, se informa el horario de atención y se ofrecen las próximas libres.
 - La visita se crea con operador: el de `KILLBICHOS_OPERADOR_ID`, o si está vacío, el operador libre con menos visitas ese día.
 - No se agenda fuera del horario de atención (`KILLBICHOS_OPEN_TIME`, `KILLBICHOS_CLOSE_TIME`, `KILLBICHOS_OPERATING_DAYS`) ni a menos de 1 hora de otra visita del mismo operador. En ese caso se le ofrece al cliente el siguiente horario libre.
 - Si OpenAI o la base de datos fallan, el cliente recibe igual un mensaje ("un operador te contactará pronto") y el error queda en la consola del backend.
