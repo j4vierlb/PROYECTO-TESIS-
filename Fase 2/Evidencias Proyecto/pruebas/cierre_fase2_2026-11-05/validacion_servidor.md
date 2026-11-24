@@ -36,8 +36,10 @@ de cambiar de entorno. Usar las cuentas y los registros de prueba del servidor.
 | SRV-08 | Instalar APK remoto e ingresar con un técnico de prueba. | Agenda del servidor para esa cuenta. | Pendiente de URL |
 | SRV-09 | Abrir croquis, agregar trampa y tomar foto en la app. | Registro y foto visibles al volver a consultar. | Pendiente de URL |
 | SRV-10 | Precargar agenda/croquis, cortar red, registrar cambio y reconectar. | Cola visible y sincronización de una sola operación por cambio. | Pendiente de URL |
-| SRV-11 | Recuperar contraseña de una cuenta de prueba con correo accesible. | Enlace al panel público y nueva clave confirmada, si SMTP está habilitado. | Pendiente de URL |
+| SRV-11 | Recuperar contraseña de una cuenta de prueba con correo accesible. | Enlace al panel público y nueva clave confirmada, si SMTP está habilitado. | **No aplica** (ver nota bajo la tabla) |
 | SRV-12 | Abrir QR y revisar conversación y avisos aplicables de WhatsApp. | Webhook del servidor, conversación y estado de entrega registrados. | Pendiente de URL |
+
+**Nota sobre SRV-11 (24 de noviembre de 2026).** Se decidió no ejecutar este caso: el servidor desplegado no tiene un correo (SMTP) configurado, así que la recuperación de contraseña por correo no está habilitada allí. La función existe en el código y se probó en un entorno local ([registro del 26 de octubre](../password_reset_2026-10-26/README.md); configuración en [`backend/docs/recuperacion_password_panel.md`](../../backend/docs/recuperacion_password_panel.md)). Para habilitarla hace falta una cuenta de correo autorizada y sus datos SMTP en el `.env` del servidor. Mientras tanto, las claves del servidor las cambia directamente un administrador. Por eso este caso no se cuenta como fallo ni como pendiente de esta validación.
 
 ## Validación en Redmi 15C del 13 y 14 de noviembre de 2026
 
