@@ -4,7 +4,7 @@
 
 Kill Bichos IA es una plataforma web y móvil para apoyar el contacto con clientes, el agendamiento de visitas y la generación asistida de croquis para una empresa de control de plagas.
 
-> **Nota:** las secciones de este archivo que llevan fecha (por ejemplo, las actualizaciones de Android de octubre) son un registro histórico de cada corte y no reflejan el estado actual. El estado vigente al cierre del proyecto, con las cifras de pruebas, la prueba del modo offline contra el servidor y los pendientes, está en los informes 2.4 y 2.6 de `Evidencias Grupales/`. El mapa de carpetas está en el `README.md` de la raíz.
+> **Nota:** las secciones de este archivo que llevan fecha (por ejemplo, las actualizaciones de Android de octubre) son un registro histórico de cada corte y no reflejan el estado actual. El estado vigente al cierre del proyecto, con las cifras de pruebas, la prueba del modo offline contra el servidor y los pendientes, está en el informe 2.6 de `Evidencias Grupales/`. El 2.4 es la foto del 12 de octubre de 2026 y no se modifica. El mapa de carpetas está en el `README.md` de la raíz.
 
 ## Estructura de Fase 2
 
@@ -102,9 +102,22 @@ La carpeta `Evidencias Proyecto/Evidencias de documentacion` contiene:
 8. Manual técnico.
 9. Matriz de trazabilidad.
 10. Informe de innovación y cierre.
-11. Acta de validación para completar con Rodrigo Quiroga y obtener su firma.
+11. Acta de validación: firmada el 17 de noviembre de 2026. En el repositorio queda la copia pública, sin firma manuscrita.
 
 Product Vision y Product Backlog se mantienen como artefactos de planificación del equipo y deben revisarse junto con estos documentos cuando cambie el alcance.
+
+## Estado al cierre (26 de noviembre de 2026)
+
+Solo datos verificados. Las secciones con fecha anterior de este archivo son registro histórico.
+
+- **Pruebas automáticas:** panel 193/193, app 205/205 y backend 288/288, para un total de 686. El backend se ejecutó completo en un clon limpio de `main` el 24 de noviembre de 2026, con dos bases PostGIS aisladas, en 59,9 s y sin pruebas omitidas ([evidencia](Evidencias%20Proyecto/pruebas/clon_limpio_2026-11-24/README.md)).
+- **Script `pruebas/ejecutar_pruebas.py`:** 32/32 aprobados. El último resultado guardado es del 21 de octubre de 2026, 23:04 ([resultado](Evidencias%20Proyecto/pruebas/resultados_2026-10-21_2304.md)), con carga de 50 solicitudes y 10 usuarios simultáneos, p95 menor a 2 s y 0 errores. No se volvió a ejecutar después de esa fecha.
+- **Aislamiento entre empresas:** 30/30. El 20 de octubre dio 22/30 y se corrigió en el PR #14.
+- **Pull requests al 24 de noviembre:** 61 integrados (Javier 34, Juan 16, Pedro 11). Cerrados sin integrar: #3, #49, #56, #57, #58 y #59. Abierto: #68.
+- **Commits:** 176, 97 y 40 según la página de contributors de GitHub; sin contar merges en `main`, 127, 91 y 39.
+- **Modo offline en iPhone (16 de noviembre de 2026):** 6 cambios sincronizados en 7 s, con un solo dispositivo y sin prueba de conflicto. La prueba en Android (Redmi) es parcial.
+- **Acta de validación:** firmada el 17 de noviembre de 2026.
+- **Limitaciones conocidas:** [Registro de cierre del 26 de noviembre de 2026](Evidencias%20Proyecto/Evidencias%20de%20documentacion/Registro_cierre_2026-11-26.md).
 
 ## Resultados y alcance al 20 de octubre de 2026
 

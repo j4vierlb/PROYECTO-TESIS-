@@ -90,6 +90,8 @@ Si la visita está **completada o cancelada**, todo lo que modifica el croquis r
 
 ## Pruebas
 
+La suite completa del backend (288 pruebas, sin omisiones, con dos bases PostGIS aisladas) se ejecutó en un clon limpio el 24 de noviembre de 2026: ver [`../pruebas/clon_limpio_2026-11-24/`](../pruebas/clon_limpio_2026-11-24/README.md).
+
 Desde esta carpeta. Las unitarias no necesitan base de datos:
 
 ```bash
@@ -116,7 +118,7 @@ app/
 ├── database.py       # engine de SQLAlchemy y la dependencia get_db
 ├── security.py        # hashing de contraseñas (passlib/bcrypt) y JWT
 ├── schemas.py          # modelos Pydantic (request/response)
-├── dependencies.py      # auth: get_current_user, require_operator
+├── dependencies.py      # auth: get_current_user (token, cuenta activa y session_version), require_operator, require_web_user (admin o coordinador), require_admin y control de acceso a visitas y trampas por empresa
 ├── repositories/         # consultas SQL a Postgres/PostGIS, divididas por tema
 │   ├── visitas.py        #   visitas del técnico (agenda, historial, edición)
 │   ├── croquis.py        #   croquis y dispositivos (trampas)

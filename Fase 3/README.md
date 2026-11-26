@@ -10,6 +10,7 @@ Presentación final del proyecto Kill Bichos IA.
 ## Dónde está el resto
 
 - Informes 2.4 (desarrollo del proyecto) y 2.6 (informe final), en español e inglés: `Fase 2/Evidencias Grupales/`.
+- Acta de validación con el cliente (copia pública, sin firma manuscrita; el original firmado se entregó al docente): `Fase 2/Evidencias Proyecto/Evidencias de documentacion/11_Acta_Validacion_Cliente_Firmada_copia_publica.docx`.
 - Código, pruebas y documentación técnica: `Fase 2/Evidencias Proyecto/`.
 - Registro de la prueba del modo offline en un iPhone contra el servidor (16 de noviembre de 2026): `Fase 2/Evidencias Proyecto/Evidencias de documentacion/Prueba_offline_iPhone_2026-11-16.md`.
 - Cómo se despliega el sistema con HTTPS: `Evidencias Grupales/deploy/README.md`.
