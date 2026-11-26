@@ -117,6 +117,7 @@ Solo datos verificados. Las secciones con fecha anterior de este archivo son reg
 - **Commits:** 176, 97 y 40 según la página de contributors de GitHub; sin contar merges en `main`, 127, 91 y 39.
 - **Modo offline en iPhone (16 de noviembre de 2026):** 6 cambios sincronizados en 7 s, con un solo dispositivo y sin prueba de conflicto. La prueba en Android (Redmi) es parcial.
 - **Acta de validación:** firmada el 17 de noviembre de 2026.
+- **Ruta del script de pruebas:** desde el 26 de noviembre de 2026 el script está en `Fase 2/Evidencias Proyecto/pruebas/ejecutar_pruebas.py` (antes `pruebas/ejecutar_pruebas.py` en la raíz). Los documentos 07 y 2.4, que son fotos anteriores a esa fecha, citan la ruta antigua; el comando es el mismo con la ruta nueva.
 - **Limitaciones conocidas:** [Registro de cierre del 26 de noviembre de 2026](Evidencias%20Proyecto/Evidencias%20de%20documentacion/Registro_cierre_2026-11-26.md).
 
 ## Resultados y alcance al 20 de octubre de 2026

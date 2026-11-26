@@ -12,7 +12,7 @@ Desde el número de prueba se escribieron mensajes al WhatsApp del sistema ("Hol
 
 ## Evidencia
 
-- **Captura del panel:** [Contingencia_IA_2026-11-26_panel.png](Contingencia_IA_2026-11-26_panel.png). Muestra la bandeja de WhatsApp con la conversación, los mensajes del cliente de las 01:22, las respuestas de contingencia del agente con el estado "Entregado" y el botón "Tomar conversación". Los apellidos y los teléfonos de las otras conversaciones están tapados.
+- **Captura del panel:** [HU18_contingencia_IA_26-11_privacidad.png](HU18_contingencia_IA_26-11_privacidad.png). Muestra la bandeja de WhatsApp con la conversación, los mensajes del cliente de las 01:22, las respuestas de contingencia del agente con el estado "Entregado" y el botón "Tomar conversación". Los apellidos y los teléfonos están tapados.
 - **Registro del backend del servidor** (copia guardada en el servidor antes de cambiar la clave, sin datos sensibles; los identificadores de los mensajes se omiten aquí):
 
 ```
