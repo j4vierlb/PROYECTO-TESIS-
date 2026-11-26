@@ -1,0 +1,15 @@
+== 2026-11-24 00:18 hora de Chile | commit aa648eb Merge pull request #67 from j4vierlb/juan
+panel (/): 200
+api (/docs): 200
+login admin@killbichos.cl / demo1234: 200
+login tecnico1@killbichos.cl / demo1234: 200
+login con clave incorrecta: 401
+CORS desde el panel: access-control-allow-origin: http://localhost:18080
+--- datos de prueba:
+(eval):1: no such file or directory: docker compose -p killbichos-limpio -f /private/tmp/claude-501/-Users-j4vier-Desktop-PROYECTO-TESIS-/650e9ec9-d803-4e1d-8324-4aff9a00e50e/scratchpad/limpio/repo/docker-compose.yml -f /private/tmp/claude-501/-Users-j4vier-Desktop-PROYECTO-TESIS-/650e9ec9-d803-4e1d-8324-4aff9a00e50e/scratchpad/limpio/override.yml
+(eval):1: no such file or directory: docker compose -p killbichos-limpio -f /private/tmp/claude-501/-Users-j4vier-Desktop-PROYECTO-TESIS-/650e9ec9-d803-4e1d-8324-4aff9a00e50e/scratchpad/limpio/repo/docker-compose.yml -f /private/tmp/claude-501/-Users-j4vier-Desktop-PROYECTO-TESIS-/650e9ec9-d803-4e1d-8324-4aff9a00e50e/scratchpad/limpio/override.yml
+tablas en la base: 
+errores en el registro de la base: 0
+--- datos de prueba:
+1 empresas, 1 usuarios, 1 técnicos, 2 clientes, 3 visitas
+tablas del esquema public: 14
