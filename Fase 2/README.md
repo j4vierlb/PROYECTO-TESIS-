@@ -108,7 +108,7 @@ Product Vision y Product Backlog se mantienen como artefactos de planificación 
 
 ## Resultados y alcance al 20 de octubre de 2026
 
-- [Script del 06/10/2026](../pruebas/resultados_2026-10-06_1614.md): 32 casos aprobados, con seguridad y rendimiento local.
+- [Script del 06/10/2026](Evidencias%20Proyecto/pruebas/resultados_2026-10-06_1614.md): 32 casos aprobados, con seguridad y rendimiento local.
 - [Regresión del panel del 09/10/2026](Evidencias%20Proyecto/pruebas/Panel_regresion_2026-10-09.md): 51 pruebas aprobadas y verificaciones en navegador con PostGIS real.
 - [Regresión tras PR #14](Evidencias%20Proyecto/pruebas/Verificacion_PR14_2026-10-20.md): **205 aprobadas**, 107 backend y 98 frontend, sin fallas ni omisiones. Incluye los 30 casos de aislamiento entre empresas, no se suman nuevamente.
 - [Maps real](Evidencias%20Proyecto/pruebas/Croquis_maps_real_2026-10-20.md): mapa satelital, selección y foto privada verificados manualmente en localhost:5173 con datos sintéticos; no se suma al total automatizado.
