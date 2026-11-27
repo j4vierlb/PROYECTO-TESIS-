@@ -123,7 +123,7 @@ no reemplazarlos sin comprobar a qué entorno pertenecen.
 
 ## Relación con el plan de pruebas general
 
-El [reporte del script del 06/10/2026 16:14](../../../pruebas/resultados_2026-10-06_1614.md)
+El [reporte del script del 06/10/2026 16:14](resultados_2026-10-06_1614.md)
 contiene 32 casos aprobados: 17 integración, 12 seguridad y 3 rendimiento.
 Es una ejecución distinta, con comportamientos que se solapan con este panel.
 No se suman las dos suites como 83 requisitos únicos.

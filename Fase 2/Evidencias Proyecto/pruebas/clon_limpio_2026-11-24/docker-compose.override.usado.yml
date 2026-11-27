@@ -1,0 +1,14 @@
+# Solo para esta prueba: el stack diario ocupa 5432/8000/8080 y las bases de prueba, 15432/15434.
+services:
+  db:
+    ports: !override
+      - "25432:5432"
+  backend:
+    ports: !override
+      - "18000:8000"
+  web:
+    build:
+      args:
+        VITE_API_URL: http://localhost:18000
+    ports: !override
+      - "18080:80"

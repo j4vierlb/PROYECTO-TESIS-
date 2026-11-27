@@ -14,7 +14,7 @@ Un archivo llamado `docker-compose.override.yml` en la raíz lo carga `docker co
 Desde la raíz del repositorio, en el servidor:
 
 ```bash
-docker compose -f docker-compose.yml -f deploy/docker-compose.https.yml up -d --build
+docker compose -f docker-compose.yml -f "Fase 3/Evidencias Grupales/deploy/docker-compose.https.yml" up -d --build
 ```
 
 Requisitos:

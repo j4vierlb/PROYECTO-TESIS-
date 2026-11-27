@@ -16,7 +16,6 @@ El código está en `Fase 2/Evidencias Proyecto/`:
 ```
 PROYECTO-TESIS-/
 ├── docker-compose.yml      # levanta base de datos, backend, panel (y ngrok, opcional)
-├── pruebas/                # scripts y resultados de las pruebas del sistema
 ├── Fase 1/                 # inicio y planificación
 │   ├── Evidencias Grupales/        # entregables del grupo
 │   └── Evidencias Individuales/    # autoevaluaciones y diarios de cada integrante
@@ -25,10 +24,11 @@ PROYECTO-TESIS-/
 │   ├── Evidencias Individuales/    # diarios y aportes de cada integrante
 │   └── Evidencias Proyecto/        # el código y la documentación técnica (detalle más abajo)
 ├── Fase 3/                 # cierre y presentación final
-│   ├── Evidencias Grupales/        # presentación final (español e inglés) y video de la demostración
+│   ├── Evidencias Grupales/        # presentación final (español e inglés), video de la demostración y deploy/ (HTTPS con Caddy)
 │   └── Evidencias Individuales/    # diarios de reflexión de la fase
 └── Fase 2/Evidencias Proyecto/
     ├── Evidencias de documentacion/  # sprints, diseño, plan de pruebas, manual técnico, trazabilidad
+    ├── pruebas/            # script de pruebas y resultados de las pruebas del sistema
     ├── database/           # schema.sql, seed.sql y migraciones (se aplican en orden)
     ├── backend/            # API FastAPI
     │   └── app/
@@ -112,7 +112,7 @@ El sistema corre en un servidor en la nube (Hetzner, con Docker Compose) y se si
 | Panel web | https://killbichos-panel.duckdns.org |
 | API (documentación) | https://killbichos-api.duckdns.org/docs |
 
-La configuración de HTTPS (Caddy) y cómo actualizar el servidor están en [`deploy/README.md`](deploy/README.md). El webhook de Twilio llega al servidor por un túnel ngrok. Las claves del servidor van solo en su `.env`.
+La configuración de HTTPS (Caddy) y cómo actualizar el servidor están en [`Fase 3/Evidencias Grupales/deploy/README.md`](Fase%203/Evidencias%20Grupales/deploy/README.md). El webhook de Twilio llega al servidor por un túnel ngrok. Las claves del servidor van solo en su `.env`.
 
 ## App móvil (Flutter): no va en Docker
 

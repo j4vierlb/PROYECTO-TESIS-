@@ -24,6 +24,7 @@ La primera vez que se crea la base (volumen vacío), PostgreSQL ejecuta estos sc
 | 5 | `migracion_croquis_terreno.sql` | Columna `foto_path` para la foto de cada trampa, y evita croquis duplicados por visita y códigos de trampa repetidos (en una base nueva ya viene en `schema.sql`) |
 | 6 | `migracion_whatsapp_saliente.sql` | Bandeja del panel, estado de entrega de cada mensaje y recordatorio del día anterior (en una base nueva ya viene en `schema.sql`) |
 | 7 | `migracion_sesion_tecnicos.sql` | Columna `session_version` en operadores: cambiar la clave de un técnico cierra sus sesiones abiertas (en una base nueva ya viene en `schema.sql`) |
+| 8 | `migracion_password_reset.sql` | Columna `session_version` en usuarios del panel y tabla `password_reset_tokens` para recuperar la contraseña por correo (en una base nueva ya viene en `schema.sql`) |
 
 Los scripts **solo corren al crear la base**. Si la base ya existe, no se vuelven a ejecutar.
 
