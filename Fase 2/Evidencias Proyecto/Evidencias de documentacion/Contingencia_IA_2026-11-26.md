@@ -44,5 +44,5 @@ El comportamiento está en `routers/whatsapp.py` (líneas 326 a 329): se registr
 
 - No hay un aviso automático al operador: la conversación se ve si se abre la bandeja del panel.
 - Esta evidencia corresponde a una clave inválida (401). Un tiempo de espera agotado o un error 5xx de OpenAI siguen sin prueba propia, aunque el código los trata en el mismo bloque.
-- Las claves de API de OpenAI pueden vencer y el sistema no avisa antes de que ocurra. La clave nueva debe crearse sin vencimiento o con una fecha anotada y revisada.
+- Las claves de API de OpenAI pueden vencer y el sistema no avisa antes de que ocurra. La clave nueva se creó sin fecha de caducidad (confirmado por Javier en el panel de OpenAI). Si se usara una clave con vencimiento, habría que anotar y revisar su fecha.
 - El caso se corrigió el mismo día reemplazando la clave en el servidor. Después del cambio no aparecieron más errores 401 de OpenAI en el backend. La verificación posterior, con una visita agendada y su recordatorio, está en [Verificacion_WhatsApp_2026-11-26.md](Verificacion_WhatsApp_2026-11-26.md).
