@@ -6,6 +6,8 @@ Responsable: Javier Lara Bustos. Este registro documenta un caso real en el que 
 
 El 26 de noviembre de 2026, entre las 01:21 y las 01:22 (hora de Chile; 04:21 y 04:22 UTC), el servidor desplegado rechazó las consultas del agente a OpenAI con el error `401 Unauthorized`: la clave de OpenAI configurada en el servidor no era aceptada. No fue una caída del servicio de OpenAI, sino una clave inválida, que para el backend produce el mismo efecto: la llamada a la IA falla.
 
+**Causa confirmada:** la clave había sido creada el 19 de octubre de 2026 con un vencimiento de 30 días (la opción que ofrece OpenAI por defecto), por lo que dejó de ser válida el 18 de noviembre de 2026. Desde ese día OpenAI la rechazaba con 401. El problema se descubrió el 26 de noviembre, cuando un cliente de prueba escribió por WhatsApp. En el servidor no existe ningún aviso previo al vencimiento de una clave.
+
 Desde el número de prueba se escribieron mensajes al WhatsApp del sistema ("Hola quiero agendar una visita" y "Por qué un operador ?"). A cada uno el sistema respondió:
 
 > Gracias por escribirnos. Un operador te contactará pronto para ayudarte.
@@ -42,4 +44,5 @@ El comportamiento está en `routers/whatsapp.py` (líneas 326 a 329): se registr
 
 - No hay un aviso automático al operador: la conversación se ve si se abre la bandeja del panel.
 - Esta evidencia corresponde a una clave inválida (401). Un tiempo de espera agotado o un error 5xx de OpenAI siguen sin prueba propia, aunque el código los trata en el mismo bloque.
-- El caso se corrigió el mismo día reemplazando la clave en el servidor. Después del cambio no aparecieron más errores 401 de OpenAI en el backend.
+- Las claves de API de OpenAI pueden vencer y el sistema no avisa antes de que ocurra. La clave nueva debe crearse sin vencimiento o con una fecha anotada y revisada.
+- El caso se corrigió el mismo día reemplazando la clave en el servidor. Después del cambio no aparecieron más errores 401 de OpenAI en el backend. La verificación posterior, con una visita agendada y su recordatorio, está en [Verificacion_WhatsApp_2026-11-26.md](Verificacion_WhatsApp_2026-11-26.md).
